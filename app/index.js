@@ -1,4 +1,4 @@
-//index.js
+//첫 화면, 아마 로그인(공통 시작점)
 import React from "react";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
