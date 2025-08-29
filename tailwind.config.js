@@ -1,5 +1,7 @@
 //tailwind.config.js
 /** @type {import('tailwindcss').Config} */
+const { Colors, Gradients } = require("./constants/Colors.cjs");
+
 module.exports = {
   content: [
     "./app/**/*.{js,jsx}", // expo-router app 폴더
@@ -9,6 +11,13 @@ module.exports = {
     "./components/*.{js,jsx}",
   ],
   presets: [require("nativewind/preset")],
-  theme: { extend: {} },
+  theme: {
+    extend: {
+      colors: {
+        ...Colors,
+        ...Gradients,
+      },
+    },
+  },
   plugins: [],
 };

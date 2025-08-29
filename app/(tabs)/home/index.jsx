@@ -33,8 +33,8 @@ export default function Home() {
 
         {/* 탄소 절감량 */}
         <View className="mt-[22px] ml-5 mr-5">
-          <View className="h-[110px] bg-white/70 rounded-[10px] gap-4 items-left justify-center">
-          <Text className="ml-8 text-black font-semibold text-[18px] mt-1">총 탄소 절감량</Text>
+          <View className="h-[110px] bg-primary/70 rounded-[10px] gap-4 items-left justify-center">
+          <Text className="ml-8 text-primary font-semibold text-[18px] mt-1">총 탄소 절감량</Text>
           <Text className="ml-8 text-bold font-bold text-[18px] mt-1">2.3 kg(kgCo2eq 기준)</Text>
           </View>
         </View>
