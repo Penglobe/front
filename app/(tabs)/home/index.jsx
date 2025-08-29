@@ -1,13 +1,16 @@
 // app/(tabs)/home/index.jsx
-import { View, StyleSheet, Button } from "react-native";
+import { View, StyleSheet, Button, Pressable } from "react-native";
 import BgHome1 from "../../../assets/images/bg/bg-home-1.svg";
 import Ipa from "../../../assets/images/character/ipa.svg";
 import Tori from "../../../assets/images/character/tori.svg";
 import Snow from "../../../assets/icons/snow.svg";
 import Ice from "../../../assets/icons/ice.svg";
+import Quiz from "../../../assets/icons/quiz.svg";
 import { Text } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function Home() {
+  const router = useRouter();
   return (
       <View className="flex-1">
         {/* 배경 */}
@@ -49,31 +52,53 @@ export default function Home() {
           </View>
         </View>
 
-
         {/* 탄소 절감량 */}
-        <View className="mt-[22px] ml-5 mr-5">
-          <View className="h-[110px] bg-white/70 rounded-[10px] gap-4 items-left justify-center">
-          <Text className="ml-8 text-primary font-sf-b text-[18px] mt-1">총 탄소 절감량</Text>
-          <Text className="ml-8 text-bold font-grotesk-md text-[18px] mt-1">2.3 kg(kgCo2eq 기준)</Text>
+        <View className="mt-[22px] px-pageX">
+          <View className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md"
+            style={{
+              shadowColor: "#000000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,  //25%
+              shadowRadius: 4,   //Blur : 4
+              elevation: 4,  //Spread=2 정도
+            }}  
+          >
+          <Text className="text-black font-sf-md text-[18px]">총 탄소 절감량</Text>
+          <Text className="font-grotesk-b text-[24px] text-green">535
+            <Text className="text-black"> kg</Text>
+            <Text className="text-[14px] font-sf-md text-black"> (kgCo2eq 기준)</Text>
+          </Text>
           </View>
         </View>
 
         {/* 토리 */}
-        <View className="mt-[90px] ml-20 items-center ml-5">
+        {/* <View className="mt-[46px] ml-20 items-center ml-5">
           <Tori />
-        </View>
+        </View> */}
 
         {/* 이파 */}
-        <View className="mt-[-60px] items-left ml-5">
+        {/* <View className="mt-[-60px] items-left ml-5">
           <Ipa />
-        </View>
+        </View> */}
+        
 
         {/* 퀴즈 */}
-        <View className="mt-[70px] items-center justify-center">
-          <View className="w-[160px] h-[50px] bg-[#F9C332]/100 rounded-[32px] items-center justify-center">
-          <Text className="text-white font-medium text-[16px] mt-1">오늘의 퀴즈</Text>
-          </View>
-        </View>
-      </View>
+  <View className="mt-auto items-center mb-[180px]">
+    <Pressable 
+      onPress={() => router.push('/(tabs)/home/quiz')}
+      className="flex-row items-center justify-center rounded-[32px] bg-yellow px-6 py-3.5 gap-2"
+      style={{
+        shadowColor: "#F9C332",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.18,  //100%
+        shadowRadius: 4,   //Blur : 4
+        elevation: 4,  //Spread=2 정도
+      }}
+    >
+      <Quiz width={24} height={24} />
+      <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>
+      </Pressable>
+    </View>
+  </View>
   );
 }
