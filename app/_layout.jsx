@@ -5,9 +5,12 @@ import "../styles/global.css";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import Fonts from "../constants/Fonts.cjs";
+import { useCallback } from "react";
+
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
+
+  const [fontsLoaded, fontError] = useFonts({
     SFPro: Fonts.SFPro.regular,
     "SFPro-Medium": Fonts.SFPro.medium,
     "SFPro-Semibold": Fonts.SFPro.semibold,
@@ -19,8 +22,18 @@ export default function RootLayout() {
     "SpaceGrotesk-Light": Fonts.SpaceGrotesk.light,
   });
 
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <Slot />
     </View>
   );

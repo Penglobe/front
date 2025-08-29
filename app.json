@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "myapp",
+    "name": "펭글로브",
     "slug": "myapp",
     "scheme": "penglobe",
     "version": "1.0.0",
@@ -42,7 +42,8 @@
       "favicon": "./assets/images/logo/logo.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font"
     ]
   }
 }

@@ -8,9 +8,53 @@ import Ice from "../../../assets/icons/ice.svg";
 import Quiz from "../../../assets/icons/quiz.svg";
 import { Text } from "react-native";
 import { useRouter } from "expo-router";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+  withSequence,
+  Easing,
+  interpolate,                                        
+} from "react-native-reanimated";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
+
+  // Y축 이동값 (0 기준)
+    const translateY = useSharedValue(0);
+  
+    useEffect(() => {
+      // -10 내려갔다가 다시 0으로
+      translateY.value = withRepeat(
+        withSequence(
+          withTiming(-10, {
+            duration: 1200,
+            easing: Easing.inOut(Easing.quad),
+          }),
+          withTiming(0, {
+            duration: 1200,
+            easing: Easing.inOut(Easing.quad),
+          })
+        ),
+        -1, // -1 = 무한 반복
+        true // reverse 효과
+      );
+    }, []);
+  
+    // 애니메이션 스타일
+ const animatedStyle = useAnimatedStyle(() => {
+    // 떠오를 때 그림자/높이 살짝 증폭
+    const elev = interpolate(translateY.value, [-8, 0], [6, 4]);
+    const radius = interpolate(translateY.value, [-8, 0], [8, 4]);
+    return {
+      transform: [{ translateY: translateY.value }],
+      shadowRadius: radius,   // iOS
+      elevation: elev,        // Android
+    };
+  });
+
   return (
       <View className="flex-1">
         {/* 배경 */}
@@ -83,10 +127,10 @@ export default function Home() {
         
 
         {/* 퀴즈 */}
-  <View className="mt-auto items-center mb-[180px]">
+  <Animated.View className="mt-auto items-center mb-[180px]" style={animatedStyle}>
     <Pressable 
       onPress={() => router.push('/(tabs)/home/quiz')}
-      className="flex-row items-center justify-center rounded-[32px] bg-yellow px-6 py-3.5 gap-2"
+      className="flex-row items-center justify-center rounded-[32px] px-6 py-3.5 gap-2 bg-yellow active:bg-amber-300"
       style={{
         shadowColor: "#F9C332",
         shadowOffset: { width: 0, height: 4 },
@@ -98,7 +142,7 @@ export default function Home() {
       <Quiz width={24} height={24} />
       <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>
       </Pressable>
-    </View>
+    </Animated.View>
   </View>
   );
 }
