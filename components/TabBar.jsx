@@ -2,18 +2,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import TabbarBg from "../assets/nav/tabbar-bg.svg";
-
-import Home from "../assets/nav/home.svg";
-import HomeSelected from "../assets/nav/home-selected.svg";
-import Ranking from "../assets/nav/ranking.svg";
-import RankingSelected from "../assets/nav/ranking-selected.svg";
-import Store from "../assets/nav/store.svg";
-import StoreSelected from "../assets/nav/store-selected.svg";
-import Mypage from "../assets/nav/mypage.svg";
-import MypageSelected from "../assets/nav/mypage-selected.svg";
-import CalcSelected from "../assets/nav/calculator-selected.svg";
-import Calc from "../assets/nav/calculator.svg";
+import { Images } from "@constants/Images";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BAR_HEIGHT = 90;
@@ -28,10 +17,10 @@ export default function TabBar({ state, descriptors, navigation }) {
 
 
   const Icon = (name, focused) => {
-    if (isRoute(name, "home"))    return focused ? <HomeSelected width={SIZE} height={SIZE}/> : <Home width={SIZE} height={SIZE}/>;
-    if (isRoute(name, "ranking")) return focused ? <RankingSelected width={SIZE} height={SIZE}/> : <Ranking width={SIZE} height={SIZE}/>;
-    if (isRoute(name, "store"))   return focused ? <StoreSelected width={SIZE} height={SIZE}/> : <Store width={SIZE} height={SIZE}/>;
-    if (isRoute(name, "mypage"))  return focused ? <MypageSelected width={SIZE} height={SIZE}/> : <Mypage width={SIZE} height={SIZE}/>;
+    if (isRoute(name, "home"))    return focused ? <Images.HomeSelected width={SIZE} height={SIZE}/> : <Images.Home width={SIZE} height={SIZE}/>;
+    if (isRoute(name, "ranking")) return focused ? <Images.RankingSelected width={SIZE} height={SIZE}/> : <Images.Ranking width={SIZE} height={SIZE}/>;
+    if (isRoute(name, "store"))   return focused ? <Images.StoreSelected width={SIZE} height={SIZE}/> : <Images.Store width={SIZE} height={SIZE}/>;
+    if (isRoute(name, "mypage"))  return focused ? <Images.MypageSelected width={SIZE} height={SIZE}/> : <Images.Mypage width={SIZE} height={SIZE}/>;
     return null;
   };
 
@@ -75,7 +64,7 @@ export default function TabBar({ state, descriptors, navigation }) {
   className="absolute left-4 right-4 items-center"
   style={{ bottom: OFFSET+24, height: 70, zIndex: 0 }}
 >
-  <TabbarBg width="100%" height={BAR_HEIGHT} />
+  <Images.TabbarBg width="100%" height={BAR_HEIGHT} />
 </View>
   <View
     className="absolute gap-28 flex-row justify-center w-full px-4"
@@ -107,9 +96,9 @@ export default function TabBar({ state, descriptors, navigation }) {
       accessibilityLabel="계산기"
     >
       {isCalculatorFocused ? (
-        <CalcSelected width={36} height={36} />
+        <Images.CalcSelected width={36} height={36} />
       ) : (
-        <Calc width={36} height={36} />
+        <Images.Calc width={36} height={36} />
       )}
     </TouchableOpacity>
   )}

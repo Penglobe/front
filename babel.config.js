@@ -20,12 +20,18 @@ module.exports = function (api) {
       [
         "module-resolver",
         {
-          root: ["./app"], // app 폴더를 절대 경로의 시작점으로 설정
+          root: ["."], // app 폴더를 절대 경로의 시작점으로 설정
           alias: {
-            "@": "./app", // "@/..." 형태로 import 가능
-            "@tabs": "./app/(tabs)", // "@tabs/..." 형태
-            "@components": "./app/components", // "@components/..." 형태
-            "@styles": "./app/styles", // "@styles/..." 형태
+            "@app": "./app",
+            "@tabs": "./app/(tabs)",
+            "@pages": "./app/pages",
+            "@components": "./components",
+            "@assets": "./assets",
+            "@constants": "./constants",
+            "@hooks": "./hooks",
+            "@styles": "./styles",
+            "@services": "./services",
+            "@utils": "./utils",
           },
         },
       ],

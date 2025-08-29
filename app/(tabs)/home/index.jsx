@@ -1,11 +1,6 @@
 // app/(tabs)/home/index.jsx
 import { View, StyleSheet, Button, Pressable } from "react-native";
-import BgHome1 from "../../../assets/images/bg/bg-home-1.svg";
-import Ipa from "../../../assets/images/character/ipa.svg";
-import Tori from "../../../assets/images/character/tori.svg";
-import Snow from "../../../assets/icons/snow.svg";
-import Ice from "../../../assets/icons/ice.svg";
-import Quiz from "../../../assets/icons/quiz.svg";
+import { Images } from "@constants/Images";
 import { Text } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, {
@@ -26,14 +21,14 @@ export default function Home() {
     const translateY = useSharedValue(0);
   
     useEffect(() => {
-      // -10 내려갔다가 다시 0으로
+      // -10 내려갔다가 10으로
       translateY.value = withRepeat(
         withSequence(
           withTiming(-10, {
             duration: 1200,
             easing: Easing.inOut(Easing.quad),
           }),
-          withTiming(0, {
+          withTiming(10, {
             duration: 1200,
             easing: Easing.inOut(Easing.quad),
           })
@@ -43,7 +38,6 @@ export default function Home() {
       );
     }, []);
   
-    // 애니메이션 스타일
  const animatedStyle = useAnimatedStyle(() => {
     // 떠오를 때 그림자/높이 살짝 증폭
     const elev = interpolate(translateY.value, [-8, 0], [6, 4]);
@@ -58,7 +52,7 @@ export default function Home() {
   return (
       <View className="flex-1">
         {/* 배경 */}
-        <BgHome1
+        <Images.BgHome1
           width="100%"
           height="100%"
           preserveAspectRatio="xMidYMid slice"
@@ -77,7 +71,7 @@ export default function Home() {
               elevation: 4,  //Spread=2 정도
             }}
           >
-            <Snow width={30} height={30} />
+            <Images.Snow width={30} height={30} />
             <Text className="text-white font-sf-md text-[16px]">20일</Text>
           </View>
 
@@ -91,28 +85,30 @@ export default function Home() {
               elevation: 4,  //Spread=2 정도
             }}
           >
-            <Ice width={30} height={30} />
+            <Images.Ice width={30} height={30} />
             <Text className="text-white font-sf-md text-[16px]">200</Text>
           </View>
         </View>
 
         {/* 탄소 절감량 */}
         <View className="mt-[22px] px-pageX">
-          <View className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md"
-            style={{
-              shadowColor: "#000000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,  //25%
-              shadowRadius: 4,   //Blur : 4
-              elevation: 4,  //Spread=2 정도
-            }}  
-          >
+          <Pressable 
+      onPress={() => router.push('pages/home/mission')}
+      className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md"
+      style={{
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08, 
+        shadowRadius: 4,   //Blur : 4
+        elevation: 4,  //Spread=2 정도
+      }}
+    >
           <Text className="text-black font-sf-md text-[18px]">총 탄소 절감량</Text>
           <Text className="font-grotesk-b text-[24px] text-green">535
             <Text className="text-black"> kg</Text>
             <Text className="text-[14px] font-sf-md text-black"> (kgCo2eq 기준)</Text>
           </Text>
-          </View>
+          </Pressable>
         </View>
 
         {/* 토리 */}
@@ -129,17 +125,17 @@ export default function Home() {
         {/* 퀴즈 */}
   <Animated.View className="mt-auto items-center mb-[180px]" style={animatedStyle}>
     <Pressable 
-      onPress={() => router.push('/(tabs)/home/quiz')}
+      onPress={() => router.push('pages/home/quiz')}
       className="flex-row items-center justify-center rounded-[32px] px-6 py-3.5 gap-2 bg-yellow active:bg-amber-300"
       style={{
         shadowColor: "#F9C332",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.18,  //100%
+        shadowOpacity: 0.18, 
         shadowRadius: 4,   //Blur : 4
         elevation: 4,  //Spread=2 정도
       }}
     >
-      <Quiz width={24} height={24} />
+      <Images.Quiz width={24} height={24} />
       <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>
       </Pressable>
     </Animated.View>

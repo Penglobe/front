@@ -1,10 +1,9 @@
 // app/_layout.jsx
+import "../styles/global.css";
 import { Slot, Stack } from "expo-router";
 import { View } from "react-native";
-import "../styles/global.css";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
-import Fonts from "../constants/Fonts.cjs";
+import Fonts from "@constants/Fonts.cjs";
 import { useCallback } from "react";
 
 

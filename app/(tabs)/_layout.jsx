@@ -1,6 +1,6 @@
 // app/(tabs)/_layout.jsx
 import { Tabs } from "expo-router";
-import TabBar from "../../components/TabBar";
+import TabBar from "@components/TabBar";
 
 export default function TabsLayout() {
   return (
