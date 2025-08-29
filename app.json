@@ -5,12 +5,11 @@
     "scheme": "penglobe",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/logo/logo.png",
     "userInterfaceStyle": "light",
-     "assets": ["./assets/fonts/"],
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/logo/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,12 +18,14 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "백그라운드에서도 위치 추적을 하기 위해 권한이 필요합니다.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -34,8 +35,14 @@
         "FOREGROUND_SERVICE"
       ]
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/images/logo/logo.png"
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
