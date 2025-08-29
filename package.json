@@ -11,23 +11,37 @@
   "dependencies": {
     "@types/react": "~19.0.10",
     "expo": "~53.0.0",
+<<<<<<< HEAD
+<<<<<<< HEAD
     "expo-location": "~18.1.6",
+=======
+=======
+    "expo-font": "^13.3.2",
+>>>>>>> 38f3b78 (✨ feat: 공통 font 설정 완료)
+    "expo-linear-gradient": "^14.1.5",
+>>>>>>> 0dcbbb8 (✨ feat: 공통 Color, Gradient 정의, 배경 Gradient component 완성)
     "expo-router": "^5.1.4",
     "expo-status-bar": "~2.2.3",
     "expo-task-manager": "^13.1.6",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
     "react-native": "0.79.6",
+<<<<<<< HEAD
     "react-native-dotenv": "^3.4.11",
+=======
+    "react-native-linear-gradient": "^2.8.3",
+>>>>>>> 0dcbbb8 (✨ feat: 공통 Color, Gradient 정의, 배경 Gradient component 완성)
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-webview": "^13.16.0",
+    "react-native-svg": "15.11.2",
     "typescript": "~5.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "prettier-plugin-tailwindcss": "^0.5.11",
+    "react-native-svg-transformer": "^1.5.1",
     "tailwindcss": "^3.4.17"
   },
   "private": true
