@@ -1,4 +1,5 @@
 //tailwind.config.js
+
 /** @type {import('tailwindcss').Config} */
 const { Colors, Gradients } = require("./constants/Colors.cjs");
 
@@ -16,6 +17,20 @@ module.exports = {
       colors: {
         ...Colors,
         ...Gradients,
+      },
+      spacing: {
+        pageX: "16px",
+        66: "66px",
+      },
+      fontFamily: {
+        sf: ["SFPro"],
+        "sf-md": ["SFPro-Medium"],
+        "sf-sb": ["SFPro-Semibold"],
+        "sf-b": ["SFPro-Bold"],
+        grotesk: ["SpaceGrotesk"],
+        "grotesk-md": ["SpaceGrotesk-Medium"],
+        "grotesk-b": ["SpaceGrotesk-Bold"],
+        "grotesk-l": ["SpaceGrotesk-Light"],
       },
     },
   },

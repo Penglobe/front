@@ -19,23 +19,42 @@ export default function Home() {
           pointerEvents="none"
         />
 
-        {/* 출석, 얼음 */}
-        <View className="mt-[60px] justify-between flex-row ml-5 mr-5 ">
-          <View className="w-[100px] h-[40px] flex-row bg-[#065A93]/100 rounded-[32px] items-center justify-center">
-          <Snow width={24} height={24} />
-          <Text className="text-white font-medium text-[16px] mt-1">20일</Text>
+        <View className="mt-[66px] px-pageX flex-row justify-between">
+          {/* 출석 */}
+          <View className="flex-row items-center justify-between bg-blue rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
+            style={{
+              shadowColor: "#065A93",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 1,  //100%
+              shadowRadius: 2,   //Blur : 2
+              elevation: 4,  //Spread=2 정도
+            }}
+          >
+            <Snow width={30} height={30} />
+            <Text className="text-white font-sf-md text-[16px]">20일</Text>
           </View>
-          <View className="w-[100px] h-[40px] bg-[#318643]/100 rounded-[32px] flex-row items-center justify-center">
-          <Ice width={24} height={24} />
-          <Text className="text-white font-medium text-[16px] mt-1">20</Text>
+
+          {/* 얼음 */}
+          <View className="flex-row items-center justify-between bg-green rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
+            style={{
+              shadowColor: "#318643",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 1,  //100%
+              shadowRadius: 2,   //Blur : 2
+              elevation: 4,  //Spread=2 정도
+            }}
+          >
+            <Ice width={30} height={30} />
+            <Text className="text-white font-sf-md text-[16px]">200</Text>
           </View>
         </View>
 
+
         {/* 탄소 절감량 */}
         <View className="mt-[22px] ml-5 mr-5">
-          <View className="h-[110px] bg-primary/70 rounded-[10px] gap-4 items-left justify-center">
-          <Text className="ml-8 text-primary font-semibold text-[18px] mt-1">총 탄소 절감량</Text>
-          <Text className="ml-8 text-bold font-bold text-[18px] mt-1">2.3 kg(kgCo2eq 기준)</Text>
+          <View className="h-[110px] bg-white/70 rounded-[10px] gap-4 items-left justify-center">
+          <Text className="ml-8 text-primary font-sf-b text-[18px] mt-1">총 탄소 절감량</Text>
+          <Text className="ml-8 text-bold font-grotesk-md text-[18px] mt-1">2.3 kg(kgCo2eq 기준)</Text>
           </View>
         </View>
 
