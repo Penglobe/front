@@ -6,6 +6,7 @@ module.exports = {
     "./App.{js,jsx}", // 루트 App
     "./App/**/*.{js,jsx}", // 루트 App
     "./index.js", // index 엔트리
+    "./components/*.{js,jsx}",
   ],
   presets: [require("nativewind/preset")],
   theme: { extend: {} },
