@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { View, Text, InteractionManager } from "react-native";
 import { useRouter } from "expo-router";
 
+
 export default function Index() {
   const router = useRouter();
 
