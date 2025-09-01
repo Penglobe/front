@@ -1,10 +1,12 @@
 // components/TabBar.jsx
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useState, useEffect, useRef } from "react";
+import { Animated, View, Text, TouchableOpacity, Dimensions, StyleSheet } from "react-native";
 import { Images } from "@constants/Images";
 import BgBlack from "@components/BgBlack";
 import { useRouter } from "expo-router";
+import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
+import colors from "@constants/Colors.cjs";
+const { Gradients } = colors;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BAR_HEIGHT = 90;
@@ -39,6 +41,69 @@ export default function TabBar({ state, descriptors, navigation }) {
   const leftRoutes  = [findBy("home"), findBy("ranking")].filter(Boolean);
   const rightRoutes = [findBy("store"), findBy("mypage")].filter(Boolean);
 
+  function CalculatorButton({ onPress, spinActive, children }) {
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  // animation
+  useEffect(() => {
+      rotate.setValue(0);
+      const loop = Animated.loop(
+        Animated.timing(rotate, {
+          toValue: 1,
+          duration: 3000, // 3초에 한 바퀴
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+    return () => loop?.stop();
+  }, []);
+
+  const spin = rotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],  //rotate = 0 → "0deg"
+  });
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.85}
+      className="w-[60px] h-[60px] rounded-full items-center justify-center bg-white"
+      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      accessibilityRole="tab"
+      accessibilityLabel="계산기"
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          transform: [{ rotate: spin }],
+        }}
+      >
+        <Svg width={80} height={80} viewBox="0 0 100 100">
+          <Defs>
+            <LinearGradient id="calcRing" x1="0%" y1="0%" x2="100%" y2="0%">
+              <Stop offset="0%" stopColor={Gradients.background[0]} />
+              <Stop offset="100%" stopColor={Gradients.background[1]} />
+            </LinearGradient>
+          </Defs>
+          <Circle
+            cx="50"  // 원 중심의 x좌표
+            cy="50"  // 원 중심의 y좌표
+            r="45"  //반지름(px 단위)
+            stroke="url(#calcRing)"
+            strokeWidth="8"  //두께
+            fill="transparent"
+            strokeDasharray="282"    // 둘레 길이 
+            strokeDashoffset="75"    // 일부만 보이게
+            strokeLinecap="round"
+          />
+        </Svg>
+      </Animated.View>
+
+      {children}
+    </TouchableOpacity>
+  );
+}
   const renderItem = (route) => {
     const { options } = descriptors[route.key];
     const idx = state.routes.findIndex((x) => x.name === route.name);
@@ -74,8 +139,8 @@ export default function TabBar({ state, descriptors, navigation }) {
 
   return (
 <View
-pointerEvents="box-none"
-style={[StyleSheet.absoluteFillObject, { zIndex: 100 }]}
+  pointerEvents="box-none"
+  style={[StyleSheet.absoluteFillObject, { zIndex: 100 }]}
 >
       {open && <BgBlack/>}
 <View
@@ -96,46 +161,42 @@ style={[StyleSheet.absoluteFillObject, { zIndex: 100 }]}
   style={{ bottom: OFFSET + 60 }}
 >
   {center && (
-    <TouchableOpacity
-      onPress={() => setOpen((v) => !v)}   //업데이트 함수, v는 현재 open 값
-      activeOpacity={0.85}
-      className="w-[60px] h-[60px] rounded-full bg-white items-center justify-center"
-      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: isCalculatorFocused }}
-      accessibilityLabel="계산기"
-    >
-      {isCalculatorFocused || open ? (
-        <Images.CalcSelected width={36} height={36} />
-      ) : (
-        <Images.Calc width={36} height={36} />
-      )}
-    </TouchableOpacity>
+  <CalculatorButton
+  onPress={() => setOpen((v) => !v)}
+  spinActive={!open}
+  >
+    {isCalculatorFocused || open ? (
+      <Images.CalcSelected width={36} height={36} />
+    ) : (
+    <Images.Calc width={36} height={36} />
+    )}
+    </CalculatorButton>
   )}
 </View>
 
 {open && (
   <View
     className="absolute self-center flex-row gap-6 z-[9]"
-    style={{ bottom: OFFSET + 140 }}
+    style={{ bottom: OFFSET + 120 }}
   >
     <TouchableOpacity
       onPress={() => { setOpen(false); router.push("/(tabs)/calculator/transport"); }}
-      className="w-[60px] h-[60px] rounded-full bg-green items-center justify-center"
+      className="w-[70px] h-[70px] rounded-full border-2 border-white bg-green items-center justify-center"
     >
-      <Text className="text-white font-bold">환경 걸음</Text>
+      <Images.NavTransport width={SIZE} height={SIZE} />
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => { setOpen(false); router.push("/(tabs)/calculator/diet"); }}
-      className="w-[60px] h-[60px] rounded-full bg-green items-center justify-center"
+      className="w-[70px] h-[70px] rounded-full border-2 border-white bg-green items-center justify-center"
+      style={{ transform: [{ translateY: -50 }] }}
     >
-      <Text className="text-white font-bold">식단</Text>
+      <Images.NavDiet width={SIZE} height={SIZE} />
     </TouchableOpacity>
     <TouchableOpacity
       onPress={() => { setOpen(false); router.push("/(tabs)/calculator/survey"); }}
-      className="w-[60px] h-[60px] rounded-full bg-green items-center justify-center"
+      className="w-[70px] h-[70px] rounded-full border-2 border-white bg-green items-center justify-center"
     >
-      <Text className="text-white font-bold">설문조사</Text>
+      <Images.NavSurvey width={SIZE} height={SIZE} />
     </TouchableOpacity>
   </View>
 )}
