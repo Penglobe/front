@@ -16,13 +16,12 @@ export default function TabsLayout() {
           bottom: 0,
           backgroundColor: "transparent",
           borderTopWidth: 0,
-          elevation: 0, 
+          elevation: 0,
         },
 
         // 기본 배경 없애기
         tabBarBackground: () => null,
       }}
-
       // 탭바 연결
       tabBar={(props) => <TabBar {...props} />}
     >
