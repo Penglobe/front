@@ -10,6 +10,11 @@ import Tori from "@assets/images/character/tori.svg";
 import Snow from "@assets/icons/snow.svg";
 import Ice from "@assets/icons/ice.svg";
 import Quiz from "@assets/icons/quiz.svg";
+import Walk from "@assets/icons/walk.svg";
+import Diet from "@assets/icons/diet.svg";
+import Target from "@assets/icons/missionTarget.svg";
+import SuccessDiet from "@assets/icons/successDiet.svg";
+import SuccessWalk from "@assets/icons/successWalk.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -42,4 +47,9 @@ export const Images = {
   MypageSelected,
   CalcSelected,
   Calc,
+  Walk,
+  Diet,
+  Target,
+  SuccessDiet,
+  SuccessWalk,
 };
