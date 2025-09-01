@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import MainButton from "@components/MainButton";
 import HeaderBar from "@components/HeaderBar";
 import React, { useCallback, useEffect, useState } from "react";
-import { Text, ScrollView, RefreshControl, Alert } from "react-native";
+import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "./MissionSection";
 
@@ -52,6 +52,13 @@ export default function MissionScreen() {
 
   return (
     <View className="flex-1 bg-white">
+      <Images.BgQuiz
+        width="100%"
+        height="100%"
+        preserveAspectRatio="xMidYMid slice"  //X축·Y축 기준을 중앙 + 꽉 채움
+        style={StyleSheet.absoluteFillObject}  //부모 컨테이너 안을 전부 채우도록 배치
+        pointerEvents="none"  //터치 이벤트 금지 
+      />
       <HeaderBar title="환경 미션"/>
       <ScrollView
         className="flex-1 px-pageX"
