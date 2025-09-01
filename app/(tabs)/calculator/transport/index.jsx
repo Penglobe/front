@@ -46,6 +46,7 @@ export default function TransportStart() {
   }
 
   // ✅ SVG → Data URI 변환
+
   const imageSrc = "data:image/svg+xml;utf8," + encodeURIComponent(startSvg);
 
   const html = `

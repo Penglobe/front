@@ -1,7 +1,12 @@
+import { View, Text, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import MainButton from "@components/MainButton";
+import HeaderBar from "@components/HeaderBar";
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, View, Text, RefreshControl, Alert } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "./MissionSection";
+
 
 // TODO: 실제 호스트로 교체
 const API_BASE = "http://192.168.0.149:8080";
@@ -47,7 +52,8 @@ export default function MissionScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-white">
+      <HeaderBar title="환경 미션"/>
       <ScrollView
         className="flex-1 px-pageX"
         refreshControl={
