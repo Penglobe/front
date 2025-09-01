@@ -30,7 +30,6 @@ export default function TabsLayout() {
       <Tabs.Screen name="store/index" options={{ title: "Store" }} />
       <Tabs.Screen name="mypage/index" options={{ title: "Mypage" }} />
       <Tabs.Screen name="calculator/index" options={{ title: "Calc" }} />
-      <Tabs.Screen name="mission/index" options={{ title: "Mission" }} />
     </Tabs>
   );
 }
