@@ -16,7 +16,7 @@ export default function QuizPage() {
       <Images.BgQuiz
         width="100%"
         height="100%"
-        preserveAspectRatio="xMidYMid slice"  //X축·Y축 기준을 중앙 + 꽉 채움
+        preserveAspectRatio="xMidYMid slice"  //X축,Y축 기준을 중앙 + 꽉 채움
         style={StyleSheet.absoluteFillObject}  //부모 컨테이너 안을 전부 채우도록 배치
         pointerEvents="none"  //터치 이벤트 금지 
       />

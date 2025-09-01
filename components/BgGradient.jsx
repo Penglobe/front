@@ -2,7 +2,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import colors from "@constants/Colors.cjs";
 import { StyleSheet } from "react-native";
 const { Gradients } = colors;
-;
 
 export default function BgGradient() {
   return (

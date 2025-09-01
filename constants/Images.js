@@ -31,6 +31,9 @@ import Mypage from "@assets/nav/mypage.svg";
 import MypageSelected from "@assets/nav/mypage-selected.svg";
 import CalcSelected from "@assets/nav/calculator-selected.svg";
 import Calc from "@assets/nav/calculator.svg";
+import NavTransport from "@assets/nav/transport.svg";
+import NavDiet from "@assets/nav/diet.svg";
+import NavSurvey from "@assets/nav/survey.svg";
 
 export const Images = {
   BgHome1,
@@ -58,4 +61,7 @@ export const Images = {
   Target2,
   SuccessDiet,
   SuccessWalk,
+  NavDiet,
+  NavTransport,
+  NavSurvey,
 };
