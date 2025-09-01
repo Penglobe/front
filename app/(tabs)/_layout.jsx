@@ -16,13 +16,12 @@ export default function TabsLayout() {
           bottom: 0,
           backgroundColor: "transparent",
           borderTopWidth: 0,
-          elevation: 0, 
+          elevation: 0,
         },
 
         // 기본 배경 없애기
         tabBarBackground: () => null,
       }}
-
       // 탭바 연결
       tabBar={(props) => <TabBar {...props} />}
     >
@@ -31,6 +30,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="store/index" options={{ title: "Store" }} />
       <Tabs.Screen name="mypage/index" options={{ title: "Mypage" }} />
       <Tabs.Screen name="calculator/index" options={{ title: "Calc" }} />
+      <Tabs.Screen name="mission/index" options={{ title: "Mission" }} />
     </Tabs>
   );
 }
