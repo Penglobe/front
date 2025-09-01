@@ -10,6 +10,7 @@ import Tori from "@assets/images/character/tori.svg";
 import Snow from "@assets/icons/snow.svg";
 import Ice from "@assets/icons/ice.svg";
 import Quiz from "@assets/icons/quiz.svg";
+import Back from "@assets/icons/back.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -42,4 +43,5 @@ export const Images = {
   MypageSelected,
   CalcSelected,
   Calc,
+  Back,
 };

@@ -1,6 +1,6 @@
 // app/_layout.jsx
 import "../styles/global.css";
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
 import Fonts from "@constants/Fonts.cjs";
@@ -33,7 +33,7 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <Slot />
+      <Stack screenOptions={{ headerShown: false }} />
     </View>
   );
 }

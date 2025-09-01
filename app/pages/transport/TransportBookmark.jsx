@@ -6,6 +6,7 @@ import { transportService } from "@services/transportService";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
+import HeaderBar from "@components/HeaderBar";
 
 export default function TransportBookmark() {
   const router = useRouter();
@@ -140,15 +141,11 @@ export default function TransportBookmark() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <BgGradient />
 
       {/* ✅ 상단 헤더 */}
-      <View className="flex-row items-center justify-between p-3 border-b mt-2">
-        <Button title="← 뒤로가기" onPress={() => router.back()} />
-        <Text className="text-lg font-bold">도착지 설정</Text>
-        <View style={{ width: 80 }} />
-      </View>
+      <HeaderBar title="환경 걸음"/>
 
       {/* ✅ 지도 */}
       <View className="flex-1 mt-2 mx-3 rounded-xl overflow-hidden shadow">
@@ -200,6 +197,6 @@ export default function TransportBookmark() {
           />
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
