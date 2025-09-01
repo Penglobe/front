@@ -1,9 +1,8 @@
-import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import MainButton from "@components/MainButton";
 import HeaderBar from "@components/HeaderBar";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, View, Text, RefreshControl, Alert } from "react-native";
+import { Text, ScrollView, RefreshControl, Alert } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "./MissionSection";
 
