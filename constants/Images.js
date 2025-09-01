@@ -1,6 +1,7 @@
 // constants/images.js
 // 배경
 import BgHome1 from "@assets/images/bg/bg-home-1.svg";
+import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 
 // 캐릭터
 import Ipa from "@assets/images/character/ipa.svg";
@@ -33,6 +34,7 @@ import Calc from "@assets/nav/calculator.svg";
 
 export const Images = {
   BgHome1,
+  BgQuiz,
   Ipa,
   Tori,
   Snow,
