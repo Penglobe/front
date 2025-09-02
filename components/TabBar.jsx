@@ -144,8 +144,6 @@ export default function TabBar({ state, descriptors, navigation }) {
 >
      {open && (
     <BgBlack
-      opacity={0.6}
-      bottomGap={BAR_HEIGHT + OFFSET} // 바텀바 높이만큼 비워줌
       onPress={() => setOpen(false)}
     />
   )}
