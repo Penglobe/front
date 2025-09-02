@@ -22,7 +22,7 @@ export default function QuizPage() {
     setAnswer(userAnswer); //사용자 답변 설정
 
     const userAnswerBool = userAnswer === "O"; //db에는 true/false로 저장되어 있음
-    const isCorrect = userAnswerBool === question.isAnswerTrue; //정답 여부 확인
+    const isCorrect = userAnswerBool === Boolean(question.isAnswerTrue); //정답 여부 확인
 
     setResult(isCorrect); //결과 설정
 
@@ -34,6 +34,7 @@ export default function QuizPage() {
     fetch("http://192.168.0.51:8080/quiz/today")
       .then((response) => response.json())
       .then((data) => {
+        console.log("질문", data);
         setQuestion(data);
       })
       .catch((error) => console.error("Error fetching quiz:", error));
@@ -53,7 +54,8 @@ export default function QuizPage() {
         },
         body: JSON.stringify({
           userId: 177, //임시 userId***************************************************
-          answer: answer === "O", // 1: 정답, 0: 오답
+          quizId: question.quizId,
+          answer: answer === "O",
         }),
       });
 
