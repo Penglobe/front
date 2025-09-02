@@ -53,7 +53,7 @@ export default function StepPill({ slot, onClaim }) {
     >
       {/* 🎯 아이콘(가장 위 레이어) */}
       <Pressable
-        onPress={() => canPress && onClaim(metric, target)}
+        onPress={() => canPress && onClaim(metric, target, rewardPoints)}
         disabled={!canPress}
         className="relative items-center justify-center"
         style={({ pressed }) => [

@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
+import Modal from "@components/Modal";
+import MainButton from "@components/MainButton";
 
 // TODO: 실제 호스트로 교체
 const API_BASE = "http://192.168.0.149:8080";
@@ -18,6 +20,9 @@ const USER_ID = 1;
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const [claimInfo, setClaimInfo] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -39,7 +44,7 @@ export default function MissionScreen() {
     load();
   }, [load]);
 
-  const onClaim = async (metric, target) => {
+  const onClaim = async (metric, target, rewardPointsFromSlot) => {
     try {
       const res = await fetch(
         `${API_BASE}/missions/claim?metric=${metric}&target=${target}`,
@@ -47,7 +52,16 @@ export default function MissionScreen() {
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || "수령 실패");
+
+      const reward =
+        rewardPointsFromSlot ??
+        windows?.[metric]?.find?.((s) => Number(s.target) === Number(target))
+          ?.rewardPoints ??
+        target * 10;
+
+      setClaimInfo({ metric, target, rewardPoints: reward });
       await load();
+      setOpen(true);
     } catch (e) {
       Alert.alert("수령 실패", e.message);
     }
@@ -129,6 +143,32 @@ export default function MissionScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* ✅ 모달: 수령 포인트 안내 */}
+      <Modal
+        visible={open}
+        onClose={async () => {
+          setOpen(false);
+          setClaimInfo(null);
+        }}
+      >
+        <Text className="text-black text-[20px] font-sf-b mb-1 text-center">
+          보상 지급 완료!
+        </Text>
+        <View className="w-full flex-row items-center justify-center">
+          <Text className="text-green font-sf-b text-[20px]">
+            {claimInfo?.rewardPoints ?? 0}
+          </Text>
+
+          <Images.Ice width={28} height={28} />
+
+          <Text className="text-black font-sf-b text-[20px]">을 받았어요.</Text>
+        </View>
+        <View className="items-center my-3">
+          <Images.Ipa2 width={150} height={150} />
+        </View>
+        <MainButton label="확인" onPress={() => setOpen(false)} />
+      </Modal>
     </View>
   );
 }
