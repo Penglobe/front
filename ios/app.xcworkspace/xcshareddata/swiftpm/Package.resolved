@@ -1,0 +1,15 @@
+{
+  "originHash" : "fd8b8b3c5a1b8b9b7547bba0879c34d7a23c6a35f3dfe20baf7e54e3eb07ffbe",
+  "pins" : [
+    {
+      "identity" : "ios_foodlenscoresdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://bitbucket.org/doing-lab/ios_foodlenscoresdk",
+      "state" : {
+        "revision" : "8c1a2a0505c7f0ba7cca9d15cfd890558960d985",
+        "version" : "3.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}
