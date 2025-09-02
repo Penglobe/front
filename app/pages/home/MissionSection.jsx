@@ -1,6 +1,6 @@
 // MissionSection.jsx
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import StepPill from "./StepPill";
 
 export default function MissionSection({
@@ -67,28 +67,60 @@ export default function MissionSection({
 
       {/* 바 모드(출석) */}
       {simpleBar ? (
-        <View className="w-full mt-1">
-          <View className="h-4 bg-[#D1D5DB] rounded-full overflow-hidden">
-            <View
-              className="h-4 bg-[#065A93] rounded-full"
-              style={{
-                width: `${Math.min(
-                  100,
-                  (Number(slots?.[0]?.progress ?? 0) /
-                    Math.max(
-                      1,
-                      Number(slots?.[slots.length - 1]?.target ?? 0)
-                    )) *
-                    100
-                )}%`,
-              }}
-            />
-          </View>
-          <Text className="mt-2 text-[#0C092A] font-bold">
-            {Number(slots?.[0]?.progress ?? 0)}/
-            {Number(slots?.[slots?.length - 1]?.target ?? 0)}
-          </Text>
-        </View>
+        (() => {
+          const slot = slots?.[0] || {};
+          const progressNum = Number(slot.progress ?? 0);
+          const targetNum = Number(slot.target ?? 20);
+          const isDone = progressNum >= targetNum;
+
+          // 서버가 claimable 내려주면 우선, 없으면 progress>=target 으로 판단
+          const canClaim =
+            !slot.claimed && (slot.claimable ?? progressNum >= targetNum);
+
+          const pct = Math.min(
+            100,
+            Math.max(0, (progressNum / Math.max(1, targetNum)) * 100)
+          );
+
+          return (
+            <View className="w-full mt-1">
+              {/* 진행 바 */}
+              <View className="h-4 mb-1 bg-[#D1D5DB] rounded-full overflow-hidden">
+                <View
+                  className="h-4 bg-[#065A93] rounded-full"
+                  style={{ width: `${pct}%` }}
+                />
+              </View>
+
+              {/* 진행/버튼 라인 */}
+              <View className="mt-2 flex-row items-center justify-between">
+                <Text
+                  className={`font-sf-b ${isDone ? "text-black" : "text-[#0C092A]"}`}
+                >
+                  {isDone ? "출석 미션 완료" : `${progressNum}/${targetNum}일`}
+                </Text>
+
+                {slot.claimed ? (
+                  <Text className="text-[#6B7280] font-sf-md">
+                    +{slot.rewardPoints}
+                  </Text>
+                ) : (
+                  <Pressable
+                    disabled={!canClaim}
+                    onPress={() => onClaim(slot.metric, slot.target)}
+                    className={[
+                      "px-4 py-2 rounded-lg",
+                      canClaim ? "bg-[#065A93]" : "bg-[#D1D5DB]",
+                    ].join(" ")}
+                    style={canClaim ? { elevation: 4 } : undefined}
+                  >
+                    <Text className="text-white font-sf-sb">받기</Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          );
+        })()
       ) : (
         // 스텝 4칸
         <View className="mt-1 relative">
