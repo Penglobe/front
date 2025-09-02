@@ -1,202 +1,190 @@
-import React, { useRef, useState } from "react";
-import { View, Text, Button, FlatList, TouchableOpacity } from "react-native";
-import { WebView } from "react-native-webview";
-import { KAKAO_API_KEY } from "@env";
-import { transportService } from "@services/transportService";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { searchAddress, listBookmarks } from "@services/transportService";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
+import MainButton from "@components/MainButton";
+import { Ionicons } from "@expo/vector-icons";
+import colors from "@constants/Colors.cjs";
+import PlaceCard from "@components/PlaceCard";
 
 export default function TransportBookmark() {
-  const router = useRouter();
-  const webViewRef = useRef(null);
-
   const { startLat, startLng } = useLocalSearchParams();
+  const router = useRouter();
 
+  const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
-  // ✅ 북마크 저장
-  const saveBookmark = async () => {
-    if (!selected) return;
-    await transportService.createBookmark(1, {
-      name: selected.name,
-      lat: selected.lat,
-      lng: selected.lng,
-    });
-    alert("북마크 저장 완료!");
-  };
+  const userId = 1; // TODO: 로그인 사용자 ID 가져오기
 
-  // ✅ Kakao Map HTML
-  const html = `
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
-      </head>
-      <body style="margin:0">
-        <div id="map" style="width:100%;height:100%"></div>
-        <script>
-          var map = new kakao.maps.Map(document.getElementById('map'), {
-            center: new kakao.maps.LatLng(${startLat}, ${startLng}),
-            level: 4
-          });
+  // ✅ 북마크 불러오기
+  const fetchBookmarks = useCallback(async () => {
+    try {
+      const data = await listBookmarks(userId);
+      setBookmarks(data);
+    } catch (err) {
+      console.error("북마크 조회 실패:", err);
+      Alert.alert("북마크 조회 실패");
+    }
+  }, [userId]);
 
-          // ✅ 출발지 마커
-          var startMarker = new kakao.maps.Marker({
-            map: map,
-            position: new kakao.maps.LatLng(${startLat}, ${startLng}),
-            title: "출발지"
-          });
+  useEffect(() => {
+    fetchBookmarks();
+  }, [fetchBookmarks]);
 
-          var ps = new kakao.maps.services.Places();
-          var markers = [];
-
-          function clearMarkers() {
-            markers.forEach(m => m.setMap(null));
-            markers = [];
-          }
-
-          // ✅ 장소 검색
-          function searchPlaces(keyword) {
-            ps.keywordSearch(keyword, function(data, status) {
-              if (status === kakao.maps.services.Status.OK) {
-                clearMarkers();
-                var bounds = new kakao.maps.LatLngBounds();
-                var results = [];
-
-                data.forEach(place => {
-                  var marker = new kakao.maps.Marker({
-                    map: map,
-                    position: new kakao.maps.LatLng(place.y, place.x)
-                  });
-                  markers.push(marker);
-
-                  // ✅ 마커 클릭 → RN으로 장소 전달
-                  kakao.maps.event.addListener(marker, "click", function() {
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                      type: "select",
-                      place: { 
-                        id: place.id,
-                        name: place.place_name, 
-                        address: place.road_address_name || place.address_name,
-                        lat: place.y, 
-                        lng: place.x 
-                      }
-                    }));
-                  });
-
-                  bounds.extend(new kakao.maps.LatLng(place.y, place.x));
-
-                  results.push({
-                    id: place.id,
-                    name: place.place_name,
-                    address: place.road_address_name || place.address_name,
-                    lat: place.y,
-                    lng: place.x
-                  });
-                });
-
-                map.setBounds(bounds);
-
-                // ✅ 검색 결과 RN으로 전달
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  type: "results",
-                  results: results
-                }));
-              }
-            });
-          }
-
-          // ✅ RN → WebView 메세지
-          document.addEventListener("message", function(event) {
-            var msg = JSON.parse(event.data);
-            if (msg.type === "search") {
-              searchPlaces(msg.keyword);
-            }
-          });
-        </script>
-      </body>
-    </html>
-  `;
-
-  // ✅ WebView → RN 메시지 핸들링
-  const handleMessage = (event) => {
-    const msg = JSON.parse(event.nativeEvent.data);
-    if (msg.type === "results") {
-      setSearchResults(msg.results);
-    } else if (msg.type === "select") {
-      setSelected(msg.place);
+  // ✅ 주소 검색
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    try {
+      setLoading(true);
+      const data = await searchAddress(query);
+      setSearchResults(data.documents || []);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("주소 검색 실패", "카카오 API 호출 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ RN → WebView 검색 요청
-  const handleSearch = (keyword) => {
-    if (webViewRef.current) {
-      webViewRef.current.postMessage(
-        JSON.stringify({ type: "search", keyword })
-      );
+  // ✅ 확인 버튼
+  const handleConfirm = () => {
+    if (!selectedPlace) {
+      Alert.alert("목적지를 선택해주세요.");
+      return;
+    }
+
+    const isBookmark = !!selectedPlace.bookmarkId;
+
+    const goNext = () =>
+      router.push({
+        pathname: "/pages/transport/transportMap",
+        params: {
+          startLat,
+          startLng,
+          endLat: isBookmark ? selectedPlace.lat : selectedPlace.y,
+          endLng: isBookmark ? selectedPlace.lng : selectedPlace.x,
+          placeName: isBookmark
+            ? selectedPlace.bookmarkLabel
+            : selectedPlace.place_name,
+        },
+      });
+
+    if (isBookmark) {
+      goNext();
+    } else {
+      Alert.alert("북마크 등록", "이 장소를 북마크로 등록하시겠습니까?", [
+        {
+          text: "예",
+          onPress: () =>
+            router.push({
+              pathname: "/pages/transport/bookmarkSetting",
+              params: {
+                lat: selectedPlace.y,
+                lng: selectedPlace.x,
+                placeName: selectedPlace.place_name,
+                address: selectedPlace.address_name,
+                startLat,
+                startLng,
+              },
+            }),
+        },
+        { text: "아니오", style: "cancel", onPress: goNext },
+      ]);
     }
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1">
       <BgGradient />
+      <HeaderBar title="목적지 선택" className="px-pageX font-sf-b" />
 
-      {/* ✅ 상단 헤더 */}
-      <HeaderBar title="환경 걸음"/>
-
-      {/* ✅ 지도 */}
-      <View className="flex-1 mt-2 mx-3 rounded-xl overflow-hidden shadow">
-        <WebView
-          ref={webViewRef}
-          originWhitelist={["*"]}
-          source={{ html }}
-          onMessage={handleMessage}
-        />
-      </View>
-
-      {/* ✅ 검색 결과 리스트 */}
-      <View className="h-1/3 bg-white border-t p-3 mt-2 rounded-t-xl shadow">
-        <Text className="text-lg font-bold mb-2">검색 결과</Text>
-        <FlatList
-          data={searchResults}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => setSelected(item)}
-              className={`p-2 border-b ${
-                selected?.id === item.id ? "bg-green-200" : ""
-              }`}
-            >
-              <Text className="font-semibold">{item.name}</Text>
-              <Text className="text-gray-500 text-sm">{item.address}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-
-      {/* ✅ 선택한 도착지 */}
-      {selected && (
-        <View className="p-4 bg-white border-t mt-2 rounded-t-xl shadow">
-          <Text className="mb-2">도착지: {selected.name}</Text>
-          <Button title="북마크 저장" onPress={saveBookmark} />
-          <Button
-            title="다음"
-            onPress={() =>
-              router.push({
-                pathname: "/pages/transport/TransportFinish",
-                params: {
-                  startLat,
-                  startLng,
-                  dest: JSON.stringify(selected),
-                },
-              })
-            }
+      {/* 🔎 검색창 */}
+      <View className="px-pageX mt-5">
+        <View className="flex-row items-center bg-white rounded-xl px-3 py-4 shadow-md shadow-black/5">
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color={colors.Colors.green}
+            className="mr-2"
+          />
+          <TextInput
+            placeholder="목적지를 검색하세요"
+            value={query}
+            onChangeText={setQuery}
+            className="flex-1 font-sf-md text-gray-800"
+            returnKeyType="search"
+            onSubmitEditing={handleSearch}
           />
         </View>
-      )}
+      </View>
+
+      {/* 검색 결과 */}
+      <View className="px-pageX mt-6">
+        <Text className="font-sf-b text-xl text-gray-800 mb-3">검색 결과</Text>
+        <View className="h-[200px] rounded-xl bg-[#E0F2F1]">
+          {loading ? (
+            <ActivityIndicator className="mt-3" />
+          ) : (
+            <FlatList
+              data={searchResults}
+              keyExtractor={(_, idx) => "s-" + idx}
+              renderItem={({ item }) => (
+                <PlaceCard
+                  item={item}
+                  isBookmark={false}
+                  isSelected={selectedPlace?.id === item.id} // ✅ 선택 여부 전달
+                  onSelect={setSelectedPlace} // ✅ 선택 이벤트 전달
+                />
+              )}
+              ListEmptyComponent={
+                <Text className="font-sf-md text-gray-400 text-center mt-4">
+                  검색 결과가 없습니다.
+                </Text>
+              }
+            />
+          )}
+        </View>
+      </View>
+
+      {/* 북마크 */}
+      <View className="px-pageX mt-8 flex-1">
+        <Text className="font-sf-b text-xl text-gray-800 mb-3">내 북마크</Text>
+        <FlatList
+          data={bookmarks}
+          keyExtractor={(item) => "b-" + item.bookmarkId}
+          renderItem={({ item }) => (
+            <PlaceCard
+              item={item}
+              isBookmark
+              isSelected={selectedPlace?.bookmarkId === item.bookmarkId} // ✅ 선택 여부 전달
+              onSelect={setSelectedPlace} // ✅ 선택 이벤트 전달
+            />
+          )}
+          ListEmptyComponent={
+            <Text className="font-sf-md text-gray-400 mt-4 text-center">
+              등록된 북마크가 없습니다.
+            </Text>
+          }
+        />
+      </View>
+
+      {/* 확인 버튼 */}
+      <View className="px-pageX mb-8">
+        <MainButton label="확인" onPress={handleConfirm} />
+      </View>
     </View>
   );
 }
