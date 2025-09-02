@@ -11,6 +11,7 @@ import {
 import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
 
+// TODO: 실제 호스트로 교체
 const API_BASE = "http://192.168.0.149:8080";
 const USER_ID = 1;
 
