@@ -140,12 +140,19 @@ export default function TabBar({ state, descriptors, navigation }) {
   return (
 <View
   pointerEvents="box-none"
-  style={[StyleSheet.absoluteFillObject, { zIndex: 100 }]}
+  style={[StyleSheet.absoluteFillObject]}
 >
-      {open && <BgBlack/>}
+     {open && (
+    <BgBlack
+      opacity={0.6}
+      bottomGap={BAR_HEIGHT + OFFSET} // 바텀바 높이만큼 비워줌
+      onPress={() => setOpen(false)}
+    />
+  )}
+   <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 100 }}>
 <View
   className="absolute left-4 right-4 items-center"
-  style={{ bottom: OFFSET+24, height: 70, zIndex: 0 }}
+  style={{ bottom: OFFSET+24, height: 70 }}
 >
   <Images.TabbarBg width="100%" height={BAR_HEIGHT} />
 </View>
@@ -199,8 +206,9 @@ export default function TabBar({ state, descriptors, navigation }) {
       <Images.NavSurvey width={SIZE} height={SIZE} />
     </TouchableOpacity>
   </View>
+  
 )}
-
 </View>
+  </View>
 )
 }
