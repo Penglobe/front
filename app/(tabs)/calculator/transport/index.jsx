@@ -4,7 +4,7 @@ import { WebView } from "react-native-webview";
 import { KAKAO_API_KEY } from "@env";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router"; // ✅ expo-router 라우터 사용
-import useTransport from "./useTransport";
+import useTransport from "../../../../hooks/useTransport";
 import BgGradient from "@components/BgGradient";
 import MainButton from "@components/MainButton";
 import TransportButton from "@components/TransportButton";

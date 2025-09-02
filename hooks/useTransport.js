@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SERVER_URL } from "@env";
-import useLocationTracking from "./useLocationTracking";
+import useLocationTracking from "../app/(tabs)/calculator/transport/useLocationTracking";
 
 export default function useTransport(userId = 1) {
   const [activityId, setActivityId] = useState(null);

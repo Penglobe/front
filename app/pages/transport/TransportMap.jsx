@@ -18,7 +18,7 @@ export default function TransportMap({ navigation, route }) {
       <script>
         var map = new kakao.maps.Map(document.getElementById('map'), {
           center: new kakao.maps.LatLng(37.5665, 126.9780),
-          level: 3
+          level: 1
         });
 
         var ps = new kakao.maps.services.Places();
