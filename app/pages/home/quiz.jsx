@@ -4,11 +4,12 @@ import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import { useEffect, useState } from "react";
+import Modal from "@components/Modal";
 
 export default function QuizPage() {
   const router = useRouter();
   const [question, setQuestion] = useState(null); //질문 가져오기
-  const [modelVisible, setModelVisible] = useState(false); //정답 모달
+  const [open, setOpen] = useState(false); //모달 열기
   const [answer, setAnswer] = useState(null); //사용자 답변
 
   /*날짜*/
@@ -16,8 +17,8 @@ export default function QuizPage() {
   const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
 
   const handleAnswer = (userAnswer) => {
-    setAnswer(userAnswer);
-    setModelVisible(true);
+    setAnswer(userAnswer); //사용자 답변 설정
+    setOpen(true); //모달 열기
   };
 
   /*퀴즈 가져오기*/
@@ -32,7 +33,15 @@ export default function QuizPage() {
 
   return (
     <View className="flex-1">
-      {/*배경*/}
+      {/*모달*/}
+      <Modal visible={open} onClose={() => setOpen(false)}>
+        <Text className="text-black text-[18px] font-sf-md mb-4">
+          모달 제목
+        </Text>
+        <Images.Ipa2 />
+        <MainButton label="포인트 받기" />
+      </Modal>
+
       <Images.BgQuiz
         width="100%"
         height="100%"
@@ -58,7 +67,7 @@ export default function QuizPage() {
             Q. {question ? question.question : "퀴즈를 불러오는 중입니다..."}
           </Text>
 
-          {/*ox*/}
+          {/*OX*/}
           <View className="flex-row justify-around w-full mt-10">
             <TouchableOpacity
               className="bg-blue py-3 px-10 rounded-lg opacity-90"
