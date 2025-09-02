@@ -18,7 +18,9 @@ import colors from "@constants/Colors.cjs";
 import PlaceCard from "@components/PlaceCard";
 
 export default function TransportBookmark() {
-  const { startLat, startLng } = useLocalSearchParams();
+  const { startLat, startLng, mode: rawMode } = useLocalSearchParams();
+  const mode = rawMode || "TRANSIT"; // ✅ 기본값 보장
+
   const router = useRouter();
 
   const [query, setQuery] = useState("");
@@ -79,6 +81,7 @@ export default function TransportBookmark() {
           placeName: isBookmark
             ? selectedPlace.bookmarkLabel
             : selectedPlace.place_name,
+          mode: mode || "TRANSIT",
         },
       });
 
@@ -98,6 +101,7 @@ export default function TransportBookmark() {
                 address: selectedPlace.address_name,
                 startLat,
                 startLng,
+                mode: mode || "TRANSIT",
               },
             }),
         },
