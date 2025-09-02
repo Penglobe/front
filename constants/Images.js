@@ -7,6 +7,9 @@ import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 import Ipa from "@assets/images/character/ipa.svg";
 import Tori from "@assets/images/character/tori.svg";
 import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
+import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
+import IpaFace from "@assets/images/character/ipa-face.svg";
+import Ipa2 from "@assets/images/character/ipa-2.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -19,6 +22,7 @@ import Target from "@assets/icons/missionTarget.svg";
 import Target2 from "@assets/icons/missionTarget2.svg";
 import SuccessDiet from "@assets/icons/successDiet.svg";
 import SuccessWalk from "@assets/icons/successWalk.svg";
+import Camera from "@assets/icons/camera.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -66,4 +70,8 @@ export const Images = {
   NavTransport,
   NavSurvey,
   Quiz_IpaTory,
+  Camera,
+  IpaTori1,
+  IpaFace,
+  Ipa2,
 };
