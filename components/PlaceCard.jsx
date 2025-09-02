@@ -23,7 +23,7 @@ export default function PlaceCard({
         shadowOffset: { width: 0, height: 3 }, // ✅ 밑으로만 그림자
         shadowOpacity: 0.15,
         shadowRadius: 3,
-        elevation: Platform.OS === "android" ? 3 : 0, // ✅ 안드로이드는 살짝만
+        elevation: Platform.OS === "android" ? 3 : 0,
       }
     : {};
 
@@ -32,6 +32,7 @@ export default function PlaceCard({
       className="px-4 py-4 rounded-2xl"
       style={{
         backgroundColor,
+        marginBottom: isBookmark ? 8 : 0, // ✅ 북마크 카드만 밑에 여백
         ...shadowStyle,
       }}
       onPress={() => onSelect(item)}
