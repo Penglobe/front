@@ -1,17 +1,8 @@
+// MissionSection.jsx
 import React from "react";
 import { View, Text } from "react-native";
 import StepPill from "./StepPill";
 
-/**
- * props:
- * - title: 섹션 타이틀
- * - icon:  아이콘 JSX
- * - slots: MissionSlotDTO[] (4칸)
- * - onClaim(metric, target)
- * - unit: "kg" | "일" (문구 표시용)
- * - accent: "default" | "yellow" (라인 색감 변경용, 선택)
- * - simpleBar: true면 아래 바 모드로 대체적 표현(출석용)
- */
 export default function MissionSection({
   title,
   icon,
@@ -21,15 +12,46 @@ export default function MissionSection({
   accent = "default",
   simpleBar = false,
 }) {
-  const progress = Number(slots?.[0]?.progress ?? 0);
-  const firstTarget = Number(slots?.[0]?.target ?? 0);
-  const lastTarget = Number(slots?.[slots?.length - 1]?.target ?? 0);
-  const range = Math.max(1, lastTarget - firstTarget);
-  // 첫 타겟부터 마지막 타겟 사이에서의 진행 비율 (0~1로 클램프)
-  const progressPct = Math.max(
-    0,
-    Math.min(1, (progress - firstTarget) / range)
-  );
+  // ✅ 구간 기반 진행도(0~1) 계산: 각 타겟 사이 비율까지 반영
+  const calcProgressPct = (slots) => {
+    if (!slots || slots.length === 0) return 0;
+
+    const progress = Number(slots[0]?.progress ?? 0);
+    const targets = slots.map((s) => Number(s.target)).sort((a, b) => a - b);
+
+    // 타겟이 1개면(출석 카드 같은) 단순 비교
+    if (targets.length === 1) {
+      return progress >= targets[0]
+        ? 1
+        : Math.max(0, progress / Math.max(1, targets[0]));
+    }
+
+    const first = targets[0];
+    const last = targets[targets.length - 1];
+
+    if (progress <= first) return 0;
+    if (progress >= last) return 1;
+
+    // progress가 속한 구간 찾기
+    let i = 0;
+    for (; i < targets.length - 1; i++) {
+      if (progress < targets[i + 1]) break;
+    }
+    // 구간 내 비율
+    const segStart = targets[i];
+    const segEnd = targets[i + 1];
+    const segRatio = (progress - segStart) / (segEnd - segStart);
+
+    // 전체 비율 = (이전 구간 개수 + 현재 구간 내 비율) / 전체 구간 개수
+    const segCount = targets.length - 1; // 4칸이면 3개 구간
+    return (i + segRatio) / segCount;
+  };
+
+  const progressPct = calcProgressPct(slots); // 0~1
+
+  const PILL = 44; // StepPill 아이콘 박스 높이
+  const LINE_H = 8; // h-2 = 8px
+  const LINE_TOP = PILL / 2 - LINE_H / 2;
 
   return (
     <View
@@ -38,8 +60,8 @@ export default function MissionSection({
     >
       {/* 타이틀 */}
       <View className="flex-row items-center mb-3">
-        <View className="mr-2">{icon}</View>
-        <Text className="text-xl font-extrabold text-black">{title}</Text>
+        <View className="mr-1">{icon}</View>
+        <Text className="text-xl font-sf-b text-black">{title}</Text>
         {unit === "kg" && <Text className="text-[#D1D5DB] ml-1">(kg)</Text>}
       </View>
 
@@ -50,31 +72,50 @@ export default function MissionSection({
             <View
               className="h-4 bg-[#065A93] rounded-full"
               style={{
-                width: `${Math.min(100, (progress / lastTarget) * 100)}%`,
+                width: `${Math.min(
+                  100,
+                  (Number(slots?.[0]?.progress ?? 0) /
+                    Math.max(
+                      1,
+                      Number(slots?.[slots.length - 1]?.target ?? 0)
+                    )) *
+                    100
+                )}%`,
               }}
             />
           </View>
           <Text className="mt-2 text-[#0C092A] font-bold">
-            {progress}/{lastTarget}
+            {Number(slots?.[0]?.progress ?? 0)}/
+            {Number(slots?.[slots?.length - 1]?.target ?? 0)}
           </Text>
         </View>
       ) : (
         // 스텝 4칸
-        <View className="mt-1">
+        <View className="mt-1 relative">
           {/* 연결 라인: 원형 중심까지만 그리기 (양쪽 32px 잘라내기) */}
-          <View className="absolute left-0 right-0 top-5">
+          <View
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: LINE_TOP,
+              zIndex: 0,
+            }}
+          >
             {/* 회색 베이스 라인 */}
             <View className="h-2 bg-[#E5E7EB] rounded-full mx-8" />
-            {/* 진행 라인 */}
+            {/* 진행 라인 (구간 기반 퍼센트 반영) */}
             <View
               className="h-2 rounded-full mx-8 -mt-2"
               style={{
-                width: `${progressPct * 100}%`,
+                width: `${Math.max(0, Math.min(1, progressPct)) * 100}%`,
                 backgroundColor: accent === "yellow" ? "#FDE68A" : "#A7F3D0",
               }}
             />
           </View>
-          <View className="flex-row justify-between">
+
+          {/* 스텝(아이콘/버튼) */}
+          <View className="flex-row justify-between" style={{ zIndex: 2 }}>
             {slots?.map((slot, idx) => (
               <StepPill key={idx} slot={slot} onClaim={onClaim} unit={unit} />
             ))}

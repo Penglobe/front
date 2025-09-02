@@ -1,16 +1,18 @@
-import { useRouter } from "expo-router";
-import MainButton from "@components/MainButton";
 import HeaderBar from "@components/HeaderBar";
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import { Images } from "@constants/Images";
-import MissionSection from "./MissionSection";
+import MissionSection from "@pages/home/MissionSection";
 
-
-// TODO: 실제 호스트로 교체
 const API_BASE = "http://192.168.0.149:8080";
-
-const USER_ID = 1; // 임시. 로그인 붙으면 토큰(or secure store)에서 주입
+const USER_ID = 1;
 
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
@@ -44,7 +46,7 @@ export default function MissionScreen() {
       );
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || "수령 실패");
-      await load(); // 수령 후 새로고침
+      await load();
     } catch (e) {
       Alert.alert("수령 실패", e.message);
     }
@@ -52,62 +54,79 @@ export default function MissionScreen() {
 
   return (
     <View className="flex-1 bg-white">
+      {/* 배경 */}
       <Images.BgQuiz
         width="100%"
         height="100%"
-        preserveAspectRatio="xMidYMid slice"  //X축,Y축 기준을 중앙 + 꽉 채움
-        style={StyleSheet.absoluteFillObject}  //부모 컨테이너 안을 전부 채우도록 배치
-        pointerEvents="none"  //터치 이벤트 금지 
+        preserveAspectRatio="xMidYMid slice"
+        style={StyleSheet.absoluteFillObject}
+        pointerEvents="none"
       />
-      <HeaderBar title="환경 미션"/>
+
+      {/* 규정: 페이지 맨 위 헤더 */}
+      <HeaderBar title="환경 미션" />
+
+      {/* 규정: 헤더 아래는 px-pageX 래퍼로 감싸기 */}
       <ScrollView
-        className="flex-1 px-pageX"
+        className="flex-1"
         refreshControl={
           <RefreshControl refreshing={loading} onRefresh={load} />
         }
         contentContainerStyle={{ paddingBottom: 28 }}
       >
-        {/* 안내 카드 */}
-        <View
-          className="bg-white rounded-2xl px-4 py-4 shadow-md"
-          style={{ elevation: 4 }}
-        >
-          <Text className="text-black font-extrabold">탄소 절감량 미션</Text>
-          <Text className="text-[#858494] mt-1">누적된 탄소 절감량이다</Text>
+        <View className="px-pageX pt-4">
+          {/* 안내 카드 */}
+          <View
+            className="bg-[#D9D9D9] rounded-2xl px-4 py-4 shadow-md"
+            style={{ elevation: 4 }}
+          >
+            <View className="flex-row items-start">
+              <Images.Notice width={18} height={18} />
+
+              <View className="flex-1 pl-2">
+                <Text className="text-black font-sf-b text-[15px] leading-[20px]">
+                  사용자의 누적 탄소 절감량을 확인하세요.
+                </Text>
+                <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
+                  출석 미션은 매달 새로 시작됩니다.
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* 환경걸음 */}
+          {windows?.WALK_CO2_KG && (
+            <MissionSection
+              title="환경걸음 탄소절감량"
+              icon={<Images.Walk width={40} height={40} />}
+              slots={windows.WALK_CO2_KG}
+              onClaim={onClaim}
+            />
+          )}
+
+          {/* 식단 */}
+          {windows?.DIET_CO2_KG && (
+            <MissionSection
+              title="식단 탄소절감량"
+              icon={<Images.Diet width={40} height={40} />}
+              slots={windows.DIET_CO2_KG}
+              onClaim={onClaim}
+              accent="yellow"
+            />
+          )}
+
+          {/* 한달 출석 */}
+          {windows?.ATTEND_MONTH_DAYS && (
+            <MissionSection
+              title="출석일"
+              icon={<Images.Snow width={40} height={40} />}
+              slots={windows.ATTEND_MONTH_DAYS}
+              onClaim={onClaim}
+              unit="일"
+              simpleBar
+            />
+          )}
         </View>
-
-        {/* 환경걸음 */}
-        {windows?.WALK_CO2_KG && (
-          <MissionSection
-            title="환경걸음 탄소절감량"
-            icon={<Images.Walk width={40} height={40} />}
-            slots={windows.WALK_CO2_KG}
-            onClaim={onClaim}
-          />
-        )}
-
-        {/* 식단 */}
-        {windows?.DIET_CO2_KG && (
-          <MissionSection
-            title="식단 탄소절감량"
-            icon={<Images.Diet width={40} height={40} />}
-            slots={windows.DIET_CO2_KG}
-            onClaim={onClaim}
-            accent="yellow"
-          />
-        )}
-
-        {/* 한달 출석 (현재 윈도우 형태 그대로 표시) */}
-        {windows?.ATTEND_MONTH_DAYS && (
-          <MissionSection
-            title="출석일"
-            icon={<Images.Snow width={40} height={40} />}
-            slots={windows.ATTEND_MONTH_DAYS}
-            onClaim={onClaim}
-            unit="일"
-            simpleBar // 하단바 형태로 렌더(옵션)
-          />
-        )}
       </ScrollView>
     </View>
   );
