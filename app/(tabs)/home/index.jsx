@@ -114,7 +114,8 @@ export default function Home() {
             <Text className="text-black"> kg</Text>
             <Text className="text-[14px] font-sf-md text-black">
               {" "}
-              (kgCo2eq 기준)
+              (CO
+              <Text className="text-[10px]">2</Text> 기준)
             </Text>
           </Text>
         </Pressable>
