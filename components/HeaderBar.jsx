@@ -26,7 +26,7 @@ export default function HeaderBar({ title = "제목", showBack = true, rightComp
           <View className="w-[40px]" />
         )}
 
-        <Text className="text-black font-sf-b text-[15px]">{title}</Text>
+        <Text className="text-black font-sf-b text-[18px]">{title}</Text>
 
         <View className="w-[40px] items-end">{rightComponent}</View>
       </View>

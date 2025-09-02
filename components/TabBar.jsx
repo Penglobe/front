@@ -89,9 +89,9 @@ export default function TabBar({ state, descriptors, navigation }) {
           <Circle
             cx="50"  // 원 중심의 x좌표
             cy="50"  // 원 중심의 y좌표
-            r="45"  //반지름(px 단위)
+            r="45"  // 반지름(px 단위)
             stroke="url(#calcRing)"
-            strokeWidth="8"  //두께
+            strokeWidth="8"  // 두께
             fill="transparent"
             strokeDasharray="282"    // 둘레 길이 
             strokeDashoffset="75"    // 일부만 보이게
