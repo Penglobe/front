@@ -6,6 +6,7 @@ import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 // 캐릭터
 import Ipa from "@assets/images/character/ipa.svg";
 import Tori from "@assets/images/character/tori.svg";
+import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
@@ -68,6 +69,7 @@ export const Images = {
   NavDiet,
   NavTransport,
   NavSurvey,
+  Quiz_IpaTory,
   Camera,
   IpaTori1,
   IpaFace,
