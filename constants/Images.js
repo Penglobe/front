@@ -19,9 +19,9 @@ import Back from "@assets/icons/back.svg";
 import Walk from "@assets/icons/walk.svg";
 import Diet from "@assets/icons/diet.svg";
 import Target from "@assets/icons/missionTarget.svg";
-import Target2 from "@assets/icons/missionTarget2.svg";
 import SuccessDiet from "@assets/icons/successDiet.svg";
 import SuccessWalk from "@assets/icons/successWalk.svg";
+import Notice from "@assets/icons/notice.svg";
 import Camera from "@assets/icons/camera.svg";
 
 // nav
@@ -63,12 +63,12 @@ export const Images = {
   Walk,
   Diet,
   Target,
-  Target2,
   SuccessDiet,
   SuccessWalk,
   NavDiet,
   NavTransport,
   NavSurvey,
+  Notice,
   Quiz_IpaTory,
   Camera,
   IpaTori1,
