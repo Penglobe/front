@@ -96,8 +96,9 @@ export default function Home() {
       <View className="mt-[22px] px-pageX">
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
-          className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md"
-          style={{
+          className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
+          style={
+            {
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.08,
