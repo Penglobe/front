@@ -1,149 +1,202 @@
-import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Text } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, Text, Button, FlatList, TouchableOpacity } from "react-native";
 import { WebView } from "react-native-webview";
 import { KAKAO_API_KEY } from "@env";
-import * as Location from "expo-location";
-import useTransport from "@hooks/useTransport";
+import { transportService } from "@services/transportService";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
-import MainButton from "@components/MainButton";
-import TransportButton from "@components/TransportButton";
+import HeaderBar from "@components/HeaderBar";
 
-// ✅ SVG 내용을 문자열로 정의
-const startSvg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="130" height="130" viewBox="0 0 24 24">
-  <!-- 동그란 배경 -->
-  <circle cx="12" cy="10" r="8" fill="#318643" stroke="black" stroke-width="1"/>
-  
-  <!-- 둥근 꼬리 -->
-  <path d="M12 22 C10 18, 14 18, 12 22 Z" fill="#318643" stroke="black" stroke-width="1"/>
-  
-  <!-- 텍스트 -->
-  <text x="12" y="10" 
-        text-anchor="middle" 
-        dominant-baseline="middle"
-        font-size="7" 
-        font-family="SFPro-Bold, Arial, sans-serif" 
-        font-weight="bold"
-        fill="white">
-    출발
-  </text>
-</svg>
-`;
+export default function TransportBookmark() {
+  const router = useRouter();
+  const webViewRef = useRef(null);
 
-export default function TransportStart() {
-  const [location, setLocation] = useState(null);
-  const { mode, setMode, activityId, startTransport, stopTransport } =
-    useTransport();
+  const { startLat, startLng } = useLocalSearchParams();
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") return;
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
-    })();
-  }, []);
+  const [searchResults, setSearchResults] = useState([]);
+  const [selected, setSelected] = useState(null);
 
-  if (!location) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  // ✅ 북마크 저장
+  const saveBookmark = async () => {
+    if (!selected) return;
+    await transportService.createBookmark(1, {
+      name: selected.name,
+      lat: selected.lat,
+      lng: selected.lng,
+    });
+    alert("북마크 저장 완료!");
+  };
 
-  // ✅ SVG → Data URI 변환
-  const imageSrc = "data:image/svg+xml;utf8," + encodeURIComponent(startSvg);
-
+  // ✅ Kakao Map HTML
   const html = `
-  <html><head><meta charset="utf-8" />
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}"></script>
-  </head><body style="margin:0"><div id="map" style="width:100%;height:100%"></div>
-  <script>
-    var map = new kakao.maps.Map(document.getElementById('map'), {
-      center: new kakao.maps.LatLng(${location.latitude}, ${location.longitude}),
-      level: 3
-    });
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
+      </head>
+      <body style="margin:0">
+        <div id="map" style="width:100%;height:100%"></div>
+        <script>
+          var map = new kakao.maps.Map(document.getElementById('map'), {
+            center: new kakao.maps.LatLng(${startLat}, ${startLng}),
+            level: 4
+          });
 
-    var imageSize = new kakao.maps.Size(160, 160);
-    var imageOption = { offset: new kakao.maps.Point(80, 150) };
+          // ✅ 출발지 마커
+          var startMarker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(${startLat}, ${startLng}),
+            title: "출발지"
+          });
 
-    var markerImage = new kakao.maps.MarkerImage("${imageSrc}", imageSize, imageOption);
+          var ps = new kakao.maps.services.Places();
+          var markers = [];
 
-    var marker = new kakao.maps.Marker({
-      position: new kakao.maps.LatLng(${location.latitude}, ${location.longitude}),
-      image: markerImage
-    });
-    marker.setMap(map);
-  </script></body></html>
-`;
+          function clearMarkers() {
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+          }
+
+          // ✅ 장소 검색
+          function searchPlaces(keyword) {
+            ps.keywordSearch(keyword, function(data, status) {
+              if (status === kakao.maps.services.Status.OK) {
+                clearMarkers();
+                var bounds = new kakao.maps.LatLngBounds();
+                var results = [];
+
+                data.forEach(place => {
+                  var marker = new kakao.maps.Marker({
+                    map: map,
+                    position: new kakao.maps.LatLng(place.y, place.x)
+                  });
+                  markers.push(marker);
+
+                  // ✅ 마커 클릭 → RN으로 장소 전달
+                  kakao.maps.event.addListener(marker, "click", function() {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: "select",
+                      place: { 
+                        id: place.id,
+                        name: place.place_name, 
+                        address: place.road_address_name || place.address_name,
+                        lat: place.y, 
+                        lng: place.x 
+                      }
+                    }));
+                  });
+
+                  bounds.extend(new kakao.maps.LatLng(place.y, place.x));
+
+                  results.push({
+                    id: place.id,
+                    name: place.place_name,
+                    address: place.road_address_name || place.address_name,
+                    lat: place.y,
+                    lng: place.x
+                  });
+                });
+
+                map.setBounds(bounds);
+
+                // ✅ 검색 결과 RN으로 전달
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: "results",
+                  results: results
+                }));
+              }
+            });
+          }
+
+          // ✅ RN → WebView 메세지
+          document.addEventListener("message", function(event) {
+            var msg = JSON.parse(event.data);
+            if (msg.type === "search") {
+              searchPlaces(msg.keyword);
+            }
+          });
+        </script>
+      </body>
+    </html>
+  `;
+
+  // ✅ WebView → RN 메시지 핸들링
+  const handleMessage = (event) => {
+    const msg = JSON.parse(event.nativeEvent.data);
+    if (msg.type === "results") {
+      setSearchResults(msg.results);
+    } else if (msg.type === "select") {
+      setSelected(msg.place);
+    }
+  };
+
+  // ✅ RN → WebView 검색 요청
+  const handleSearch = (keyword) => {
+    if (webViewRef.current) {
+      webViewRef.current.postMessage(
+        JSON.stringify({ type: "search", keyword })
+      );
+    }
+  };
 
   return (
-    <View className="flex-1">
-      {/* ✅ 배경 */}
+    <View className="flex-1 bg-white">
       <BgGradient />
 
+      {/* ✅ 상단 헤더 */}
+      <HeaderBar title="환경 걸음"/>
+
       {/* ✅ 지도 */}
-      <View className="h-[250px] mt-20 mx-5 rounded-xl overflow-hidden">
-        <WebView originWhitelist={["*"]} source={{ html }} className="flex-1" />
+      <View className="flex-1 mt-2 mx-3 rounded-xl overflow-hidden shadow">
+        <WebView
+          ref={webViewRef}
+          originWhitelist={["*"]}
+          source={{ html }}
+          onMessage={handleMessage}
+        />
       </View>
 
-      {/* ✅ 타이틀 */}
-      <View className="px-4 mt-5">
-        <Text
-          className="text-xl text-[#318643]"
-          style={{ fontFamily: "SFPro-Bold" }}
-        >
-          이동 수단을 선택해 주세요
-        </Text>
+      {/* ✅ 검색 결과 리스트 */}
+      <View className="h-1/3 bg-white border-t p-3 mt-2 rounded-t-xl shadow">
+        <Text className="text-lg font-bold mb-2">검색 결과</Text>
+        <FlatList
+          data={searchResults}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => setSelected(item)}
+              className={`p-2 border-b ${
+                selected?.id === item.id ? "bg-green-200" : ""
+              }`}
+            >
+              <Text className="font-semibold">{item.name}</Text>
+              <Text className="text-gray-500 text-sm">{item.address}</Text>
+            </TouchableOpacity>
+          )}
+        />
       </View>
 
-      {/* ✅ 이동수단 선택 */}
-      <View className="m-5 flex-row flex-wrap justify-between">
-        <View className="w-[48%]">
-          <TransportButton
-            label="대중교통"
-            icon="bus-outline"
-            selected={mode === "TRANSIT"}
-            onPress={() => setMode("TRANSIT")}
-            disabled={!!activityId}
+      {/* ✅ 선택한 도착지 */}
+      {selected && (
+        <View className="p-4 bg-white border-t mt-2 rounded-t-xl shadow">
+          <Text className="mb-2">도착지: {selected.name}</Text>
+          <Button title="북마크 저장" onPress={saveBookmark} />
+          <Button
+            title="다음"
+            onPress={() =>
+              router.push({
+                pathname: "/pages/transport/TransportFinish",
+                params: {
+                  startLat,
+                  startLng,
+                  dest: JSON.stringify(selected),
+                },
+              })
+            }
           />
         </View>
-        <View className="w-[48%]">
-          <TransportButton
-            label="도보"
-            icon="walk-outline"
-            selected={mode === "WALK"}
-            onPress={() => setMode("WALK")}
-            disabled={!!activityId}
-          />
-        </View>
-        <View className="w-[48%]">
-          <TransportButton
-            label="자전거"
-            icon="bicycle-outline"
-            selected={mode === "BIKE"}
-            onPress={() => setMode("BIKE")}
-            disabled={!!activityId}
-          />
-        </View>
-        {/* 빈 칸 자리 맞춤 */}
-        <View className="w-[48%]" />
-      </View>
-
-      {/* ✅ 이동 시작/종료 버튼 */}
-      <View className="absolute bottom-[150px] left-0 right-0 px-4">
-        {!activityId ? (
-          <MainButton label="이동 시작" onPress={startTransport} />
-        ) : (
-          <MainButton
-            label="이동 종료"
-            onPress={stopTransport}
-            className="bg-red-500 active:bg-red-700"
-            style={{ shadowColor: "#c53030" }}
-          />
-        )}
-      </View>
+      )}
     </View>
   );
 }
