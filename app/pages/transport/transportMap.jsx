@@ -44,7 +44,7 @@ export default function TransportMap() {
   const prevCoord = useRef(null);
   const ended = useRef(false); // ✅ 중복 종료 방지
 
-  // 🚀 TransportMap 진입 시 자동 시작
+  // 🚀 TransportMap 진입 시 이동 자동 시작
   useEffect(() => {
     (async () => {
       try {
@@ -85,7 +85,7 @@ export default function TransportMap() {
           }
           prevCoord.current = { latitude, longitude };
 
-          // ✅ 도착지 근처 도착 감지 (50m 반경)
+          // ✅ 도착지 근처 도착 감지 (20m 반경)
           if (!ended.current && endLat && endLng) {
             const distToEnd = calculateDistance(
               latitude,
@@ -93,7 +93,7 @@ export default function TransportMap() {
               parseFloat(endLat),
               parseFloat(endLng)
             );
-            if (distToEnd <= 50) {
+            if (distToEnd <= 20) {
               ended.current = true;
               await handleStop(true); // 자동 종료
             }
