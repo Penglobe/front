@@ -18,10 +18,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "백그라운드에서도 위치 추적을 하기 위해 권한이 필요합니다.",
-        "UIBackgroundModes": [
-          "location",
-          "location"
-        ],
+        "NSLocationAlwaysUsageDescription": "앱이 항상 위치를 사용하도록 허용해야 백그라운드 이동 추적이 가능합니다.",
+        "UIBackgroundModes": ["location"],
         "NSCameraUsageDescription": "음식을 촬영하기 위해 카메라 접근 권한이 필요합니다."
       },
       "bundleIdentifier": "com.anonymous.myapp"
@@ -34,17 +32,13 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION",
-        "FOREGROUND_SERVICE",
-        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
         "FOREGROUND_SERVICE"
       ],
       "package": "com.anonymous.myapp"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },

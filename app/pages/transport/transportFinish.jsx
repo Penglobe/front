@@ -10,19 +10,12 @@ import Ipa from "@assets/images/character/ipa-face.svg";
 import IpaTori from "@assets/images/character/ipa-tori-1.svg";
 
 export default function TransportFinish() {
-  const { placeName, distanceM, co2Kg, durationM, mode } =
+  const { placeName, distanceM, co2Kg, durationM, mode, points } =
     useLocalSearchParams();
   const router = useRouter();
 
-  // 🚗 자동차로 갔을 경우 배출되는 CO₂ (kg)
+  // 🚗 자동차로 갔을 경우 배출되는 CO₂ (kg) → 안내문용
   const carCo2 = distanceM ? (parseFloat(distanceM) * 0.0002).toFixed(2) : 0;
-
-  // 교통수단별 절감 비율
-  let factor = 1.0;
-  if (mode === "TRANSIT") factor = 0.5;
-
-  // 절감된 CO₂ (프론트에서 재계산, 서버와 일치)
-  const savedCo2 = (carCo2 * factor).toFixed(2);
 
   return (
     <View className="flex-1">
@@ -35,7 +28,7 @@ export default function TransportFinish() {
         <View className="flex-row items-center mb-5 mt-5">
           <Ipa width={40} height={40} style={{ marginRight: 6 }} />
           <Text className="text-2xl font-sf-b text-green-700">
-            도착했습니다!
+            {points > 0 ? `${points} 얼음을 얻었습니다!` : "도착했습니다!"}
           </Text>
         </View>
 
@@ -65,7 +58,7 @@ export default function TransportFinish() {
           <Text className="font-sf-md text-lg">절감된 CO₂</Text>
           <View className="items-end">
             <Text className="text-3xl font-sf-b text-[#318643] mt-1">
-              {savedCo2} kg
+              {co2Kg} kg
             </Text>
           </View>
           <Text className="text-sm mt-1 text-gray-600">
