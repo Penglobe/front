@@ -90,7 +90,7 @@ export default function TransportFinish() {
             </Text>
           </View>
 
-          <Text className="text-sm mt-2 text-gray-600">
+          <Text className="text-sm mt-3 text-gray-600">
             🚗 자동차로 이동했다면 약 {carCo2} kg CO₂가 배출돼요.
           </Text>
 
