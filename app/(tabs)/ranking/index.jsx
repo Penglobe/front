@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, Dimensions } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
-import RegionalRanking from "@pages/ranking/RegionalRanking";
+import RegionRanking from "@pages/ranking/RegionRanking";
 import WeeklyRanking from "@pages/ranking/WeeklyRanking";
 import GlobalRanking from "@pages/ranking/GlobalRanking"; // Import the new component
 
@@ -121,7 +121,7 @@ export default function Ranking() {
 
           {/* 탭 내용 */}
           {activeTab === "regions" && (
-            <RegionalRanking
+            <RegionRanking
               selectedRegion={selectedRegion}
               setSelectedRegion={setSelectedRegion}
               rankingData={rankingData}
