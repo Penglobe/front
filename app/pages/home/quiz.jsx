@@ -12,7 +12,6 @@ export default function QuizPage() {
   const [open, setOpen] = useState(false); //모달 열기
   const [answer, setAnswer] = useState(null); //사용자 답변
   const [result, setResult] = useState(null); // 정답 여부에 따라서 모달 내용 변경
-  const [modalMessage, setModalMessage] = useState(""); // 서버 메시지
 
   /*날짜*/
   const today = new Date();
@@ -42,8 +41,6 @@ export default function QuizPage() {
   }, []);
 
   /*퀴즈 정답처리*/
-
-  /*퀴즈 정답처리*/
   const handleSubmitAnswer = async () => {
     if (!question || !answer) return;
 
@@ -54,7 +51,7 @@ export default function QuizPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: 177, //임시 userId***************************************************
+          userId: 1, //임시 userId***************************************************
           answer: answer === "O",
         }),
       });
@@ -64,7 +61,6 @@ export default function QuizPage() {
         alert(errorData.message); // 에러 메세지
         return;
       }
-
       const data = await res.json(); // 정상
     } catch (e) {
       alert("서버 오류가 발생했습니다.");
