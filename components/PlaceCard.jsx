@@ -7,7 +7,7 @@ export default function PlaceCard({
   item,
   isBookmark = false,
   isSelected,
-  onSelect,
+  onSelect = () => {}, // ✅ 기본값 추가
   readOnly = false,
 }) {
   const backgroundColor = isBookmark
@@ -36,7 +36,7 @@ export default function PlaceCard({
         marginBottom: isBookmark ? 8 : 0,
         ...shadowStyle,
       }}
-      onPress={() => !readOnly && onSelect?.(item)}
+      onPress={() => !readOnly && onSelect(item)}
     >
       <View className="flex-row items-center">
         <View className="flex-1">
