@@ -16,7 +16,7 @@ export default function Diet() {
       <View className="flex-1 px-pageX pt-[38px] gap-[20px]">
       <Text className="font-sf-b text-green text-[24px] leading-[34px]">식사 사진을 올리면, {"\n"}이번 한 끼로 얼마나 탄소를 {"\n"}아꼈는지 알려드려요</Text>
       <Pressable 
-      onPress={() => router.push("/pages/diet/loading")}
+      onPress={() => router.push("/pages/diet/dietTest")}
       className="w-[100%] h-[180px] bg-green/40 rounded-[20px] items-center justify-center gap-2 active:bg-green/60">
       <Images.Camera width={36} height={36} />
       <Text className="font-sf-b text-green text-[16px]">사진 추가</Text>
