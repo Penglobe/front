@@ -10,7 +10,7 @@
 		044D15923E95E73BEE9E5ACD /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */; };
 		0A24A2162E674C0200F04B69 /* FoodLensModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2142E674C0200F04B69 /* FoodLensModule.m */; };
 		0A24A2172E674C0200F04B69 /* FoodLensModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2152E674C0200F04B69 /* FoodLensModule.swift */; };
-		0AA0A8812E67C770004F67B8 /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA0A8802E67C770004F67B8 /* FoodLensCore */; };
+		0AA0A8842E682042004F67B8 /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0AA0A8832E682042004F67B8 /* FoodLensCore */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		6FF9F81F38E805910EFFA6F2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */; };
@@ -43,7 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A207A08C4812E6E49C425E3F /* libPods-app.a in Frameworks */,
-				0AA0A8812E67C770004F67B8 /* FoodLensCore in Frameworks */,
+				0AA0A8842E682042004F67B8 /* FoodLensCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,7 +188,7 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				0AA0A87F2E67C770004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
+				0AA0A8822E682042004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -754,7 +754,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0AA0A87F2E67C770004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
+		0AA0A8822E682042004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://bitbucket.org/doing-lab/ios_foodlenscoresdk";
 			requirement = {
@@ -765,9 +765,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0AA0A8802E67C770004F67B8 /* FoodLensCore */ = {
+		0AA0A8832E682042004F67B8 /* FoodLensCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0AA0A87F2E67C770004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
+			package = 0AA0A8822E682042004F67B8 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
 			productName = FoodLensCore;
 		};
 /* End XCSwiftPackageProductDependency section */
