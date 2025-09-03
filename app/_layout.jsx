@@ -6,9 +6,7 @@ import { useFonts } from "expo-font";
 import Fonts from "@constants/Fonts.cjs";
 import { useCallback } from "react";
 
-
 export default function RootLayout() {
-
   const [fontsLoaded, fontError] = useFonts({
     SFPro: Fonts.SFPro.regular,
     "SFPro-Medium": Fonts.SFPro.medium,
