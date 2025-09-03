@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 import { KAKAO_API_KEY } from "@env";
@@ -27,18 +27,51 @@ const endSvg = `
 </svg>
 `;
 
+// ✅ 현재 위치 마커 (작은 원형)
+const currentSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="6" fill="#1976d2" stroke="white" stroke-width="2"/>
+</svg>
+`;
+
 export default function KakaoMapView({
   startLat = null,
   startLng = null,
   endLat = null,
   endLng = null,
+  currentLat = null,
+  currentLng = null,
   height = 250,
 }) {
+  const webviewRef = useRef(null);
+
   const startImage = "data:image/svg+xml;utf8," + encodeURIComponent(startSvg);
   const endImage = "data:image/svg+xml;utf8," + encodeURIComponent(endSvg);
+  const currentImage =
+    "data:image/svg+xml;utf8," + encodeURIComponent(currentSvg);
 
-  // ✅ 중심 좌표 계산
-  let centerLat = 37.5665; // 기본 서울 좌표
+  // ✅ currentLat/currentLng 변경 시 현재 위치 갱신
+  useEffect(() => {
+    if (currentLat && currentLng && webviewRef.current) {
+      const js = `
+        if (window.currentMarker) {
+          window.currentMarker.setPosition(
+            new kakao.maps.LatLng(${currentLat}, ${currentLng})
+          );
+        } else {
+          window.currentMarker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(${currentLat}, ${currentLng}),
+            image: new kakao.maps.MarkerImage("${currentImage}", new kakao.maps.Size(24,24), {offset: new kakao.maps.Point(12,12)}),
+            map: map
+          });
+        }
+      `;
+      webviewRef.current.injectJavaScript(js);
+    }
+  }, [currentLat, currentLng]);
+
+  // ✅ 초기 중심 좌표
+  let centerLat = 37.5665; // 기본 서울
   let centerLng = 126.978;
   if (startLat && startLng && endLat && endLng) {
     centerLat = (parseFloat(startLat) + parseFloat(endLat)) / 2;
@@ -60,18 +93,18 @@ export default function KakaoMapView({
       <script>
         var map = new kakao.maps.Map(document.getElementById('map'), {
           center: new kakao.maps.LatLng(${centerLat}, ${centerLng}),
-          level: 2
+          level: 3
         });
 
         // 출발지 마커
         ${
           startLat && startLng
             ? `
-          var startMarker = new kakao.maps.Marker({
+          new kakao.maps.Marker({
             position: new kakao.maps.LatLng(${startLat}, ${startLng}),
-            image: new kakao.maps.MarkerImage("${startImage}", new kakao.maps.Size(160,160), {offset: new kakao.maps.Point(80,150)})
+            image: new kakao.maps.MarkerImage("${startImage}", new kakao.maps.Size(160,160), {offset: new kakao.maps.Point(80,150)}),
+            map: map
           });
-          startMarker.setMap(map);
         `
             : ""
         }
@@ -80,11 +113,11 @@ export default function KakaoMapView({
         ${
           endLat && endLng
             ? `
-          var endMarker = new kakao.maps.Marker({
+          new kakao.maps.Marker({
             position: new kakao.maps.LatLng(${endLat}, ${endLng}),
-            image: new kakao.maps.MarkerImage("${endImage}", new kakao.maps.Size(160,160), {offset: new kakao.maps.Point(80,150)})
+            image: new kakao.maps.MarkerImage("${endImage}", new kakao.maps.Size(160,160), {offset: new kakao.maps.Point(80,150)}),
+            map: map
           });
-          endMarker.setMap(map);
         `
             : ""
         }
@@ -94,7 +127,12 @@ export default function KakaoMapView({
 
   return (
     <View style={[styles.container, { height }]}>
-      <WebView originWhitelist={["*"]} source={{ html }} style={{ flex: 1 }} />
+      <WebView
+        ref={webviewRef}
+        originWhitelist={["*"]}
+        source={{ html }}
+        style={{ flex: 1 }}
+      />
     </View>
   );
 }

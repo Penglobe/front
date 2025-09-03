@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
   TextInput,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { searchAddress, listBookmarks } from "@services/transportService";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
@@ -19,7 +20,7 @@ import PlaceCard from "@components/PlaceCard";
 
 export default function TransportBookmark() {
   const { startLat, startLng, mode: rawMode } = useLocalSearchParams();
-  const mode = rawMode || "TRANSIT"; // ✅ 기본값 보장
+  const mode = rawMode || "TRANSIT";
 
   const router = useRouter();
 
@@ -42,9 +43,12 @@ export default function TransportBookmark() {
     }
   }, [userId]);
 
-  useEffect(() => {
-    fetchBookmarks();
-  }, [fetchBookmarks]);
+  // ✅ 화면 focus될 때마다 북마크 새로 불러오기
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookmarks();
+    }, [fetchBookmarks])
+  );
 
   // ✅ 주소 검색
   const handleSearch = async () => {
@@ -149,8 +153,8 @@ export default function TransportBookmark() {
                 <PlaceCard
                   item={item}
                   isBookmark={false}
-                  isSelected={selectedPlace?.id === item.id} // ✅ 선택 여부 전달
-                  onSelect={setSelectedPlace} // ✅ 선택 이벤트 전달
+                  isSelected={selectedPlace?.id === item.id}
+                  onSelect={setSelectedPlace}
                 />
               )}
               ListEmptyComponent={
@@ -165,7 +169,16 @@ export default function TransportBookmark() {
 
       {/* 북마크 */}
       <View className="px-pageX mt-8 flex-1">
-        <Text className="font-sf-b text-xl text-gray-800 mb-3">내 북마크</Text>
+        <View className="flex-row justify-between items-center mt-2 mb-3">
+          <Text className="font-sf-b text-xl text-gray-800">내 북마크</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/pages/transport/bookmarkManage")}
+            className="px-3 py-1 bg-[#318643] rounded-lg"
+          >
+            <Text className="text-white font-sf-md text-base">관리</Text>
+          </TouchableOpacity>
+        </View>
+
         <FlatList
           data={bookmarks}
           keyExtractor={(item) => "b-" + item.bookmarkId}
@@ -173,8 +186,8 @@ export default function TransportBookmark() {
             <PlaceCard
               item={item}
               isBookmark
-              isSelected={selectedPlace?.bookmarkId === item.bookmarkId} // ✅ 선택 여부 전달
-              onSelect={setSelectedPlace} // ✅ 선택 이벤트 전달
+              isSelected={selectedPlace?.bookmarkId === item.bookmarkId}
+              onSelect={setSelectedPlace}
             />
           )}
           ListEmptyComponent={
@@ -187,7 +200,7 @@ export default function TransportBookmark() {
 
       {/* 확인 버튼 */}
       <View className="px-pageX mb-8">
-        <MainButton label="확인" onPress={handleConfirm} />
+        <MainButton label="출발" onPress={handleConfirm} />
       </View>
     </View>
   );

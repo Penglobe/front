@@ -8,19 +8,20 @@ export default function PlaceCard({
   isBookmark = false,
   isSelected,
   onSelect,
+  readOnly = false,
 }) {
   const backgroundColor = isBookmark
     ? isSelected
-      ? "#ffffff"
+      ? colors.Colors.white
       : "#E0F2F1"
     : isSelected
-      ? "#ffffff"
+      ? colors.Colors.white
       : "transparent";
 
   const shadowStyle = isBookmark
     ? {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 3 }, // ✅ 밑으로만 그림자
+        shadowColor: colors.Colors.black,
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.15,
         shadowRadius: 3,
         elevation: Platform.OS === "android" ? 3 : 0,
@@ -32,22 +33,26 @@ export default function PlaceCard({
       className="px-4 py-4 rounded-2xl"
       style={{
         backgroundColor,
-        marginBottom: isBookmark ? 8 : 0, // ✅ 북마크 카드만 밑에 여백
+        marginBottom: isBookmark ? 8 : 0,
         ...shadowStyle,
       }}
-      onPress={() => onSelect(item)}
+      onPress={() => !readOnly && onSelect?.(item)}
     >
       <View className="flex-row items-center">
         <View className="flex-1">
           <Text
             className="font-sf-b text-lg"
-            style={{ color: isSelected ? colors.Colors.green : "#000" }}
+            style={{
+              color: isSelected ? colors.Colors.green : colors.Colors.black,
+            }}
           >
             {isBookmark ? item.bookmarkLabel : item.place_name}
           </Text>
           <Text
             className="font-sf-md text-base mt-1"
-            style={{ color: isSelected ? colors.Colors.green : "#888" }}
+            style={{
+              color: isSelected ? colors.Colors.green : colors.Colors.darkGray,
+            }}
           >
             {isBookmark ? item.address : item.address_name}
           </Text>

@@ -10,7 +10,7 @@ export async function startTransport(userId, mode) {
   const res = await axios.post(`${BASE_URL}/start`, null, {
     params: { userId, mode },
   });
-  return res.data.data; // TransportActivityDto
+  return res.data.data;
 }
 
 // 이동 종료
@@ -23,6 +23,7 @@ export async function stopTransport(transportId, distanceM, pathGeojson) {
       headers: { "Content-Type": "application/json" },
     }
   );
+  console.log("🚀 stopTransport response:", res.data);
   return res.data.data;
 }
 
