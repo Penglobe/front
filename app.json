@@ -18,8 +18,13 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "백그라운드에서도 위치 추적을 하기 위해 권한이 필요합니다.",
-        "UIBackgroundModes": ["location"]
-      }
+        "UIBackgroundModes": [
+          "location",
+          "location"
+        ],
+        "NSCameraUsageDescription": "음식을 촬영하기 위해 카메라 접근 권한이 필요합니다."
+      },
+      "bundleIdentifier": "com.anonymous.myapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,13 +35,30 @@
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
         "FOREGROUND_SERVICE"
-      ]
+      ],
+      "package": "com.anonymous.myapp"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
-    "plugins": ["expo-router", "expo-font"]
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
+    ]
   }
 }

@@ -15,7 +15,7 @@ export default function Loading() {
       <Modal visible={open} onClose={() => setOpen(false)}>
         <Text className="text-black text-[18px] font-sf-md mb-4">모달 제목</Text>
         <Images.Ipa2 />
-        <MainButton label="포인트 받기" />
+        <MainButton label="포인트 받기" onPress={() => router.push("pages/diet/dietResult")} />
       </Modal>
 
       <Images.Ipa2 />

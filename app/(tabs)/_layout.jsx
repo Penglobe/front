@@ -17,7 +17,6 @@ export default function TabsLayout() {
           backgroundColor: "transparent",
           borderTopWidth: 0,
           elevation: 0,
-          zIndex: 10,
         },
 
         // 기본 배경 없애기
@@ -30,6 +29,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="ranking/index" options={{ title: "Ranking" }} />
       <Tabs.Screen name="store/index" options={{ title: "Store" }} />
       <Tabs.Screen name="mypage/index" options={{ title: "Mypage" }} />
+      <Tabs.Screen name="calculator/index" options={{ title: "Calc" }} />
     </Tabs>
   );
 }

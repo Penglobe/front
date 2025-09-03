@@ -4,14 +4,15 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
     "@types/react": "~19.0.10",
     "axios": "^1.11.0",
     "expo": "^53.0.22",
+    "expo-camera": "^16.1.11",
     "expo-constants": "~17.1.7",
     "expo-font": "~13.3.2",
     "expo-linear-gradient": "^14.1.5",
@@ -38,6 +39,7 @@
     "@babel/core": "^7.20.0",
     "@types/react-native": "^0.72.8",
     "babel-plugin-module-resolver": "^5.0.2",
+    "expo-build-properties": "^0.14.8",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-native-svg-transformer": "^1.5.1",
     "tailwindcss": "^3.4.17"
