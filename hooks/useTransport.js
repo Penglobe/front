@@ -13,10 +13,12 @@ export default function useTransport(userId) {
   const positionsRef = useRef([]); // GPS 좌표 기록
 
   // 이동 시작
-  const startTransport = async () => {
-    if (!mode) throw new Error("이동 수단을 선택해주세요");
+  const startTransport = async (selectedMode) => {
+    const effectiveMode = selectedMode || mode;
+    if (!effectiveMode) throw new Error("이동 수단을 선택해주세요");
 
-    const data = await startTransportApi(userId, mode);
+    const data = await startTransportApi(userId, effectiveMode);
+    setMode(effectiveMode);
     setActivity(data);
     setTracking(true);
 

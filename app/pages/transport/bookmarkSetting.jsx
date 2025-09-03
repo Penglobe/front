@@ -13,8 +13,16 @@ import colors from "@constants/Colors.cjs";
 import Tori from "@assets/images/character/tori.svg";
 import Ipa from "@assets/images/character/ipa-face.svg";
 export default function BookmarkSetting() {
-  const { lat, lng, placeName, address, startLat, startLng } =
-    useLocalSearchParams();
+  const {
+    lat,
+    lng,
+    placeName,
+    address,
+    startLat,
+    startLng,
+    mode: rawMode,
+  } = useLocalSearchParams();
+  const mode = rawMode || "TRANSIT"; // ✅ 기본값 보장
   const router = useRouter();
 
   const userId = 1;
@@ -41,6 +49,7 @@ export default function BookmarkSetting() {
                 endLat: lat,
                 endLng: lng,
                 placeName: label,
+                mode: mode || "TRANSIT",
               },
             }),
         },

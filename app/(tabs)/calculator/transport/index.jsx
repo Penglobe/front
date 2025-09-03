@@ -1,3 +1,4 @@
+// pages/transport/transportStart.jsx
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, Text, Alert } from "react-native";
 import * as Location from "expo-location";
@@ -17,6 +18,7 @@ export default function TransportStart() {
   const { mode, setMode, activity, startTransport, stopTransport } =
     useTransport(userId);
 
+  // ✅ 권한 요청 & 현재 위치 가져오기
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -26,6 +28,11 @@ export default function TransportStart() {
       }
       let loc = await Location.getCurrentPositionAsync({});
       setLocation(loc.coords);
+
+      // ✅ 기본 모드 대중교통
+      if (!mode) {
+        setMode("TRANSIT");
+      }
     })();
   }, []);
 
@@ -40,7 +47,7 @@ export default function TransportStart() {
   // 👉 이동 시작 버튼 핸들러
   const handleStart = async () => {
     try {
-      await startTransport();
+      await startTransport(mode || "TRANSIT");
     } catch (err) {
       Alert.alert("이동 시작 실패", "서버와 통신할 수 없습니다.");
     }
@@ -86,7 +93,7 @@ export default function TransportStart() {
           <TransportButton
             label="대중교통"
             icon="bus-outline"
-            selected={mode === "TRANSIT"}
+            selected={mode === "TRANSIT"} // ✅ 기본 선택됨
             onPress={() => setMode("TRANSIT")}
             disabled={!!activity}
           />
@@ -126,6 +133,7 @@ export default function TransportStart() {
                   params: {
                     startLat: location.latitude,
                     startLng: location.longitude,
+                    mode: mode || "TRANSIT", // ✅ 항상 값 보장
                   },
                 })
               }
