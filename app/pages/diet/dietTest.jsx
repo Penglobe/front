@@ -87,6 +87,8 @@ export default function ShopScreen() {
   }
 
   const takeAndPredict = async () => {
+    // RN(JS) 쪽 예
+
     try {
       if (!FoodLensModule) {
         Alert.alert("네이티브 모듈 없음", "iOS를 다시 빌드하세요: npx expo run:ios");
