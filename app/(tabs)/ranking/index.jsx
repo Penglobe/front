@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Pressable, Dimensions } from "react-native";
-import Svg, { Path, G, Text as SvgText } from "react-native-svg";
-import geojson from "@assets/map/krmap.json";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
+import RegionalRanking from "@pages/ranking/RegionalRanking";
+import WeeklyRanking from "@pages/ranking/WeeklyRanking";
+import GlobalRanking from "@pages/ranking/GlobalRanking"; // Import the new component
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -13,86 +14,68 @@ const tabs = [
   { key: "global", label: "전체 랭킹" },
 ];
 
-function RankingContent({ activeTab }) {
-  switch (activeTab) {
-    case "weekly":
-      return <Text>주간 랭킹 페이지입니다.</Text>;
-    case "global":
-      return <Text>전체 랭킹 페이지입니다.</Text>;
-    default:
-      return null;
-  }
-}
+// RankingContent is no longer needed as we'll render components directly
+// function RankingContent({ activeTab }) {
+//   switch (activeTab) {
+//     case "weekly":
+//       return <Text>주간 랭킹 페이지입니다.</Text>;
+//     case "global":
+//       return <Text>전체 랭킹 페이지입니다.</Text>;
+//     default:
+//       return null;
+//   }
+// }
 
 export default function Ranking() {
   const [activeTab, setActiveTab] = useState("regions");
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [rankingData, setRankingData] = useState([]);
 
-  // 지도 좌표 범위 계산
-  let minX = Infinity,
-    maxX = -Infinity,
-    minY = Infinity,
-    maxY = -Infinity;
-  geojson.features.forEach((f) => {
-    const polys =
-      f.geometry.type === "Polygon"
-        ? [f.geometry.coordinates]
-        : f.geometry.coordinates;
-    polys.forEach((polygon) =>
-      polygon.forEach((ring) =>
-        ring.forEach(([x, y]) => {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        })
-      )
-    );
-  });
+  // 컴포넌트가 처음 로드될 때 한 번만 실행됩니다.
+  useEffect(() => {
+    // TODO: 추후 실제 사용자 정보로 지역을 설정하는 로직으로 교체해야 합니다.
+    // 예시:
+    // const { user } = useAuth();
+    // if (user) {
+    //   const profile = await getUserProfile();
+    //   setSelectedRegion(profile.region);
+    // }
 
-  const mapWidth = maxX - minX;
-  const mapHeight = maxY - minY;
-  const scaleX = (screenWidth - 40) / mapWidth;
-  const scaleY = (screenHeight / 3 - 40) / mapHeight;
-  const zoomFactor = 1.2;
-  const scale = Math.min(scaleX, scaleY) * zoomFactor;
+    const dummyUserRegion = "서울특별시"; // 임시 데이터로 서울특별시를 기본 선택
+    setSelectedRegion(dummyUserRegion);
+  }, []); // 빈 배열은 첫 렌더링 시 한 번만 실행됨을 의미합니다.
 
-  const offsetX = (screenWidth - mapWidth * scale) / 2 - minX * scale - 30;
-  const offsetY = (screenHeight / 3 - mapHeight * scale) / 2 - minY * scale;
+  useEffect(() => {
+    const fetchRankingData = async () => {
+      // TODO: 백엔드 API가 구현되면 실제 함수로 교체해야 합니다.
+      // const data = await getRegionalRankings();
+      // setRankingData(data);
 
-  // 각 지역의 중심 좌표를 미리 계산
-  const centerCoords = geojson.features.reduce((acc, feature) => {
-    const title = feature.properties.title;
-    let fminX = Infinity,
-      fmaxX = -Infinity,
-      fminY = Infinity,
-      fmaxY = -Infinity;
-
-    const polys =
-      feature.geometry.type === "Polygon"
-        ? [feature.geometry.coordinates]
-        : feature.geometry.coordinates;
-
-    polys.forEach((polygon) =>
-      polygon.forEach((ring) =>
-        ring.forEach(([x, y]) => {
-          if (x < fminX) fminX = x;
-          if (x > fmaxX) fmaxX = x;
-          if (y < fminY) fminY = y;
-          if (y > fmaxY) fmaxY = y;
-        })
-      )
-    );
-
-    const centerX = (fminX + fmaxX) / 2;
-    const centerY = (fminY + fmaxY) / 2;
-
-    acc[title] = {
-      x: centerX * scale + offsetX,
-      y: screenHeight / 3 - (centerY * scale + offsetY),
+      // 임시 데이터
+      const dummyRanking = [
+        { regionName: "서울특별시", rank: 1, totalCo2: 10000 },
+        { regionName: "경기도", rank: 2, totalCo2: 9500 },
+        { regionName: "부산광역시", rank: 3, totalCo2: 9000 },
+        { regionName: "인천광역시", rank: 4, totalCo2: 8500 },
+        { regionName: "대구광역시", rank: 5, totalCo2: 8000 },
+        { regionName: "광주광역시", rank: 6, totalCo2: 7500 },
+        { regionName: "대전광역시", rank: 7, totalCo2: 7000 },
+        { regionName: "울산광역시", rank: 8, totalCo2: 6500 },
+        { regionName: "세종특별자치시", rank: 9, totalCo2: 6000 },
+        { regionName: "강원도", rank: 10, totalCo2: 5500 },
+        { regionName: "충청북도", rank: 11, totalCo2: 5000 },
+        { regionName: "충청남도", rank: 12, totalCo2: 4500 },
+        { regionName: "전라북도", rank: 13, totalCo2: 4000 },
+        { regionName: "전라남도", rank: 14, totalCo2: 3500 },
+        { regionName: "경상북도", rank: 15, totalCo2: 3000 },
+        { regionName: "경상남도", rank: 16, totalCo2: 2500 },
+        { regionName: "제주특별자치도", rank: 17, totalCo2: 2000 },
+      ];
+      setRankingData(dummyRanking);
     };
-    return acc;
-  }, {});
+
+    fetchRankingData();
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -136,102 +119,16 @@ export default function Ranking() {
             </View>
           </View>
 
-          {activeTab === "regions" ? (
-            <>
-              {/* 2. 지도 흰색 박스 */}
-              <View className="bg-white rounded-2xl p-2 shadow">
-                <View style={{ width: "100%", height: screenHeight / 3 }}>
-                  <Svg width="100%" height="100%">
-                    {geojson.features.map((feature, idx) => {
-                      const coords =
-                        feature.geometry.type === "Polygon"
-                          ? [feature.geometry.coordinates]
-                          : feature.geometry.coordinates;
-
-                      const title = feature.properties.title;
-                      const isSelected = selectedRegion === title;
-
-                      return (
-                        <G key={idx}>
-                          {coords.map((polygon, p_idx) => {
-                            const d = polygon
-                              .map(
-                                (ring) =>
-                                  "M" +
-                                  ring
-                                    .map(
-                                      ([x, y]) =>
-                                        `${x * scale + offsetX},${
-                                          screenHeight / 3 -
-                                          (y * scale + offsetY) // Note: This will be fixed next
-                                        }`
-                                    )
-                                    .join("L") +
-                                  "Z"
-                              )
-                              .join(" ");
-
-                            return (
-                              <Path
-                                key={p_idx}
-                                d={d}
-                                fill={isSelected ? "#4CAF50" : "#BDBDBD"}
-                                stroke="#333"
-                                strokeWidth={0.5}
-                                onPressIn={() => setSelectedRegion(title)}
-                              />
-                            );
-                          })}
-                        </G>
-                      );
-                    })}
-                    {/* 선택된 지역 이름 표시 */}
-                    {selectedRegion && centerCoords[selectedRegion] && (
-                      <SvgText
-                        x={centerCoords[selectedRegion].x}
-                        y={centerCoords[selectedRegion].y}
-                        textAnchor="middle"
-                        alignmentBaseline="middle"
-                        fontSize="16"
-                        fontWeight="bold"
-                        fill="white"
-                        stroke="black"
-                        strokeWidth={0.5}
-                      >
-                        {selectedRegion}
-                      </SvgText>
-                    )}
-                  </Svg>
-                </View>
-              </View>
-
-              {/* 3. 랭킹 리스트 박스 */}
-              <View className="flex-1 bg-deactivateButton/75 rounded-2xl p-4 mt-4">
-                <Text className="text-white font-sf-b text-lg mb-2">
-                  지역별 탄소 절감량 Top 5
-                </Text>
-                <View>
-                  <Text className="text-white font-sf-r text-base">
-                    1. 서울특별시
-                  </Text>
-                  <Text className="text-white font-sf-r text-base">
-                    2. 경기도
-                  </Text>
-                  <Text className="text-white font-sf-r text-base">
-                    3. 부산광역시
-                  </Text>
-                  <Text className="text-white font-sf-r text-base">
-                    4. 인천광역시
-                  </Text>
-                  <Text className="text-white font-sf-r text-base">
-                    5. 경상남도
-                  </Text>
-                </View>
-              </View>
-            </>
-          ) : (
-            <RankingContent activeTab={activeTab} />
+          {/* 탭 내용 */}
+          {activeTab === "regions" && (
+            <RegionalRanking
+              selectedRegion={selectedRegion}
+              setSelectedRegion={setSelectedRegion}
+              rankingData={rankingData}
+            />
           )}
+          {activeTab === "weekly" && <WeeklyRanking />}
+          {activeTab === "global" && <GlobalRanking />}
         </View>
       </View>
     </View>
