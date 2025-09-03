@@ -120,10 +120,13 @@ export default function QuizPage() {
       {/*날짜, 오늘의 퀴즈*/}
       <View className="px-pageX pt-[30px] gap-[30px]">
         <View className="bg-white rounded-[10px] p-4">
-          <Text className="text-black font-sf-md text-[16px]">
+          <Text className="text-green font-sf-md text-[22px]">
             {formattedDate}
           </Text>
-          <Text className="font-sf-b text-[24px] text-green">오늘의 퀴즈</Text>
+          <Text className="font-sf-b text-[15px] mt-2">
+            환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}하지만 얼음은 없어도 지식은
+            쌓을 수 있어요!
+          </Text>
         </View>
 
         {/*퀴즈*/}
@@ -134,18 +137,18 @@ export default function QuizPage() {
           </Text>
 
           {/*OX*/}
-          <View className="flex-row justify-around w-full mt-10">
+          <View className="flex-row justify-around mt-10">
             <TouchableOpacity
-              className="bg-blue py-3 px-10 rounded-lg opacity-90"
+              className="bg-blue py-8 px-12 rounded-lg opacity-90"
               onPress={() => handleAnswer("O")}
             >
-              <Text className="text-white text-lg font-bold">O</Text>
+              <Text className="text-white text-[60px] font-extrabold">O</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-red-500 py-3 px-10 rounded-lg opacity-90"
+              className="bg-red-400 py-8 px-12 rounded-lg opacity-90"
               onPress={() => handleAnswer("X")}
             >
-              <Text className="text-white text-lg font-bold">X</Text>
+              <Text className="text-white text-[60px] font-extrabold">X</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -154,7 +157,7 @@ export default function QuizPage() {
         <View style={{ flex: 1 }}>
           <Images.Quiz_IpaTory
             width={300}
-            height={300}
+            height={200}
             style={{
               position: "absolute",
               left: 30,
