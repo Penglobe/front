@@ -1,5 +1,5 @@
 import HeaderBar from "@components/HeaderBar";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { use, useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,19 +7,23 @@ import {
   RefreshControl,
   Alert,
   StyleSheet,
+  Pressable,
 } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
+import { SERVER_URL } from "@env";
+import { useRouter } from "expo-router";
+import { apiFetch, logout } from "@services/authService";
 
 // TODO: 실제 호스트로 교체
-const API_BASE = "http://192.168.0.149:8080";
-const USER_ID = 1;
+const API_BASE = SERVER_URL;
 
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [claimInfo, setClaimInfo] = useState(null);
@@ -27,9 +31,8 @@ export default function MissionScreen() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/missions/windows`, {
-        headers: { "X-User-Id": String(USER_ID) },
-      });
+      const res = await apiFetch("/missions/windows");
+
       const json = await res.json();
       if (res.ok && json?.data) setWindows(json.data);
       else throw new Error(json?.message || "로드 실패");
@@ -46,10 +49,11 @@ export default function MissionScreen() {
 
   const onClaim = async (metric, target, rewardPointsFromSlot) => {
     try {
-      const res = await fetch(
-        `${API_BASE}/missions/claim?metric=${metric}&target=${target}`,
-        { method: "POST", headers: { "X-User-Id": String(USER_ID) } }
+      const res = await apiFetch(
+        `/missions/claim?metric=${metric}&target=${target}`,
+        { method: "POST" }
       );
+
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || "수령 실패");
 
@@ -64,6 +68,16 @@ export default function MissionScreen() {
       setOpen(true);
     } catch (e) {
       Alert.alert("수령 실패", e.message);
+    }
+  };
+
+  //임시용 나중에 지워야댐
+  const onLogout = async () => {
+    try {
+      await logout(); // 👉 clearTokens() 대신 여기서 logout() 호출
+      router.replace("/"); // 로그인 화면으로 이동
+    } catch (e) {
+      Alert.alert("로그아웃 실패", e.message ?? "다시 시도해주세요");
     }
   };
 
@@ -104,6 +118,9 @@ export default function MissionScreen() {
                 </Text>
                 <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
                   출석 미션은 매달 새로 시작됩니다.
+                </Text>
+                <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
+                  (출석 보상 미수령 시 다음 달에 수령 불가능합니다.)
                 </Text>
               </View>
             </View>
@@ -169,6 +186,28 @@ export default function MissionScreen() {
         </View>
         <MainButton label="확인" onPress={() => setOpen(false)} />
       </Modal>
+
+      <View
+        style={{
+          position: "absolute",
+          left: 16,
+          right: 16,
+          bottom: 16,
+        }}
+      >
+        <Pressable
+          onPress={onLogout}
+          style={{
+            height: 48,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#ef4444",
+          }}
+        >
+          <Text className="text-white font-sf-b text-[16px]">로그아웃</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }

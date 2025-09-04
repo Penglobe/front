@@ -18,7 +18,9 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "백그라운드에서도 위치 추적을 하기 위해 권한이 필요합니다.",
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -33,10 +35,17 @@
         "FOREGROUND_SERVICE"
       ]
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
-    "plugins": ["expo-router", "expo-font"]
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      "expo-build-properties"
+    ]
   }
 }

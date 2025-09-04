@@ -40,7 +40,7 @@ export default function StepPill({ slot, onClaim }) {
   const eraserLeft = (BOX - ERASER) / 2 + dx; // 중앙 + 보정
   const eraserTop = (BOX - ERASER) / 2 + dy;
 
-  const numberColor = locked ? "#c6ccd8ff" : "#000000ff";
+  const numberColor = locked ? "#bcc1c9ff" : "black";
 
   return (
     <View
