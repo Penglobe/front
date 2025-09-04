@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
+import { getAccessToken } from "@services/authService";
 
 const MY_USER_NAME = "나의아이디"; // 백엔드 data.sql에 추가한 테스트 사용자 닉네임
 
@@ -12,9 +19,7 @@ export default function WeeklyRanking() {
 
   // --- Start of re-added test logic ---
   const updateRanks = useCallback((list) => {
-    const sortedList = [...list].sort(
-      (a, b) => b.score - a.score
-    );
+    const sortedList = [...list].sort((a, b) => b.score - a.score);
     const rankedList = sortedList.map((item, index) => ({
       ...item,
       rank: index + 1,
@@ -38,7 +43,12 @@ export default function WeeklyRanking() {
   const increaseMyCarbon = () => {
     console.log("Increasing my carbon for:", MY_USER_NAME);
     const newList = rankingList.map((item) => {
-      console.log("Checking item:", item.nickname, "vs MY_USER_NAME:", MY_USER_NAME);
+      console.log(
+        "Checking item:",
+        item.nickname,
+        "vs MY_USER_NAME:",
+        MY_USER_NAME
+      );
       if (item.nickname === MY_USER_NAME) {
         console.log("Found my user, increasing score.");
         return { ...item, score: item.score + 600 };
@@ -51,7 +61,12 @@ export default function WeeklyRanking() {
   const increaseOthersCarbon = () => {
     console.log("Increasing others carbon, excluding:", MY_USER_NAME);
     const newList = rankingList.map((item) => {
-      console.log("Checking item:", item.nickname, "vs MY_USER_NAME:", MY_USER_NAME);
+      console.log(
+        "Checking item:",
+        item.nickname,
+        "vs MY_USER_NAME:",
+        MY_USER_NAME
+      );
       if (item.nickname !== MY_USER_NAME) {
         console.log("Found other user, increasing score.");
         return { ...item, score: item.score + 100 };
@@ -65,18 +80,30 @@ export default function WeeklyRanking() {
   useEffect(() => {
     const fetchWeeklyRanking = async () => {
       try {
-        // 백엔드 API 호출
+        const token = await getAccessToken();
+        if (!token) {
+          console.warn("로그인 필요");
+          return;
+        }
+
         const response = await fetch(
-          "http://192.168.0.79:8080/rankings/weekly"
+          "http://192.168.0.79:8080/rankings/weekly",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
+
+        if (!response.ok)
+          throw new Error(`Weekly ranking 에러: ${response.status}`);
+
         const data = await response.json();
-
-        setRankingList(data.top10); // Directly set data.top10
-
+        setRankingList(data.top10);
         setMyRank(data.myRank);
       } catch (error) {
         console.error("Error fetching weekly ranking:", error);
-        // 에러 처리 (예: 에러 메시지 표시)
       } finally {
         setLoading(false);
       }
@@ -114,11 +141,12 @@ export default function WeeklyRanking() {
             <Text className="text-white font-sf-b text-lg">
               실시간 현재 순위 : {myRank.rank}위
             </Text>
-            {myRank.lastWeekRank !== null && myRank.lastWeekRank !== undefined && (
-              <Text className="text-white font-sf-r text-sm mt-1">
-                지난 주에는 {myRank.lastWeekRank}위로 완료했어요!
-              </Text>
-            )}
+            {myRank.lastWeekRank !== null &&
+              myRank.lastWeekRank !== undefined && (
+                <Text className="text-white font-sf-r text-sm mt-1">
+                  지난 주에는 {myRank.lastWeekRank}위로 완료했어요!
+                </Text>
+              )}
           </View>
         </LinearGradient>
       )}

@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
+import { getAccessToken } from "@services/authService";
 
 const MY_USER_NAME = "나의아이디";
+
+
 
 export default function GlobalRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -13,12 +16,26 @@ export default function GlobalRanking() {
   useEffect(() => {
     const fetchGlobalRanking = async () => {
       try {
-        // 백엔드 API 호출
-        const response = await fetch(
-          "http://192.168.0.79:8080/rankings/global"
-        );
-        const data = await response.json();
+        const token = await getAccessToken();
+        if (!token) {
+          console.warn("로그인 필요");
+          return;
+        }
 
+        const response = await fetch(
+          "http://192.168.0.79:8080/rankings/global",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`Global ranking 에러: ${response.status}`);
+
+        const data = await response.json();
         setRankingList(data.top10);
         setMyRank(data.myRank);
       } catch (error) {
