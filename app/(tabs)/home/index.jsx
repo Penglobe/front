@@ -13,6 +13,7 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import { useEffect } from "react";
+import { Image as ExpoImage } from "expo-image";
 
 export default function Home() {
   const router = useRouter();
@@ -127,9 +128,15 @@ export default function Home() {
         </View>
 
       {/* 이파 */}
-      <View className="mt-[-60px] items-left ml-5">
-          <Images.Ipa_gif />
-        </View>
+      <View className="mt-[-60px] ml-5">
+        <ExpoImage
+          source={require("../../../assets/images/character/ipa.gif")}
+          style={{ width: 160, height: 240, borderRadius: 10 }}
+          contentFit="fill"    
+          transition={20}         // 페이드인 (옵션)
+          cachePolicy="memory-disk"// 캐시 (옵션)
+        />
+      </View>
 
       {/* 퀴즈 */}
       <Animated.View
