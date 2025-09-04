@@ -62,7 +62,6 @@ export function ShutterButton({ onPress, disabled, loading }) {
           elevation: 5,
         }}
       >
-        {/* 바깥 래퍼는 링보다 크거나 같게 */}
         <Animated.View
           style={[wrapStyle, { overflow: "visible" }]}
           className={`w-[80px] h-[80px] bg-transparent items-center justify-center ${disabled ? "opacity-60" : ""}`}
