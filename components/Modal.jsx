@@ -3,12 +3,7 @@ import BgBlack from "@components/BgBlack";
 
 export default function Modal({ visible, children }) {
   return (
-    <RNModal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
-
+    <RNModal visible={visible} transparent animationType="fade">
       <BgBlack />
 
       <View

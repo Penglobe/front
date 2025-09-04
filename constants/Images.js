@@ -10,6 +10,7 @@ import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
+import Logo from "@assets/images/logo/logo.svg";
 import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 
 // 아이콘
@@ -24,6 +25,7 @@ import SuccessDiet from "@assets/icons/successDiet.svg";
 import SuccessWalk from "@assets/icons/successWalk.svg";
 import Notice from "@assets/icons/notice.svg";
 import Camera from "@assets/icons/camera.svg";
+import Kakao from "@assets/icons/kakao.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -75,5 +77,7 @@ export const Images = {
   IpaTori1,
   IpaFace,
   Ipa2,
+  Logo,
+  Kakao,
   Ipa_sad,
 };
