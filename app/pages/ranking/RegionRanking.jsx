@@ -4,7 +4,7 @@ import RankingCard from "@pages/ranking/RankingCard";
 import Svg, { Path, G, Text as SvgText, Rect } from "react-native-svg";
 import geojson from "@assets/map/krmap.json";
 
-export default function RegionalRanking({
+export default function RegionRanking({
   selectedRegion,
   setSelectedRegion,
   rankingData,
@@ -47,7 +47,14 @@ export default function RegionalRanking({
           )
         );
       });
-      return { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY };
+      return {
+        minX,
+        maxX,
+        minY,
+        maxY,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
     };
 
     // 1. Mainland Map Calculation
@@ -76,7 +83,8 @@ export default function RegionalRanking({
 
     const jejuInternalPadding = 15;
     const jejuScaleX = (insetWidth - jejuInternalPadding * 2) / jejuBBox.width;
-    const jejuScaleY = (insetHeight - jejuInternalPadding * 2) / jejuBBox.height;
+    const jejuScaleY =
+      (insetHeight - jejuInternalPadding * 2) / jejuBBox.height;
     const jejuScale = Math.min(jejuScaleX, jejuScaleY);
 
     const jejuOffsetX =
@@ -99,10 +107,10 @@ export default function RegionalRanking({
       // Manual label position adjustments for specific regions
       switch (title) {
         case "경상북도":
-          centerX -= 25000; // Move more to the left
+          centerX -= 25000;
           break;
         case "전라남도":
-          centerX += 15000; // Move to the right
+          centerX += 15000;
           break;
       }
 
@@ -129,7 +137,12 @@ export default function RegionalRanking({
       jejuScale,
       jejuOffsetX,
       jejuOffsetY,
-      insetRect: { x: insetX, y: insetY, width: insetWidth, height: insetHeight },
+      insetRect: {
+        x: insetX,
+        y: insetY,
+        width: insetWidth,
+        height: insetHeight,
+      },
       centerCoords,
       mapContainerHeight,
     };
@@ -269,7 +282,7 @@ export default function RegionalRanking({
         style={{ flex: 1 }}
       >
         <Text className="text-white font-sf-b text-lg mb-2">
-          지역별 탄소 절감량 Top 5
+          지역별 탄소 절감량 랭킹
         </Text>
         <ScrollView
           ref={scrollViewRef}
@@ -283,7 +296,7 @@ export default function RegionalRanking({
             const isProminent = item.regionName === selectedRegion;
             return (
               <View
-                key={item.rank}
+                key={item.rank + item.regionName}
                 onLayout={(event) => {
                   layoutMap.current[item.regionName] = {
                     y: event.nativeEvent.layout.y,
@@ -292,7 +305,11 @@ export default function RegionalRanking({
                 }}
               >
                 <RankingCard
-                  item={item}
+                  item={{
+                    rank: item.rank,
+                    nickname: item.regionName,
+                    score: item.totalCo2,
+                  }}
                   isProminent={isProminent}
                   onPress={() => handleRegionPress(item.regionName)}
                 />

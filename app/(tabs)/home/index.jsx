@@ -2,7 +2,7 @@
 import { View, StyleSheet, Button, Pressable } from "react-native";
 import { Images } from "@constants/Images";
 import { Text } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,11 +12,32 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
-import { useEffect } from "react";
+
 import { Image as ExpoImage } from "expo-image";
+import { useCallback, useEffect } from "react";
+import { useAuth } from "@hooks/useAuth";
 
 export default function Home() {
   const router = useRouter();
+  const { user, refreshUser } = useAuth();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshUser();
+    }, [refreshUser])
+  );
+
+  // counters가 user.counters 나 평평한 user로 올 수 있어 모두 대응
+  const counters = user?.counters ?? user ?? {};
+
+  // 연속 출석일(우선순위: camel -> snake)
+  const streakDays =
+    Number(
+      counters?.attendanceStreakDays ?? counters?.attendance_streak_days ?? 0
+    ) || 0;
+
+  // 총 포인트(우선순위: camel -> snake)
+  const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
 
   // Y축 이동값 (0 기준)
   const translateY = useSharedValue(0);
@@ -74,7 +95,9 @@ export default function Home() {
           }}
         >
           <Images.Snow width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">20일</Text>
+          <Text className="text-white font-sf-md text-[16px]">
+            {streakDays.toLocaleString("ko-KR")}일
+          </Text>
         </View>
 
         {/* 얼음 */}
@@ -89,7 +112,9 @@ export default function Home() {
           }}
         >
           <Images.Ice width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">200</Text>
+          <Text className="text-white font-sf-md text-[16px]">
+            {totalPoint.toLocaleString("ko-KR")}
+          </Text>
         </View>
       </View>
 
@@ -98,8 +123,7 @@ export default function Home() {
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
           className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
-          style={
-            {
+          style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.08,

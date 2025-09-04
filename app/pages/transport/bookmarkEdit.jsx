@@ -74,7 +74,7 @@ export default function BookmarkEdit() {
 
           {/* 지도 */}
           <View className="rounded-xl overflow-hidden mt-5">
-            <KakaoMapView endLat={lat} endLng={lng} height={220} />
+            <KakaoMapView currentLat={lat} currentLng={lng} height={220} />
           </View>
 
           {/* 주소 */}

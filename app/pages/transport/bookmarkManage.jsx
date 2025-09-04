@@ -7,6 +7,8 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
 import PlaceCard from "@components/PlaceCard";
+import { Feather } from "@expo/vector-icons";
+import Colors from "@constants/Colors.cjs";
 
 export default function BookmarkManage() {
   const router = useRouter();
@@ -58,8 +60,8 @@ export default function BookmarkManage() {
               </View>
 
               {/* 오른쪽: 버튼 묶음 (수직 배치) */}
-              <View className="flex-col items-stretch w-[70px]">
-                {/* ✅ 수정 버튼 (위, 파란색 배경) */}
+              <View className="flex-col items-stretch w-[80px]">
+                {/* ✅ 수정 버튼 (파란색 배경 + 아이콘) */}
                 <TouchableOpacity
                   onPress={() =>
                     router.push({
@@ -73,21 +75,19 @@ export default function BookmarkManage() {
                       },
                     })
                   }
-                  className="py-2 bg-blue rounded-lg mb-2"
+                  className="py-2 bg-green rounded-lg mb-2 flex-row items-center justify-center"
                 >
-                  <Text className="text-white font-sf-md text-center">
-                    수정
-                  </Text>
+                  <Feather name="edit-3" size={16} color="white" />
+                  <Text className="text-white font-sf-md ml-1">수정</Text>
                 </TouchableOpacity>
 
-                {/* ✅ 삭제 버튼 (아래, 빨간색 배경) */}
+                {/* ✅ 삭제 버튼 (빨간색 배경 + 아이콘) */}
                 <TouchableOpacity
                   onPress={() => handleDelete(item.bookmarkId)}
-                  className="py-2 bg-red-500 rounded-lg"
+                  className="py-2 bg-darkGray rounded-lg flex-row items-center justify-center"
                 >
-                  <Text className="text-white font-sf-md text-center">
-                    삭제
-                  </Text>
+                  <Feather name="trash" size={16} color="white" />
+                  <Text className="text-white font-sf-md ml-1">삭제</Text>
                 </TouchableOpacity>
               </View>
             </View>
