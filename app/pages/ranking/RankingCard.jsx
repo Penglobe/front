@@ -12,10 +12,10 @@ export default function RankingCard({ item, isProminent, onPress }) {
         <View className="flex-row justify-between items-center">
           <Text className="font-sf-b text-black w-1/6">{item.rank}위</Text>
           <Text className="font-sf-r text-black w-3/6">
-            {item.userName || item.regionName}
+            {item.nickname}
           </Text>
           <Text className="font-sf-b text-black w-2/6 text-right">
-            {item.totalCo2 || item.carbonReduction}kg
+            {item.score}kg
           </Text>
         </View>
       </View>
