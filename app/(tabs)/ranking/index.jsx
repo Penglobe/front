@@ -4,7 +4,8 @@ import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import RegionRanking from "@pages/ranking/RegionRanking";
 import WeeklyRanking from "@pages/ranking/WeeklyRanking";
-import GlobalRanking from "@pages/ranking/GlobalRanking"; // Import the new component
+import GlobalRanking from "@pages/ranking/GlobalRanking";
+import { getAccessToken } from "@services/authService";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -22,11 +23,42 @@ export default function Ranking() {
   useEffect(() => {
     const fetchRankingData = async () => {
       try {
-        const response = await fetch(
-          "http://192.168.0.79:8080/rankings/regions"
-        );
-        const data = await response.json();
+        const token = await getAccessToken(); // ✅ 토큰 가져오기
+        if (!token) {
+          console.warn("로그인 필요");
+          return;
+        }
 
+        const updateResponse = await fetch(
+          "http://192.168.0.79:8080/rankings/update-all",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!updateResponse.ok) {
+          throw new Error(`update-all 에러: ${updateResponse.status}`);
+        }
+
+        const response = await fetch(
+          "http://192.168.0.79:8080/rankings/regions",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // ✅ JWT 붙이기
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`서버 응답 에러: ${response.status}`);
+        }
+
+        const data = await response.json();
         setRankingData(data);
       } catch (error) {
         console.error("Error fetching region ranking:", error);
