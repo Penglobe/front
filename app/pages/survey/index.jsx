@@ -22,6 +22,7 @@ export default function Survey() {
       try {
         const response = await fetch("http://192.168.0.51:8080/surveys/today");
         const data = await response.json();
+
         setQuestions(data);
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
@@ -80,6 +81,7 @@ export default function Survey() {
 
       if (!response.ok) {
         const text = await response.text();
+
         console.error("서버 에러:", text);
         alert("서버 요청 실패: " + response.status);
         return;
@@ -87,7 +89,7 @@ export default function Survey() {
 
       const data = await response.json();
       console.log("서버 응답:", data);
-      console.log(data.data.top3);
+      console.log(data.top3);
 
       // 결과 페이지로 이동
       router.push({
