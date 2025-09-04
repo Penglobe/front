@@ -15,20 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.myapp",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "백그라운드에서도 위치 추적을 하기 위해 권한이 필요합니다.",
-        "UIBackgroundModes": [
-          "location"
-        ]
-      }
-
         "NSLocationAlwaysUsageDescription": "앱이 항상 위치를 사용하도록 허용해야 백그라운드 이동 추적이 가능합니다.",
-        "UIBackgroundModes": ["location"],
-        "NSCameraUsageDescription": "음식을 촬영하기 위해 카메라 접근 권한이 필요합니다."
-      },
-      "bundleIdentifier": "com.anonymous.myapp"
-
+        "NSCameraUsageDescription": "음식을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
+        "UIBackgroundModes": ["location"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -44,9 +38,7 @@
       ],
       "package": "com.anonymous.myapp"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
@@ -54,13 +46,10 @@
       "expo-router",
       "expo-font",
       "expo-web-browser",
-      "expo-build-properties"
       [
         "expo-build-properties",
         {
-          "ios": {
-            "deploymentTarget": "15.1"
-          }
+          "ios": { "deploymentTarget": "15.1" }
         }
       ]
     ]
