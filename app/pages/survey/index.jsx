@@ -67,7 +67,7 @@ export default function Survey() {
       );
 
       const payload = {
-        userId: 1,
+        userId: 1, //***************************************************************** */
         answer: answerArray,
       };
 
