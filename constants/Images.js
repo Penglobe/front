@@ -11,6 +11,7 @@ import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Logo from "@assets/images/logo/logo.svg";
+import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -78,4 +79,5 @@ export const Images = {
   Ipa2,
   Logo,
   Kakao,
+  Ipa_sad,
 };

@@ -13,10 +13,12 @@ export default function useTransport(userId) {
   const positionsRef = useRef([]); // GPS 좌표 기록
 
   // 이동 시작
-  const startTransport = async () => {
-    if (!mode) throw new Error("이동 수단을 선택해주세요");
+  const startTransport = async (selectedMode) => {
+    const effectiveMode = selectedMode || mode;
+    if (!effectiveMode) throw new Error("이동 수단을 선택해주세요");
 
-    const data = await startTransportApi(userId, mode);
+    const data = await startTransportApi(userId, effectiveMode);
+    setMode(effectiveMode);
     setActivity(data);
     setTracking(true);
 
@@ -27,19 +29,24 @@ export default function useTransport(userId) {
   };
 
   // 이동 종료
-  const stopTransport = async (pathGeojson = null) => {
+  const stopTransport = async (customDistance = null, pathGeojson = null) => {
     if (!activity) throw new Error("진행 중인 이동이 없습니다");
 
-    // 거리 계산
-    let distanceM = 0;
-    const points = positionsRef.current;
-    for (let i = 1; i < points.length; i++) {
-      distanceM += calculateDistance(
-        points[i - 1].latitude,
-        points[i - 1].longitude,
-        points[i].latitude,
-        points[i].longitude
-      );
+    let distanceM;
+    if (customDistance != null) {
+      distanceM = customDistance; // 🚀 외부에서 전달한 거리 사용
+    } else {
+      // 내부적으로 positionsRef로 계산
+      distanceM = 0;
+      const points = positionsRef.current;
+      for (let i = 1; i < points.length; i++) {
+        distanceM += calculateDistance(
+          points[i - 1].latitude,
+          points[i - 1].longitude,
+          points[i].latitude,
+          points[i].longitude
+        );
+      }
     }
 
     const data = await stopTransportApi(
