@@ -12,6 +12,8 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
+
+import { Image as ExpoImage } from "expo-image";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "@hooks/useAuth";
 
@@ -145,14 +147,20 @@ export default function Home() {
       </View>
 
       {/* 토리 */}
-      {/* <View className="mt-[46px] ml-20 items-center ml-5">
-          <Tori />
-        </View> */}
+      <View className="mt-[80px] ml-20 items-center ml-5">
+          <Images.Tori />
+        </View>
 
       {/* 이파 */}
-      {/* <View className="mt-[-60px] items-left ml-5">
-          <Ipa />
-        </View> */}
+      <View className="mt-[-60px] ml-5">
+        <ExpoImage
+          source={require("../../../assets/images/character/ipa.gif")}
+          style={{ width: 160, height: 240, borderRadius: 10 }}
+          contentFit="fill"    
+          transition={20}         // 페이드인 (옵션)
+          cachePolicy="memory-disk"// 캐시 (옵션)
+        />
+      </View>
 
       {/* 퀴즈 */}
       <Animated.View

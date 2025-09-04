@@ -103,6 +103,28 @@ export default function TabBar({ state, descriptors, navigation }) {
         accessibilityRole="tab"
         accessibilityLabel="계산기"
       >
+
+        <Svg width={80} height={80} viewBox="0 0 100 100">
+          <Defs>
+            <LinearGradient id="calcRing" x1="0%" y1="0%" x2="100%" y2="0%">
+              <Stop offset="0%" stopColor={Gradients.background[0]} />
+              <Stop offset="100%" stopColor={Gradients.background[1]} />
+            </LinearGradient>
+          </Defs>
+          <Circle
+            cx="50"  // 원 중심의 x좌표
+            cy="50"  // 원 중심의 y좌표
+            r="46"  // 반지름(px 단위)
+            stroke="url(#calcRing)"
+            strokeWidth="8"  // 두께
+            fill="transparent"
+            strokeDasharray="282"    // 둘레 길이 
+            strokeDashoffset="75"    // 일부만 보이게
+            strokeLinecap="round"
+          />
+        </Svg>
+      </Animated.View>
+
         <Animated.View
           pointerEvents="none"
           style={{
@@ -130,6 +152,7 @@ export default function TabBar({ state, descriptors, navigation }) {
             />
           </Svg>
         </Animated.View>
+
 
         {children}
       </TouchableOpacity>
