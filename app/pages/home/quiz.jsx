@@ -53,7 +53,6 @@ export default function QuizPage() {
         body: JSON.stringify({
           userId: 1, //임시 userId***************************************************
           quizId: question.quizId,
-
           answer: answer === "O",
         }),
       });

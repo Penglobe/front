@@ -71,13 +71,18 @@ export default function Survey() {
         answer: answerArray,
       };
 
-      const response = await fetch("http://192.168.0.51:8080/surveys/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      console.log("payload: ", payload);
+
+      const response = await fetch(
+        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
@@ -89,11 +94,18 @@ export default function Survey() {
 
       const data = await response.json();
       console.log("서버 응답:", data);
-      console.log(data.top3);
+      console.log("데이터 : ", data.data.top3);
 
       // 결과 페이지로 이동
+
+      const resultDataStr = encodeURIComponent(JSON.stringify(data.data));
+
       router.push({
         pathname: "/pages/survey/result",
+        params: {
+          userId: payload.userId,
+          resultData: resultDataStr, // 문자열로 전달
+        },
       });
     } catch (error) {
       console.error("네트워크 에러:", error);
