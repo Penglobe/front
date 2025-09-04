@@ -122,14 +122,14 @@ export default function Home() {
       </View>
 
       {/* 토리 */}
-      {/* <View className="mt-[46px] ml-20 items-center ml-5">
-          <Tori />
-        </View> */}
+      <View className="mt-[80px] ml-20 items-center ml-5">
+          <Images.Tori />
+        </View>
 
       {/* 이파 */}
-      {/* <View className="mt-[-60px] items-left ml-5">
-          <Ipa />
-        </View> */}
+      <View className="mt-[-60px] items-left ml-5">
+          <Images.Ipa_gif />
+        </View>
 
       {/* 퀴즈 */}
       <Animated.View
