@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
-import { getAccessToken } from "@services/authService";
-
-const MY_USER_NAME = "나의아이디";
-
-
+import { getAccessToken, me } from "@services/authService";
 
 export default function GlobalRanking() {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserNickname, setCurrentUserNickname] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     const fetchGlobalRanking = async () => {
@@ -19,7 +17,17 @@ export default function GlobalRanking() {
         const token = await getAccessToken();
         if (!token) {
           console.warn("로그인 필요");
+          setLoading(false);
           return;
+        }
+
+        // Fetch current user's info using the 'me' function
+        const userInfo = await me();
+        if (userInfo && userInfo.nickname) {
+          setCurrentUserNickname(userInfo.nickname);
+        }
+        if (userInfo && userInfo.userId) {
+          setCurrentUserId(userInfo.userId);
         }
 
         const response = await fetch(
@@ -38,8 +46,20 @@ export default function GlobalRanking() {
         const data = await response.json();
         setRankingList(data.top10);
         setMyRank(data.myRank);
+
+        // Check if myRank is null and display alert
+        if (!data.myRank) {
+          Alert.alert(
+            "랭킹 확인 불가",
+            "기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을 통해 탄소 절감량을 늘려보세요!"
+          );
+        }
       } catch (error) {
         console.error("Error fetching global ranking:", error);
+        Alert.alert(
+          "랭킹 불러오기 오류",
+          "전체 랭킹을 불러오는 중 오류가 발생했습니다."
+        );
       } finally {
         setLoading(false);
       }
@@ -59,7 +79,7 @@ export default function GlobalRanking() {
   }
 
   const myRankingFromTop10 = rankingList.find(
-    (item) => item.nickname === MY_USER_NAME
+    (item) => item.nickname === currentUserNickname
   );
 
   return (
@@ -85,7 +105,7 @@ export default function GlobalRanking() {
       {/* 랭킹 리스트 (카드 형식) */}
       <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
         {rankingList.map((item) => {
-          const isCurrentUser = item.nickname === MY_USER_NAME;
+          const isCurrentUser = item.nickname === currentUserNickname;
           return (
             <RankingCard
               key={item.rank + item.nickname}
@@ -106,7 +126,7 @@ export default function GlobalRanking() {
             <RankingCard
               item={{
                 rank: myRank.rank,
-                nickname: MY_USER_NAME, // 백엔드 응답에 닉네임이 없으므로 직접 설정
+                nickname: currentUserNickname, // 백엔드 응답에 닉네임이 없으므로 직접 설정
                 score: myRank.score,
               }}
               isProminent={true}

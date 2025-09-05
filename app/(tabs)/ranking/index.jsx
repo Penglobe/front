@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, Pressable, Dimensions } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import RegionRanking from "@pages/ranking/RegionRanking";
 import WeeklyRanking from "@pages/ranking/WeeklyRanking";
 import GlobalRanking from "@pages/ranking/GlobalRanking";
-import { getAccessToken } from "@services/authService";
+import { getAccessToken, me } from "@services/authService";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -17,56 +17,46 @@ const tabs = [
 
 export default function Ranking() {
   const [activeTab, setActiveTab] = useState("regions");
-  const [selectedRegion, setSelectedRegion] = useState("서울특별시"); // Revert to hardcoded default
+  const [selectedRegion, setSelectedRegion] = useState("서울특별시");
   const [rankingData, setRankingData] = useState([]);
 
-  useEffect(() => {
-    const fetchRankingData = async () => {
-      try {
-        const token = await getAccessToken(); // ✅ 토큰 가져오기
-        if (!token) {
-          console.warn("로그인 필요");
-          return;
-        }
-
-        const updateResponse = await fetch(
-          "http://192.168.0.79:8080/rankings/update-all",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!updateResponse.ok) {
-          throw new Error(`update-all 에러: ${updateResponse.status}`);
-        }
-
-        const response = await fetch(
-          "http://192.168.0.79:8080/rankings/regions",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // ✅ JWT 붙이기
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`서버 응답 에러: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setRankingData(data);
-      } catch (error) {
-        console.error("Error fetching region ranking:", error);
+  const fetchRegionRankingData = useCallback(async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        console.warn("로그인 필요");
+        return;
       }
-    };
 
-    fetchRankingData();
-  }, []);
+      const userInfo = await me();
+      if (userInfo && userInfo.regionName) {
+        setSelectedRegion(userInfo.regionName);
+      }
+
+      const response = await fetch(
+        "http://192.168.0.79:8080/rankings/regions",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ JWT 붙이기
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`서버 응답 에러: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setRankingData(data);
+    } catch (error) {
+      console.error("Error fetching region ranking:", error);
+    }
+  }, []); // Empty dependency array for useCallback
+
+  useEffect(() => {
+    fetchRegionRankingData();
+  }, [fetchRegionRankingData]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -118,7 +108,9 @@ export default function Ranking() {
               rankingData={rankingData}
             />
           )}
-          {activeTab === "weekly" && <WeeklyRanking />}
+          {activeTab === "weekly" && (
+            <WeeklyRanking fetchRegionRankingData={fetchRegionRankingData} />
+          )}
           {activeTab === "global" && <GlobalRanking />}
         </View>
       </View>
