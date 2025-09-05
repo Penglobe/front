@@ -5,6 +5,7 @@ import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import { use, useEffect, useState } from "react";
 import Modal from "@components/Modal";
+import { useAuth } from "@hooks/useAuth";
 
 export default function QuizPage() {
   const router = useRouter();
@@ -12,6 +13,10 @@ export default function QuizPage() {
   const [open, setOpen] = useState(false); //모달 열기
   const [answer, setAnswer] = useState(null); //사용자 답변
   const [result, setResult] = useState(null); // 정답 여부에 따라서 모달 내용 변경
+  const { user } = useAuth();
+
+  /*user*/
+  const userId = user?.userId;
 
   /*날짜*/
   const today = new Date();
@@ -34,7 +39,7 @@ export default function QuizPage() {
     fetch("http://192.168.0.51:8080/quiz/today")
       .then((response) => response.json())
       .then((data) => {
-        console.log("질문", data);
+        //console.log("질문", data);
         setQuestion(data);
       })
       .catch((error) => console.error("Error fetching quiz:", error));
@@ -51,7 +56,7 @@ export default function QuizPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: 1, //임시 userId***************************************************
+          userId, //: 1, //임시 userId***************************************************
           quizId: question.quizId,
           answer: answer === "O",
         }),
