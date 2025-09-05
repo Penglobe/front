@@ -6,12 +6,17 @@ import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import SurveyResultButton from "@components/SurveyResultButton";
+import { useAuth } from "@hooks/useAuth";
 
 export default function Survey() {
   const router = useRouter();
   const [questions, setQuestions] = useState([]); // 질문 데이터
   const [answer, setAnswer] = useState({}); // { itemId: 선택값 }
   const [firstUnanswered, setFirstUnanswered] = useState(null); // 제출 시 답 안 한 문항 id
+  const { user } = useAuth();
+
+  //user
+  const userId = user?.userId;
 
   // 스크롤뷰 관련
   const scrollRef = useRef(null);
@@ -50,7 +55,7 @@ export default function Survey() {
       );
 
       const payload = {
-        userId: 1, //***************************************************************** */
+        userId,
         answer: answerArray,
       };
 
@@ -130,7 +135,7 @@ export default function Survey() {
       );
 
       const payload = {
-        userId: 1, //***************************************************************** */
+        userId,
         answer: answerArray,
       };
 
