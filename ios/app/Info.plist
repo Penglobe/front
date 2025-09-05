@@ -28,7 +28,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>penglobe</string>
-				<string>com.anonymous.myapp</string>
+				<string>com.penglobe9.app</string>
 			</array>
 		</dict>
 	</array>
@@ -38,6 +38,18 @@
 	<string>0b6fbe431b4144f190423b9630b6354a</string>
 	<key>FoodLensCompanyToken</key>
 	<string>774ee2d62e604f8a944242d471488ce6</string>
+	<key>KAKAO_APP_KEY</key>
+	<string>bf3a523b1b5666d092b1773d17933a97</string>
+	<key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>kakaobf3a523b1b5666d092b1773d17933a97</string>
+      </array>
+    </dict>
+  </array>
+
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -57,6 +69,8 @@
 	<string>Allow $(PRODUCT_NAME) to access your location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+<string>개발 서버(Metro)와 통신하기 위해 로컬 네트워크 접근이 필요합니다.</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>

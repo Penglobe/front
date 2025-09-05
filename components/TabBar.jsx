@@ -103,7 +103,7 @@ export default function TabBar({ state, descriptors, navigation }) {
         accessibilityRole="tab"
         accessibilityLabel="계산기"
       >
-
+        <Animated.View>
         <Svg width={80} height={80} viewBox="0 0 100 100">
           <Defs>
             <LinearGradient id="calcRing" x1="0%" y1="0%" x2="100%" y2="0%">

@@ -1,5 +1,5 @@
 {
-  "originHash" : "fd8b8b3c5a1b8b9b7547bba0879c34d7a23c6a35f3dfe20baf7e54e3eb07ffbe",
+  "originHash" : "412e95bab9fa2b4c4910d43a19f882491c691a0fd027b185e461750dc49e9883",
   "pins" : [
     {
       "identity" : "ios_foodlenscoresdk",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "8c1a2a0505c7f0ba7cca9d15cfd890558960d985",
         "version" : "3.1.1"
+      }
+    },
+    {
+      "identity" : "kakaomapssdk-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM.git",
+      "state" : {
+        "revision" : "cc073a32729b7f545cca49f96d0b859fa3a0d5db",
+        "version" : "2.12.10"
       }
     }
   ],

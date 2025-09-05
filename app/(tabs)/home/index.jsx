@@ -19,25 +19,25 @@ import { useAuth } from "@hooks/useAuth";
 
 export default function Home() {
   const router = useRouter();
-  const { user, refreshUser } = useAuth();
+  // const { user, refreshUser } = useAuth();
 
-  useFocusEffect(
-    useCallback(() => {
-      refreshUser();
-    }, [refreshUser])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     refreshUser();
+  //   }, [refreshUser])
+  // );
 
-  // counters가 user.counters 나 평평한 user로 올 수 있어 모두 대응
-  const counters = user?.counters ?? user ?? {};
+  // // counters가 user.counters 나 평평한 user로 올 수 있어 모두 대응
+  // const counters = user?.counters ?? user ?? {};
 
-  // 연속 출석일(우선순위: camel -> snake)
-  const streakDays =
-    Number(
-      counters?.attendanceStreakDays ?? counters?.attendance_streak_days ?? 0
-    ) || 0;
+  // // 연속 출석일(우선순위: camel -> snake)
+  // const streakDays =
+  //   Number(
+  //     counters?.attendanceStreakDays ?? counters?.attendance_streak_days ?? 0
+  //   ) || 0;
 
-  // 총 포인트(우선순위: camel -> snake)
-  const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
+  // // 총 포인트(우선순위: camel -> snake)
+  // const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
 
   // Y축 이동값 (0 기준)
   const translateY = useSharedValue(0);
@@ -96,7 +96,7 @@ export default function Home() {
         >
           <Images.Snow width={30} height={30} />
           <Text className="text-white font-sf-md text-[16px]">
-            {streakDays.toLocaleString("ko-KR")}일
+            {/* {streakDays.toLocaleString("ko-KR")}일 */}
           </Text>
         </View>
 
@@ -113,7 +113,7 @@ export default function Home() {
         >
           <Images.Ice width={30} height={30} />
           <Text className="text-white font-sf-md text-[16px]">
-            {totalPoint.toLocaleString("ko-KR")}
+            {/* {totalPoint.toLocaleString("ko-KR")} */}
           </Text>
         </View>
       </View>
