@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, Text, Image, ScrollView, Pressable, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { fetchProduct, buyProduct } from "@services/shopService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
+import { apiFetch } from "@services/authService"; // ✅ 추가
 
 export default function ProductDetailPage() {
-  const { id } = useLocalSearchParams(); // 목록에서 보낸 id 파라미터
+  const { id } = useLocalSearchParams();
+  const pid = Array.isArray(id) ? id[0] : id; // 안전 캐스팅
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -15,15 +16,18 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(1);
 
   const load = useCallback(async () => {
+    if (!pid) return;
     try {
-      const res = await fetchProduct(Number(id));
-      setItem(res);
+      const res = await apiFetch(`/shop/products/${pid}`); // ✅ 직접 호출
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || `조회 실패(${res.status})`);
+      setItem(json?.data ?? json);
     } catch (e) {
       Alert.alert("오류", e?.message ?? "상품 정보를 불러올 수 없습니다.", [
         { text: "확인", onPress: () => router.back() },
       ]);
     }
-  }, [id, router]);
+  }, [pid, router]);
 
   useEffect(() => {
     load();
@@ -35,12 +39,22 @@ export default function ProductDetailPage() {
   const minus = () => setQty((n) => Math.max(1, n - 1));
   const plus = () => setQty((n) => n + 1);
 
-  const handleBuy = async () => {
+  const handleBuy = useCallback(async () => {
     try {
-      const res = await buyProduct(item.productId, qty);
+      const res = await apiFetch(`/shop/orders`, {
+        // ✅ 직접 호출
+        method: "POST",
+        body: JSON.stringify({ productId: item.productId, qty }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || `구매 실패(${res.status})`);
+
+      const data = json?.data ?? json;
       Alert.alert(
         "구매 완료",
-        `${item.name} x${qty}\n사용 포인트: ${res?.totalPoints?.toLocaleString?.() ?? res?.totalPoints ?? 0}점`,
+        `${item.name} x${qty}\n사용 포인트: ${
+          data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
+        }점`,
         [
           { text: "주문내역 보기", onPress: () => router.push("/orders") },
           { text: "확인", onPress: () => router.back() },
@@ -49,7 +63,7 @@ export default function ProductDetailPage() {
     } catch (e) {
       Alert.alert("구매 실패", e?.message ?? "구매 중 문제가 발생했습니다.");
     }
-  };
+  }, [item, qty, router]);
 
   if (!item) {
     return (
@@ -66,7 +80,6 @@ export default function ProductDetailPage() {
 
       <View className="flex-1 px-pageX pt-3">
         <View className="flex-1 px-pageX pt-3 bg-white rounded-2xl">
-          {/* 내용 */}
           <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
             {!!item.img && (
               <Image
@@ -98,7 +111,6 @@ export default function ProductDetailPage() {
                 <Text className="text-gray-700">전 매장 사용 가능</Text>
               </Section>
 
-              {/* 수량 */}
               <View className="mt-10">
                 <Text className="text-base font-sf-b mb-3">수량</Text>
                 <View className="flex-row items-center">
@@ -121,6 +133,7 @@ export default function ProductDetailPage() {
               </View>
             </View>
           </ScrollView>
+
           {/* 하단 고정 결제 바 */}
           <View
             style={{ paddingBottom: Math.max(insets.bottom, 12) }}
