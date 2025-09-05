@@ -39,6 +39,16 @@ export default function Home() {
   // 총 포인트(우선순위: camel -> snake)
   const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
 
+  // 총 탄소 절감량(kg) — camel/snake + counters 모두 대응
+  const totalScore =
+    Number(
+      user?.totalScore ??
+        user?.total_score ??
+        counters?.totalScore ??
+        counters?.total_score ??
+        0
+    ) || 0;
+
   // Y축 이동값 (0 기준)
   const translateY = useSharedValue(0);
 
@@ -137,7 +147,7 @@ export default function Home() {
             총 탄소 절감량
           </Text>
           <Text className="font-grotesk-b text-[24px] text-green">
-            535
+            {totalScore.toLocaleString("ko-KR")}
             <Text className="text-black"> kg</Text>
             <Text className="text-[14px] font-sf-md text-black">
               {" "}
