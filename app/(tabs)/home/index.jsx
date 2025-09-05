@@ -2,7 +2,7 @@
 import { View, StyleSheet, Button, Pressable } from "react-native";
 import { Images } from "@constants/Images";
 import { Text } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,10 +12,32 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
-import { useEffect } from "react";
+
+import { Image as ExpoImage } from "expo-image";
+import { useCallback, useEffect } from "react";
+import { useAuth } from "@hooks/useAuth";
 
 export default function Home() {
   const router = useRouter();
+  const { user, refreshUser } = useAuth();
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshUser();
+    }, [refreshUser])
+  );
+
+  // counters가 user.counters 나 평평한 user로 올 수 있어 모두 대응
+  const counters = user?.counters ?? user ?? {};
+
+  // 연속 출석일(우선순위: camel -> snake)
+  const streakDays =
+    Number(
+      counters?.attendanceStreakDays ?? counters?.attendance_streak_days ?? 0
+    ) || 0;
+
+  // 총 포인트(우선순위: camel -> snake)
+  const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
 
   // Y축 이동값 (0 기준)
   const translateY = useSharedValue(0);
@@ -62,34 +84,40 @@ export default function Home() {
 
       <View className="mt-[66px] px-pageX flex-row justify-between">
         {/* 출석 */}
-        <View
+        <Pressable
+          onPress={() => router.push("/(tabs)/mypage")}
           className="flex-row items-center justify-between bg-blue rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 1, //100%
-            shadowRadius: 2, //Blur : 2
-            elevation: 4, //Spread=2 정도
+            shadowOpacity: 1,
+            shadowRadius: 2,
+            elevation: 4,
           }}
         >
           <Images.Snow width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">20일</Text>
-        </View>
+          <Text className="text-white font-sf-md text-[16px]">
+            {streakDays.toLocaleString("ko-KR")}일
+          </Text>
+        </Pressable>
 
         {/* 얼음 */}
-        <View
+        <Pressable
+          onPress={() => router.push("/pages/point/pointHistory")}
           className="flex-row items-center justify-between bg-green rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 1, //100%
-            shadowRadius: 2, //Blur : 2
-            elevation: 4, //Spread=2 정도
+            shadowOpacity: 1,
+            shadowRadius: 2,
+            elevation: 4,
           }}
         >
           <Images.Ice width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">200</Text>
-        </View>
+          <Text className="text-white font-sf-md text-[16px]">
+            {totalPoint.toLocaleString("ko-KR")}
+          </Text>
+        </Pressable>
       </View>
 
       {/* 탄소 절감량 */}
@@ -97,8 +125,7 @@ export default function Home() {
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
           className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
-          style={
-            {
+          style={{
             shadowColor: "#000000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.08,
@@ -122,14 +149,20 @@ export default function Home() {
       </View>
 
       {/* 토리 */}
-      {/* <View className="mt-[46px] ml-20 items-center ml-5">
-          <Tori />
-        </View> */}
+      <View className="mt-[80px] ml-20 items-center ml-5">
+        <Images.Tori />
+      </View>
 
       {/* 이파 */}
-      {/* <View className="mt-[-60px] items-left ml-5">
-          <Ipa />
-        </View> */}
+      <View className="mt-[-60px] ml-5">
+        <ExpoImage
+          source={require("../../../assets/images/character/ipa.gif")}
+          style={{ width: 160, height: 240, borderRadius: 10 }}
+          contentFit="fill"
+          transition={20} // 페이드인 (옵션)
+          cachePolicy="memory-disk" // 캐시 (옵션)
+        />
+      </View>
 
       {/* 퀴즈 */}
       <Animated.View

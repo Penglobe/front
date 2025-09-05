@@ -296,7 +296,7 @@ export default function RegionRanking({
             const isProminent = item.regionName === selectedRegion;
             return (
               <View
-                key={item.rank}
+                key={item.rank + item.regionName}
                 onLayout={(event) => {
                   layoutMap.current[item.regionName] = {
                     y: event.nativeEvent.layout.y,
@@ -305,7 +305,11 @@ export default function RegionRanking({
                 }}
               >
                 <RankingCard
-                  item={item}
+                  item={{
+                    rank: item.rank,
+                    nickname: item.regionName,
+                    score: item.totalCo2,
+                  }}
                   isProminent={isProminent}
                   onPress={() => handleRegionPress(item.regionName)}
                 />
