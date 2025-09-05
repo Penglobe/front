@@ -4,11 +4,22 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
-import { apiFetch } from "@services/authService"; // ✅ 추가
+import { apiFetch } from "@services/authService";
+import { SERVER_URL } from "@env";
+import { Images } from "@constants/Images";
+import MainButton from "@components/MainButton";
+
+const BASE = (SERVER_URL || "").replace(/\/+$/, "");
+function toUri(path) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  const rel = path.startsWith("/") ? path : `/${path}`;
+  return `${BASE}${rel}`;
+}
 
 export default function ProductDetailPage() {
   const { id } = useLocalSearchParams();
-  const pid = Array.isArray(id) ? id[0] : id; // 안전 캐스팅
+  const pid = Array.isArray(id) ? id[0] : id;
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -18,7 +29,7 @@ export default function ProductDetailPage() {
   const load = useCallback(async () => {
     if (!pid) return;
     try {
-      const res = await apiFetch(`/shop/products/${pid}`); // ✅ 직접 호출
+      const res = await apiFetch(`/shop/products/${pid}`);
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.message || `조회 실패(${res.status})`);
       setItem(json?.data ?? json);
@@ -42,14 +53,14 @@ export default function ProductDetailPage() {
   const handleBuy = useCallback(async () => {
     try {
       const res = await apiFetch(`/shop/orders`, {
-        // ✅ 직접 호출
         method: "POST",
         body: JSON.stringify({ productId: item.productId, qty }),
       });
       const json = await res.json().catch(() => null);
+      console.log("BUY status:", res.status, "resp:", json);
       if (!res.ok) throw new Error(json?.message || `구매 실패(${res.status})`);
-
       const data = json?.data ?? json;
+
       Alert.alert(
         "구매 완료",
         `${item.name} x${qty}\n사용 포인트: ${
@@ -73,28 +84,42 @@ export default function ProductDetailPage() {
     );
   }
 
+  const imgUri = toUri(item?.img);
+
+  // 플로팅 버튼 높이(+여백)만큼 스크롤 하단에 공간 확보
+  const bottomGap = Math.max(insets.bottom, 16) + 76;
+
   return (
     <View className="flex-1">
       <BgGradient />
       <HeaderBar title="상품 정보" />
 
+      {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
       <View className="flex-1 px-pageX pt-3">
-        <View className="flex-1 px-pageX pt-3 bg-white rounded-2xl">
-          <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-            {!!item.img && (
-              <Image
-                source={{ uri: item.img }}
-                style={{ width: "100%", height: 280 }}
-                resizeMode="cover"
-                className="rounded-2xl mt-1"
-              />
-            )}
+        <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
+          {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
+          <View className="bg-white rounded-2xl px-pageX pt-3 pb-5">
+            {/* 이미지 */}
+            <View className="w-full h-[280px] rounded-2xl mt-1 mb-3 bg-white items-center justify-center overflow-hidden">
+              {imgUri ? (
+                <Image
+                  source={{ uri: imgUri }}
+                  className="w-full h-full"
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text className="text-gray-400">이미지 없음</Text>
+              )}
+            </View>
 
             <View className="px-pageX py-4">
               <Text className="text-xl font-sf-b">{item.name}</Text>
-              <Text className="text-emerald-600 font-sf-b mt-2">
-                {price.toLocaleString()} P
-              </Text>
+              <View className="flex-row items-center mt-2">
+                <Text className="text-emerald-600 font-sf-b mr-1">
+                  {price.toLocaleString()}
+                </Text>
+                <Images.Ice width={18} height={18} />
+              </View>
 
               {!!item.description && (
                 <View className="mt-6">
@@ -115,52 +140,43 @@ export default function ProductDetailPage() {
                 <Text className="text-base font-sf-b mb-3">수량</Text>
                 <View className="flex-row items-center">
                   <Pressable
+                    className="w-10 h-10 rounded-xl items-center justify-center bg-gray-100"
                     onPress={minus}
-                    className="w-10 h-10 rounded-xl items-center justify-center"
-                    style={{ backgroundColor: "#F3F4F6" }}
                   >
                     <Text className="text-xl">−</Text>
                   </Pressable>
                   <Text className="mx-4 text-lg font-sf-b">{qty}</Text>
                   <Pressable
+                    className="w-10 h-10 rounded-xl items-center justify-center bg-gray-100"
                     onPress={plus}
-                    className="w-10 h-10 rounded-xl items-center justify-center"
-                    style={{ backgroundColor: "#F3F4F6" }}
                   >
                     <Text className="text-xl">＋</Text>
                   </Pressable>
                 </View>
               </View>
             </View>
-          </ScrollView>
-
-          {/* 하단 고정 결제 바 */}
-          <View
-            style={{ paddingBottom: Math.max(insets.bottom, 12) }}
-            className="px-pageX pt-3 pb-3 border-t border-gray-200 bg-white"
-          >
-            <View className="flex-row items-center">
-              <Pressable
-                onPress={() =>
-                  Alert.alert("안내", "장바구니는 추후 제공 예정입니다.")
-                }
-                className="h-12 px-4 rounded-xl mr-2 items-center justify-center"
-                style={{ backgroundColor: "#F3F4F6" }}
-              >
-                <Text className="font-sf-b">장바구니</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleBuy}
-                className="flex-1 h-12 rounded-xl items-center justify-center"
-                style={{ backgroundColor: "#10B981" }}
-              >
-                <Text className="text-white font-sf-b">
-                  {total.toLocaleString()} P 결제하기
-                </Text>
-              </Pressable>
-            </View>
           </View>
+        </ScrollView>
+
+        {/* 플로팅 결제 버튼 (배경 바 없음) */}
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: insets.bottom ? insets.bottom : 12,
+          }}
+          className="px-pageX pb-3"
+        >
+          <MainButton onPress={handleBuy} className="w-full">
+            <View className="flex-row items-center">
+              <Text className="text-white font-sf-b mr-1">
+                {total.toLocaleString()}
+              </Text>
+              <Images.Ice width={18} height={18} />
+              <Text className="text-white font-sf-b ml-1">결제하기</Text>
+            </View>
+          </MainButton>
         </View>
       </View>
     </View>

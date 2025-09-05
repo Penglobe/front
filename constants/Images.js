@@ -13,6 +13,7 @@ import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Logo from "@assets/images/logo/logo.svg";
 import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 import Ipa_gif from "@assets/images/character/ipa.gif";
+import ToriFace from "@assets/images/character/tori-face.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -82,4 +83,5 @@ export const Images = {
   Kakao,
   Ipa_sad,
   Ipa_gif,
+  ToriFace,
 };

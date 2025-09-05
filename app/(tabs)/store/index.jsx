@@ -1,5 +1,5 @@
 // app/(tabs)/store/index.jsx
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -9,21 +9,36 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  StyleSheet, // ✅ 추가
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch } from "@services/authService";
-import { Images } from "../../../constants/Images";
+import { Images } from "@constants/Images";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SERVER_URL } from "@env";
+
+function toUri(path) {
+  if (!path) return null;
+  return path.startsWith("http")
+    ? path
+    : `${SERVER_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+}
 
 export default function StoreListPage() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([]); // 원본
+  const [query, setQuery] = useState(""); // 검색어
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const NUM_COLUMNS = 2;
+  const TABBAR_H = 70; // 전역 탭바 높이에 맞게 조정
+
+  // 서버에서 상품 불러오기
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,70 +70,75 @@ export default function StoreListPage() {
     setRefreshing(false);
   }, [loadProducts]);
 
-  const buy = useCallback(
-    async (product) => {
-      try {
-        const res = await apiFetch(`/shop/orders`, {
-          method: "POST",
-          body: JSON.stringify({ productId: product.productId, qty: 1 }),
-        });
-        const json = await res.json().catch(() => null);
-        if (!res.ok)
-          throw new Error(json?.message || `구매 실패(${res.status})`);
+  // 🔎 검색: 실시간 필터
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((it) => {
+      const name = (it?.name ?? "").toLowerCase();
+      const desc = (it?.description ?? "").toLowerCase();
+      return name.includes(q) || desc.includes(q);
+    });
+  }, [items, query]);
 
-        const data = json?.data ?? json;
-        Alert.alert(
-          "구매 완료",
-          `${product.name} x1\n사용 포인트: ${
-            data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-          }점`,
-          [
-            { text: "주문내역 보기", onPress: () => router.push("/orders") },
-            { text: "확인" },
-          ]
-        );
-      } catch (e) {
-        Alert.alert("구매 실패", e?.message ?? "구매 중 문제가 발생했습니다.");
-      }
-    },
-    [router]
-  );
+  const handleSearchSubmit = () => {
+    // 실시간 필터라 submit 시 별도 요청은 없음.
+  };
+
+  const clearQuery = () => setQuery("");
 
   const goDetail = (id) => {
     router.push({ pathname: "/pages/detail", params: { id: String(id) } });
   };
 
-  const renderItem = ({ item }) => (
-    <Pressable
-      onPress={() => goDetail(item.productId)}
-      android_ripple={{ color: "#eee" }}
-      className="bg-white rounded-2xl p-4"
-      style={styles.card}
-    >
-      {!!item.img && <Image source={{ uri: item.img }} style={styles.image} />}
+  const renderItem = ({ item, index }) => {
+    const isRight = index % NUM_COLUMNS === 1;
+    const imgUri = toUri(item?.img);
 
-      <Text className="text-green text-[16px] font-sf-b mt-1" numberOfLines={1}>
-        {item.name}
-      </Text>
+    return (
+      <Pressable
+        onPress={() => goDetail(item.productId)}
+        android_ripple={{ color: "#00000010" }}
+        className={`
+          w-[48%] ${isRight ? "mr-0" : "mr-[4%]"}
+          mb-3
+          relative pb-12
+          rounded-2xl overflow-hidden
+          border border-black/10
+          bg-white/90
+          p-3
+        `}
+      >
+        {!!imgUri && (
+          <Image
+            source={{ uri: imgUri }}
+            className="w-full h-[120px] rounded-2xl mb-2"
+          />
+        )}
 
-      {!!item.description && (
-        <Text
-          className="text-darkGray text-[13px] font-sf-md mt-1"
-          numberOfLines={2}
-        >
-          {item.description}
+        <Text className="text-[15px] text-gray-900 font-sf-b" numberOfLines={1}>
+          {item.name}
         </Text>
-      )}
 
-      {/* ✅ 가격: 카드 오른쪽 아래 고정 */}
-      <View style={styles.priceRight} className="flex-row items-center">
-        <Text className="text-black font-sf-b">
-          {(item.price ?? 0).toLocaleString()}
-        </Text>
-        <Images.Ice width={20} height={20} />
-      </View>
-    </Pressable>
-  );
+        {!!item.description && (
+          <Text
+            className="text-[12px] text-gray-500 font-sf-md mt-0.5"
+            numberOfLines={2}
+          >
+            {item.description}
+          </Text>
+        )}
+
+        {/* 가격 배지: 우측 하단 고정 */}
+        <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-2.5 py-1">
+          <Text className="text-green font-sf-b mr-1">
+            {(item.price ?? 0).toLocaleString()}
+          </Text>
+          <Images.Ice width={16} height={16} />
+        </View>
+      </Pressable>
+    );
+  };
 
   if (loading && items.length === 0) {
     return (
@@ -130,22 +150,59 @@ export default function StoreListPage() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       <BgGradient />
       <HeaderBar title="굿즈샵" />
 
+      {/* 🔎 검색창 */}
+      <View className="px-pageX mt-4">
+        <View className="flex-row items-center bg-white rounded-xl px-3 py-3 shadow-md shadow-black/5">
+          <Ionicons name="search-outline" size={20} color={"#10B981"} />
+          <View className="flex-1 ml-2 mr-2">
+            <View className="-mt-1" />
+            <View>
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="상품명을 검색하세요"
+                className="font-sf-md text-gray-800"
+                returnKeyType="search"
+                onSubmitEditing={handleSearchSubmit}
+              />
+            </View>
+          </View>
+          {!!query && (
+            <Pressable onPress={clearQuery} hitSlop={8}>
+              <Ionicons name="close-circle" size={20} color={"#94A3B8"} />
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      {/* 목록 */}
       <View className="flex-1 px-pageX pt-3">
+        <View className="flex-row justify-between items-center mb-2 px-1">
+          <Text className="text-gray-500 font-sf-md">
+            {query
+              ? `검색 결과 ${filtered.length}개`
+              : `전체 ${items.length}개`}
+          </Text>
+        </View>
+
         <FlatList
-          data={items}
+          data={filtered}
           keyExtractor={(it) => String(it.productId)}
           renderItem={renderItem}
-          numColumns={NUM_COLUMNS} // ✅ 2열
-          columnWrapperStyle={styles.column} // ✅ 행 간격/정렬
-          contentContainerStyle={styles.listContent} // ✅ 리스트 하단 여백
+          numColumns={NUM_COLUMNS}
+          key={`cols-${NUM_COLUMNS}`}
+          columnWrapperStyle={{ justifyContent: "flex-start" }}
+          contentContainerStyle={{
+            paddingBottom: TABBAR_H + insets.bottom + 12,
+          }}
           ListEmptyComponent={
             !loading ? (
               <Text className="text-center text-gray-500 mt-10">
-                상품이 없습니다.
+                {query ? "검색 결과가 없습니다." : "상품이 없습니다."}
               </Text>
             ) : null
           }
@@ -158,24 +215,3 @@ export default function StoreListPage() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    width: "48%",
-    marginBottom: 14,
-    marginRight: "4%",
-    position: "relative",
-    paddingBottom: 40, // ⬅️ 아래 고정 영역만큼 여백 확보
-  },
-  image: {
-    width: "100%",
-    height: 120,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  priceRight: {
-    position: "absolute",
-    right: 16, // ⬅️ 오른쪽 고정
-    bottom: 16, // ⬅️ 아래 고정
-  },
-});
