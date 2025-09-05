@@ -34,7 +34,7 @@ export default function QuizPage() {
     fetch("http://192.168.0.51:8080/quiz/today")
       .then((response) => response.json())
       .then((data) => {
-        console.log("질문", data);
+        //console.log("질문", data);
         setQuestion(data);
       })
       .catch((error) => console.error("Error fetching quiz:", error));

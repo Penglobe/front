@@ -1,10 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import BgGradient from "@components/BgGradient";
 import { useEffect, useRef, useState } from "react";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
+import SurveyResultButton from "@components/SurveyResultButton";
 
 export default function Survey() {
   const router = useRouter();
@@ -21,17 +22,79 @@ export default function Survey() {
     async function fetchQuestion() {
       try {
         const response = await fetch("http://192.168.0.51:8080/surveys/today");
-        const data = await response.json();
+        const result = await response.json();
+
+        // 서버 응답 구조에 맞춰서 접근
+        const data = result.data ?? result;
 
         setQuestions(data);
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
-      } finally {
-        setLoading(false);
+        alert("질문 불러오기 실패");
       }
     }
+
     fetchQuestion();
   }, []);
+
+  const resultHandler = async () => {
+    try {
+      //console.log("보낼 answer 객체:", answer);
+
+      // answer 객체 → DTO 배열 변환
+      const answerArray = Object.entries(answer).map(
+        ([itemId, selectValue]) => ({
+          itemId: Number(itemId),
+          selectValue,
+        })
+      );
+
+      const payload = {
+        userId: 1, //***************************************************************** */
+        answer: answerArray,
+      };
+
+      //console.log("payload: ", payload);
+
+      const response = await fetch(
+        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+
+        console.error("서버 에러:", text);
+        alert("서버 요청 실패: " + response.status);
+        return;
+      }
+
+      const data = await response.json();
+      //console.log("서버 응답:", data);
+      //console.log("데이터 : ", data.data.top3);
+
+      // 결과 페이지로 이동
+
+      const resultDataStr = encodeURIComponent(JSON.stringify(data.data));
+
+      router.push({
+        pathname: "/pages/survey/result",
+        params: {
+          userId: payload.userId,
+          resultData: resultDataStr, // 문자열로 전달
+        },
+      });
+    } catch (error) {
+      console.error("네트워크 에러:", error);
+      alert("서버 요청 실패");
+    }
+  };
 
   /*제출하기*/
   const submitHandler = async () => {
@@ -56,7 +119,7 @@ export default function Survey() {
     }
 
     try {
-      console.log("보낼 answer 객체:", answer);
+      //console.log("보낼 answer 객체:", answer);
 
       // answer 객체 → DTO 배열 변환
       const answerArray = Object.entries(answer).map(
@@ -70,8 +133,6 @@ export default function Survey() {
         userId: 1, //***************************************************************** */
         answer: answerArray,
       };
-
-      console.log("payload: ", payload);
 
       const response = await fetch(
         `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
@@ -93,8 +154,8 @@ export default function Survey() {
       }
 
       const data = await response.json();
-      console.log("서버 응답:", data);
-      console.log("데이터 : ", data.data.top3);
+      //console.log("서버 응답:", data);
+      //console.log("데이터 : ", data.data.top3);
 
       // 결과 페이지로 이동
 
@@ -122,70 +183,78 @@ export default function Survey() {
         {/* 헤더 */}
         <HeaderBar title="설문조사" />
 
-        {/* 타이틀 */}
-        <View className="bg-secondary rounded-xl px-4 py-2 self-start mt-2 left-5 flex-row items-center gap-1">
-          <Images.IpaFace width={60} height={60} />
-          <Text className="text-black text-base font-bold">
-            <Text className="text-red-500 text-xl mb-1">
-              ※ 하루에 한 번만 제출 가능합니다. {"\n"}
-            </Text>
-            오늘 하루 실천 기록은
-            <Text className="text-red-500"> 오후에 작성</Text>
-            하는 것이 {"\n"}가장 정확합니다. {"\n"}
-          </Text>
-        </View>
-
-        {/* 질문 카드 */}
-        {questions.map((q) => {
-          const isUnanswered = firstUnanswered === q.itemId;
-
-          return (
-            <View
-              key={q.itemId}
-              onLayout={(e) => {
-                itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
-              }}
-              className={`w-11/12 p-5 rounded-lg shadow-md mb-5 self-center bg-white ${
-                isUnanswered ? "border-2 border-red-500" : ""
-              }`}
-            >
-              {/*질문 출력*/}
-              <Text className="text-black text-lg font-sf-b mb-3">
-                Q. {q.code}
+        <View className="px-pageX">
+          {/* 타이틀 */}
+          <View className="bg-secondary rounded-xl px-pageX py-2 self-start mt-2 flex-row items-center gap-1">
+            <Images.IpaFace width={50} height={50} />
+            <Text className="text-black text-sm font-bold">
+              <Text className="text-red-500 text-base mb-3">
+                ※ 여러 번 응답할 수 있지만, {"\n"}
+                최초 응답의 탄소 절감량만 기록됩니다. {"\n"}
               </Text>
+              <Text>
+                응답은 오후에 작성하는 것이 {"\n"}가장 정확합니다. {"\n"}
+              </Text>
+            </Text>
 
-              {/*보기 출력*/}
-              {q.options.map((opt) => (
-                <TouchableOpacity
-                  key={opt.value}
-                  className="flex-row items-center mb-3"
-                  onPress={() => {
-                    setAnswer((prev) => ({ ...prev, [q.itemId]: opt.value }));
-                    if (isUnanswered) {
-                      setFirstUnanswered(null);
-                    }
-                  }}
-                >
-                  {/*커스텀 라디오 버튼 + 항목*/}
-                  <View className="h-5 w-5 border-2 border-black rounded-full mr-3 items-center justify-center">
-                    {answer[q.itemId] === opt.value && (
-                      <View className="h-3 w-3 bg-black rounded-full" />
-                    )}
-                  </View>
-                  <Text className="text-black text-base font-sf-md">
-                    {opt.value}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            {/*결과보기*/}
+            <View className="flex-row justify-end mt-10">
+              <SurveyResultButton label="결과보기" onPress={resultHandler} />
             </View>
-          );
-        })}
+          </View>
 
-        <MainButton
-          label="제출하기"
-          onPress={submitHandler}
-          className="mt-5 mb-10"
-        />
+          {/* 질문 카드 */}
+          {questions.map((q) => {
+            const isUnanswered = firstUnanswered === q.itemId;
+
+            return (
+              <View
+                key={q.itemId}
+                onLayout={(e) => {
+                  itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
+                }}
+                className={`p-5 rounded-lg shadow-md mb-5 bg-white px-pageX ${
+                  isUnanswered ? "border-2 border-red-500" : ""
+                }`}
+              >
+                {/*질문 출력*/}
+                <Text className="text-black text-lg font-sf-b mb-3">
+                  Q. {q.code}
+                </Text>
+
+                {/*보기 출력*/}
+                {q.options.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.value}
+                    className="flex-row items-center mb-3"
+                    onPress={() => {
+                      setAnswer((prev) => ({ ...prev, [q.itemId]: opt.value }));
+                      if (isUnanswered) {
+                        setFirstUnanswered(null);
+                      }
+                    }}
+                  >
+                    {/*커스텀 라디오 버튼 + 항목*/}
+                    <View className="h-5 w-5 border-2 border-black rounded-full mr-3 items-center justify-center">
+                      {answer[q.itemId] === opt.value && (
+                        <View className="h-3 w-3 bg-black rounded-full" />
+                      )}
+                    </View>
+                    <Text className="text-black text-base font-sf-md">
+                      {opt.value}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            );
+          })}
+
+          <MainButton
+            label="제출하기"
+            onPress={submitHandler}
+            className="mt-5 mb-5"
+          />
+        </View>
       </View>
     </ScrollView>
   );

@@ -12,6 +12,7 @@ import IpaFace from "@assets/images/character/ipa-face.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Logo from "@assets/images/logo/logo.svg";
 import Ipa_sad from "@assets/images/character/ipa-sad.svg";
+import ToriFace from "@assets/images/character/tori-face.svg";
 import Ipa_gif from "@assets/images/character/ipa.gif";
 
 // 아이콘
@@ -81,5 +82,6 @@ export const Images = {
   Logo,
   Kakao,
   Ipa_sad,
+  ToriFace,
   Ipa_gif,
 };
