@@ -32,10 +32,18 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
   private var lastLocation: CLLocation?
 
   private let userLayerID  = "UserLayer"
-  private let userStyleID  = "PerLevelStyle"  // 샘플처럼 스타일 ID 고정
+  private let userStyleID  = "PerLevelStyle"  // 스타일 ID
   private let userPoiRank: Int = 100
   private var userPoi: Poi?
-  private var userStyleAdded = false   // 스타일 중복 추가 방지
+  private var userStyleAdded = false
+  
+  private var layerSetupInProgress = false
+  private var layerSetupAttempts = 0
+  private let layerSetupMaxAttempts = 50
+
+  // 레이어 준비/재시도 상태
+  private var userLayerReady = false
+  private var userLayerRetrying = false
 
   // 카메라 대기
   private var pendingCamera: (lat: Double, lon: Double, zoom: Int)?
@@ -140,13 +148,14 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
       if let map = self.mapView {
         map.viewRect = CGRect(origin: .zero, size: self.lastSize)
       }
-      self.ensureUserLayerAndStyle() // ✅ 스타일/레이어 준비
+      self.ensureUserLayerAndStyle()
       self.applyCameraIfReady()
       self.onMapReady?([:])
       NSLog("✅ onMapReady fired")
 
-      // 위치 권한 요청 & 업데이트 시작
-      self.requestLocationIfNeeded()
+      // 🔁 레이어/스타일 준비를 성공할 때까지 재시도 → 준비되면 자동으로 requestLocationIfNeeded() 호출
+      self.ensureUserLayerAndStyleWithRetry()
+
     }
   }
 
@@ -167,11 +176,66 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
 
     let target = MapPoint(longitude: lon, latitude: lat)
     let cu = CameraUpdate.make(target: target, zoomLevel: zoom, mapView: map)
-    map.moveCamera(cu)   // duration 없는 버전 사용 (SDK 시그니처 맞춤)
+    map.moveCamera(cu)
     NSLog("🎯 moveCamera -> lat=\(lat), lon=\(lon), zoom=\(zoom)")
 
     onRegionChange?(["latitude": lat, "longitude": lon, "zoomLevel": zoom])
   }
+  
+  private func ensureUserLayerAndStyleWithRetry() {
+    guard !layerSetupInProgress else { return }
+    layerSetupInProgress = true
+    layerSetupAttempts = 0
+    attemptLayerSetup()
+  }
+
+  private func attemptLayerSetup() {
+    guard let map = mapView else { return }
+    let manager = map.getLabelManager()
+
+    // 1) 레이어 시도
+    if manager.getLabelLayer(layerID: userLayerID) == nil {
+      let opt = LabelLayerOptions(
+        layerID: userLayerID,
+        competitionType: .none,
+        competitionUnit: .poi,
+        orderType: .rank,
+        zOrder: 999
+      )
+      _ = manager.addLabelLayer(option: opt)
+      NSLog("📚 (retry) trying to add LabelLayer: \(userLayerID)")
+    }
+
+    // 2) 준비 여부 체크
+    userLayerReady = (manager.getLabelLayer(layerID: userLayerID) != nil)
+
+    // 3) 스타일 시도
+    if userLayerReady && !userStyleAdded {
+      createPoiStyle(styleID: userStyleID, iconName: "marker_normal")
+      userStyleAdded = true
+      NSLog("🎨 (retry) PoiStyle added: \(userStyleID)")
+    }
+
+    // 4) 완료 처리
+    if userLayerReady && userStyleAdded {
+      layerSetupInProgress = false
+      NSLog("✅ layer/style ready -> starting location updates")
+      requestLocationIfNeeded()
+      return
+    }
+
+    // 5) 재시도 스케줄
+    layerSetupAttempts += 1
+    if layerSetupAttempts < layerSetupMaxAttempts {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+        self?.attemptLayerSetup()
+      }
+    } else {
+      layerSetupInProgress = false
+      NSLog("❌ layer/style not ready after retries; giving up")
+    }
+  }
+
 
   // MARK: POI 스타일 & 레이어
   private func ensureUserLayerAndStyle() {
@@ -193,17 +257,53 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
       NSLog("📚 LabelLayer exists: \(userLayerID)")
     }
 
-    // 2) 샘플처럼 PerLevel 스타일 등록 (아이콘 + 텍스트 스타일)
+    // ✅ 레이어 준비 표시
+    userLayerReady = (manager.getLabelLayer(layerID: userLayerID) != nil)
+
+    // 2) 스타일(PerLevel) 등록
     if !userStyleAdded {
-      createPoiStyle(styleID: userStyleID, iconName: "marker_normal") // ← PNG 자원명(확장자 없이)
+      createPoiStyle(styleID: userStyleID, iconName: "marker_normal")
       userStyleAdded = true
       NSLog("🎨 PoiStyle added: \(userStyleID)")
     } else {
       NSLog("🎨 PoiStyle already added: \(userStyleID)")
     }
   }
+  
+  private func forceRGBAImage(_ image: UIImage) -> UIImage? {
+    // 메인 스레드에서 보장
+    if !Thread.isMainThread {
+      return DispatchQueue.main.sync { self.forceRGBAImage(image) }
+    }
+    let width = Int(image.size.width * image.scale)
+    let height = Int(image.size.height * image.scale)
+    let bitsPerComponent = 8
+    let bytesPerRow = width * 4
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    let bitmapInfo = CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
 
-  /// 이름으로 에셋을 불러와서 확실한 PNG 비트맵 UIImage로 변환 (PDF/SVG 벡터 방지)
+    guard let ctx = CGContext(data: nil, width: width, height: height,
+                              bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow,
+                              space: colorSpace, bitmapInfo: bitmapInfo) else { return nil }
+
+    if let cg = image.cgImage {
+      ctx.interpolationQuality = .high
+      ctx.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+    } else {
+      // cgImage가 없으면 수동 드로우
+      UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+      image.draw(in: CGRect(origin: .zero, size: image.size))
+      let raster = UIGraphicsGetImageFromCurrentImageContext()
+      UIGraphicsEndImageContext()
+      return raster
+    }
+
+    guard let newCG = ctx.makeImage() else { return nil }
+    return UIImage(cgImage: newCG, scale: image.scale, orientation: image.imageOrientation)
+  }
+
+
+  /// 이름으로 에셋을 불러와 PNG 비트맵으로 보장 (PDF/SVG 벡터 방지)
   private func loadBitmapPNG(named: String) -> UIImage? {
     let base = UIImage(named: named) ?? UIImage(named: "\(named).png")
     guard let img = base else {
@@ -211,22 +311,15 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
       return nil
     }
 
-    // 벡터인 경우 수동 래스터라이즈
-    if img.cgImage == nil {
-      let size = img.size
-      UIGraphicsBeginImageContextWithOptions(size, false, 0)
-      img.draw(in: CGRect(origin: .zero, size: size))
-      let raster = UIGraphicsGetImageFromCurrentImageContext()
-      UIGraphicsEndImageContext()
-      if let ras = raster {
-        NSLog("🧱 loadBitmapPNG: rasterized vector -> \(named) size=\(ras.size)")
-      }
-      return raster
+    // ✅ 1) RGBA8로 강제 변환 (픽셀 포맷 문제 차단)
+    if let rgba = forceRGBAImage(img) {
+      NSLog("🧱 loadBitmapPNG: RGBA8 enforced -> \(named) size=\(rgba.size)")
+      return rgba
     }
 
-    // PNG 데이터로 재생성하여 비트맵 보장
+    // 2) 최후의 수단: pngData 재생성
     if let data = img.pngData(), let raster = UIImage(data: data) {
-      NSLog("🧱 loadBitmapPNG: ensured PNG bitmap -> \(named) size=\(raster.size)")
+      NSLog("🧱 loadBitmapPNG: ensured PNG bitmap (fallback) -> \(named) size=\(raster.size)")
       return raster
     }
 
@@ -234,7 +327,7 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
     return img
   }
 
-  /// 샘플과 동일 컨셉: 아이콘 + 텍스트 라인들로 PoiStyle 등록
+  /// PerLevel PoiStyle 등록 (아이콘 + 텍스트 라인)
   private func createPoiStyle(styleID: String, iconName: String) {
     guard let map = mapView else { return }
     let manager = map.getLabelManager()
@@ -250,7 +343,7 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
     let symbol = iconImage ?? makeDotImage(diameter: 24, fill: .systemBlue, border: .white, borderWidth: 3)
     let iconStyle = PoiIconStyle(symbol: symbol, anchorPoint: CGPoint(x: 0.5, y: 1.0), badges: [])
 
-    // 2) 텍스트 스타일 -> PoiTextLineStyle 로 포장
+    // 2) 텍스트 라인 스타일
     let line1 = PoiTextLineStyle(
       textStyle: TextStyle(
         fontSize: 15,
@@ -277,13 +370,28 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
     NSLog("🎨 createPoiStyle: registered styleID=\(styleID)")
   }
 
-  // MARK: 사용자 현재 위치 POI 갱신
+  // MARK: 사용자 현재 위치 POI 갱신 (레이어 동적 생성 + 재시도)
   private func updateUserPoi(at coord: CLLocationCoordinate2D) {
     guard let map = mapView else { return }
     let manager = map.getLabelManager()
-    guard let layer = manager.getLabelLayer(layerID: userLayerID) else {
-      NSLog("⚠️ updateUserPoi: layer not found")
-      return
+
+    var layer = manager.getLabelLayer(layerID: userLayerID)
+    if layer == nil {
+      NSLog("⚠️ updateUserPoi: layer not found -> creating...")
+      ensureUserLayerAndStyle()
+      layer = manager.getLabelLayer(layerID: userLayerID)
+      if layer == nil {
+        if !userLayerRetrying {
+          userLayerRetrying = true
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.userLayerRetrying = false
+            if let self = self { self.updateUserPoi(at: coord) }
+          }
+        } else {
+          NSLog("❌ updateUserPoi: layer still not found after retry")
+        }
+        return
+      }
     }
 
     let pos = MapPoint(longitude: coord.longitude, latitude: coord.latitude)
@@ -294,7 +402,7 @@ final class RNKakaoMapView: UIView, MapControllerDelegate {
     } else {
       let opt = PoiOptions(styleID: userStyleID)
       opt.rank = userPoiRank
-      if let p = layer.addPoi(option: opt, at: pos) {
+      if let p = layer!.addPoi(option: opt, at: pos) {
         p.clickable = false
         p.show()
         userPoi = p
