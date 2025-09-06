@@ -45,10 +45,10 @@ export default function RootLayout() {
   }
 
   return (
-    // <AuthProvider>
+    <AuthProvider>
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <Stack screenOptions={{ headerShown: false }} />
       </View>
-    // {/* </AuthProvider> */}
+     </AuthProvider>
   );
 }
