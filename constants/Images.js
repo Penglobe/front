@@ -14,7 +14,6 @@ import Logo from "@assets/images/logo/logo.svg";
 import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 import ToriFace from "@assets/images/character/tori-face.svg";
 import Ipa_gif from "@assets/images/character/ipa.gif";
-import ToriFace from "@assets/images/character/tori-face.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
