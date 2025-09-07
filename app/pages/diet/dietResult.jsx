@@ -67,7 +67,7 @@ export default function DietResult() {
         co2Kg: Number(savedKg.toFixed(1)), // 소수 1자리 반올림
       };
 
-      const res = await fetch(`${process.env.SERVER_URL}/diet`, {
+      const res = await fetch(`${process.env.SERVER_URL}/diet/ingest/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
