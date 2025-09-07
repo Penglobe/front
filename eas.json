@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 16.18.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "SERVER_URL": "https://penglobe.shinhanacademy.co.kr"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "SERVER_URL": "https://penglobe.shinhanacademy.co.kr"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

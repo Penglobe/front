@@ -5,112 +5,99 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
-import { getAccessToken } from "@services/authService";
+import { getAccessToken, me } from "@services/authService";
 
-const MY_USER_NAME = "나의아이디"; // 백엔드 data.sql에 추가한 테스트 사용자 닉네임
-
-export default function WeeklyRanking() {
+export default function WeeklyRanking({ fetchRegionRankingData }) {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserNickname, setCurrentUserNickname] = useState(null);
 
-  // --- Start of re-added test logic ---
-  const updateRanks = useCallback((list) => {
-    const sortedList = [...list].sort((a, b) => b.score - a.score);
-    const rankedList = sortedList.map((item, index) => ({
-      ...item,
-      rank: index + 1,
-    }));
+  // --- Refactored Data Fetching Logic ---
+  const fetchRankingData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        console.warn("로그인 필요");
+        setLoading(false);
+        return;
+      }
 
-    const myRankInfo = rankedList.find(
-      (item) => item.nickname === MY_USER_NAME
-    );
+      const userInfo = await me();
+      if (userInfo && userInfo.nickname) {
+        setCurrentUserNickname(userInfo.nickname);
+      }
 
-    if (myRankInfo) {
-      setMyRank((prev) => ({
-        ...(prev || {}),
-        rank: myRankInfo.rank,
-        score: myRankInfo.score, // Update score here
-      }));
+      const response = await fetch("http://192.168.0.79:8080/rankings/weekly", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Weekly ranking 에러: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setRankingList(data.top10 || []);
+      setMyRank(data.myRank || null);
+
+      if (!data.myRank) {
+        Alert.alert(
+          "랭킹 참여 조건 미달",
+          "주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! \n이번 주에 출석을 완료하고 다음 주에 다시 도전해보세요!"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching weekly ranking:", error);
+      Alert.alert(
+        "랭킹 불러오기 오류",
+        "주간 랭킹을 불러오는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setRankingList(rankedList);
   }, []);
-
-  const increaseMyCarbon = () => {
-    console.log("Increasing my carbon for:", MY_USER_NAME);
-    const newList = rankingList.map((item) => {
-      console.log(
-        "Checking item:",
-        item.nickname,
-        "vs MY_USER_NAME:",
-        MY_USER_NAME
-      );
-      if (item.nickname === MY_USER_NAME) {
-        console.log("Found my user, increasing score.");
-        return { ...item, score: item.score + 600 };
-      }
-      return item;
-    });
-    updateRanks(newList);
-  };
-
-  const increaseOthersCarbon = () => {
-    console.log("Increasing others carbon, excluding:", MY_USER_NAME);
-    const newList = rankingList.map((item) => {
-      console.log(
-        "Checking item:",
-        item.nickname,
-        "vs MY_USER_NAME:",
-        MY_USER_NAME
-      );
-      if (item.nickname !== MY_USER_NAME) {
-        console.log("Found other user, increasing score.");
-        return { ...item, score: item.score + 100 };
-      }
-      return item;
-    });
-    updateRanks(newList);
-  };
-  // --- End of re-added test logic ---
 
   useEffect(() => {
-    const fetchWeeklyRanking = async () => {
-      try {
-        const token = await getAccessToken();
-        if (!token) {
-          console.warn("로그인 필요");
-          return;
+    fetchRankingData();
+  }, [fetchRankingData]);
+
+  // --- New API call for the test button ---
+  const handleAddDummyData = async () => {
+    try {
+      const token = await getAccessToken();
+      const response = await fetch(
+        "http://192.168.0.79:8080/users/me/add-dummy-data",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        const response = await fetch(
-          "http://192.168.0.79:8080/rankings/weekly",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok)
-          throw new Error(`Weekly ranking 에러: ${response.status}`);
-
-        const data = await response.json();
-        setRankingList(data.top10);
-        setMyRank(data.myRank);
-      } catch (error) {
-        console.error("Error fetching weekly ranking:", error);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to add dummy data");
       }
-    };
 
-    fetchWeeklyRanking();
-  }, []);
+      console.log("Dummy data added successfully. Refetching rankings...");
+      await fetchRankingData(); // Re-fetch data to show changes
+      if (fetchRegionRankingData) {
+        await fetchRegionRankingData(); // Re-fetch region data as well
+      }
+      Alert.alert("성공", "데이터가 추가되고 랭킹이 갱신되었습니다."); // Add a success alert
+    } catch (error) {
+      console.error("Error adding dummy data:", error);
+      Alert.alert("오류", "데이터 추가 중 오류가 발생했습니다.");
+    }
+  };
 
   if (loading) {
     return (
@@ -123,7 +110,7 @@ export default function WeeklyRanking() {
   }
 
   const myRankingFromTop10 = rankingList.find(
-    (item) => item.nickname === MY_USER_NAME
+    (item) => item.nickname === currentUserNickname
   );
 
   return (
@@ -154,7 +141,7 @@ export default function WeeklyRanking() {
       {/* 랭킹 리스트 (카드 형식) */}
       <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
         {rankingList.map((item) => {
-          const isCurrentUser = item.nickname === MY_USER_NAME;
+          const isCurrentUser = item.nickname === currentUserNickname;
           return (
             <RankingCard
               key={item.rank + item.nickname}
@@ -175,7 +162,7 @@ export default function WeeklyRanking() {
             <RankingCard
               item={{
                 rank: myRank.rank,
-                nickname: MY_USER_NAME, // 백엔드 응답에 닉네임이 없으므로 직접 설정
+                nickname: currentUserNickname,
                 score: myRank.score,
               }}
               isProminent={true}
@@ -187,17 +174,11 @@ export default function WeeklyRanking() {
       {/* 테스트 버튼 */}
       <View className="flex-row justify-around mt-4">
         <TouchableOpacity
-          onPress={increaseMyCarbon}
+          onPress={handleAddDummyData}
           className="bg-blue-500 p-3 rounded-lg"
         >
-          <Text className="text-white font-bold">나의 절감량 늘리기</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={increaseOthersCarbon}
-          className="bg-red-500 p-3 rounded-lg"
-        >
           <Text className="text-white font-bold">
-            다른 사용자 절감량 늘리기
+            랭킹 참여/점수 추가 (테스트)
           </Text>
         </TouchableOpacity>
       </View>
