@@ -12,6 +12,7 @@ import colors from "@constants/Colors.cjs";
 // ✅ SVG 캐릭터 import
 import Tori from "@assets/images/character/tori.svg";
 import Ipa from "@assets/images/character/ipa-face.svg";
+
 export default function BookmarkSetting() {
   const {
     lat,
@@ -22,13 +23,20 @@ export default function BookmarkSetting() {
     startLng,
     mode: rawMode,
   } = useLocalSearchParams();
+
   const mode = rawMode || "TRANSIT"; // ✅ 기본값 보장
   const router = useRouter();
 
-  const userId = 1;
+  const userId = 1; // TODO: 로그인 사용자 ID 연동
   const [label, setLabel] = useState(placeName || "");
 
+  // ✅ 북마크 저장
   const handleSave = async () => {
+    if (!label.trim()) {
+      Alert.alert("북마크 이름을 입력해주세요.");
+      return;
+    }
+
     try {
       await createBookmark(userId, {
         bookmarkLabel: label,
@@ -41,19 +49,19 @@ export default function BookmarkSetting() {
         {
           text: "확인",
           onPress: () =>
-            router.push({
+            router.replace({
               pathname: "/pages/transport/transportBookmark",
               params: {
                 startLat,
                 startLng,
-                mode: mode || "TRANSIT",
+                mode,
               },
             }),
         },
       ]);
     } catch (err) {
       console.error("북마크 등록 실패:", err);
-      Alert.alert("북마크 등록 실패");
+      Alert.alert("북마크 등록 실패", "잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -91,11 +99,15 @@ export default function BookmarkSetting() {
 
           {/* 지도 */}
           <View className="rounded-xl overflow-hidden mt-5">
-            <KakaoMapView endLat={lat} endLng={lng} height={220} />
+            <KakaoMapView
+              endLat={lat}
+              endLng={lng}
+              height={220}
+            />
           </View>
 
           {/* 주소 */}
-          <View className="flex-row items-center bg-gray-50 mt-5">
+          <View className="flex-row items-center bg-gray-50 mt-5 p-2 rounded-lg">
             <Ionicons
               name="location-outline"
               size={22}

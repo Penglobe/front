@@ -35,26 +35,22 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// TaskManager 정의
-TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
-  if (error) {
-    console.error("TaskManager error:", error);
-    return;
-  }
-  if (locations?.length > 0) {
-    console.log("Background location update:", locations[0].coords);
-  }
-});
+// TaskManager 정의 (중복 방지)
+if (!TaskManager.isTaskDefined(TASK_NAME)) {
+  TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
+    if (error) {
+      console.error("TaskManager error:", error);
+      return;
+    }
+    if (locations?.length > 0) {
+      console.log("Background location update:", locations[0].coords);
+    }
+  });
+}
 
 export default function TransportMap() {
-  const {
-    startLat,
-    startLng,
-    endLat,
-    endLng,
-    placeName,
-    mode: rawMode,
-  } = useLocalSearchParams();
+  const { startLat, startLng, endLat, endLng, placeName, mode: rawMode } =
+    useLocalSearchParams();
   const mode = rawMode || "TRANSIT";
   const router = useRouter();
 
@@ -62,7 +58,7 @@ export default function TransportMap() {
 
   const [transportId, setTransportId] = useState(null);
   const [distance, setDistance] = useState(0);
-  const [currentLat, setCurrentLat] = useState(null); // ✅ 현재 위치 상태
+  const [currentLat, setCurrentLat] = useState(null);
   const [currentLng, setCurrentLng] = useState(null);
 
   const distanceRef = useRef(0);
@@ -70,7 +66,6 @@ export default function TransportMap() {
   const ended = useRef(false);
   const startTime = useRef(Date.now());
 
-  // distance 최신값 ref에 저장
   useEffect(() => {
     distanceRef.current = distance;
   }, [distance]);
@@ -93,7 +88,9 @@ export default function TransportMap() {
 
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("위치 권한이 필요합니다.");
+          Alert.alert("위치 권한 필요", "서비스 이용을 위해 권한을 허용해주세요.", [
+            { text: "확인", onPress: () => router.back() },
+          ]);
           return;
         }
         if (Platform.OS === "ios") {
@@ -107,7 +104,6 @@ export default function TransportMap() {
         }
       } catch (err) {
         console.error("이동 시작 실패:", err);
-        Alert.alert("이동 시작 실패", "이동 수단 정보가 없습니다.");
       }
     })();
 
@@ -134,7 +130,6 @@ export default function TransportMap() {
           const { latitude, longitude } = loc.coords;
           const now = Date.now();
 
-          // ✅ 현재 위치 갱신
           setCurrentLat(latitude);
           setCurrentLng(longitude);
 
@@ -151,7 +146,8 @@ export default function TransportMap() {
             const warning = checkSpeed(speed);
             if (warning) {
               ended.current = true;
-              router.push({
+              await Location.stopLocationUpdatesAsync(TASK_NAME);
+              router.replace({
                 pathname: "/pages/transport/transportFail",
                 params: { placeName, reason: warning },
               });
@@ -162,7 +158,7 @@ export default function TransportMap() {
 
           prevCoord.current = { latitude, longitude, timestamp: now };
 
-          // 도착지 감지
+          // 도착 감지
           if (!ended.current && endLat && endLng) {
             const distToEnd = calculateDistance(
               latitude,
@@ -179,9 +175,7 @@ export default function TransportMap() {
       );
     })();
 
-    return () => {
-      subscription && subscription.remove();
-    };
+    return () => subscription && subscription.remove();
   }, []);
 
   // ✅ 이동 종료
@@ -193,7 +187,7 @@ export default function TransportMap() {
 
       const warning = checkSpeed(avgSpeed, true);
       if (warning) {
-        router.push({
+        router.replace({
           pathname: "/pages/transport/transportFail",
           params: { placeName, reason: warning },
         });
@@ -206,9 +200,12 @@ export default function TransportMap() {
         return;
       }
 
-      const result = await stopTransport(transportId, Math.round(usedDistance));
+      const result = await stopTransport(
+        transportId,
+        Math.round(usedDistance)
+      );
 
-      router.push({
+      router.replace({
         pathname: "/pages/transport/transportFinish",
         params: {
           placeName,
@@ -232,7 +229,7 @@ export default function TransportMap() {
       <HeaderBar title="이동 중" className="px-pageX" />
 
       {/* 지도 */}
-      <View className="h-[280px] m-[17px] rounded-2xl overflow-hidden shadow-lg bg-white">
+      <View className="mb-5 overflow-hidden">
         <KakaoMapView
           startLat={startLat}
           startLng={startLng}
@@ -240,7 +237,7 @@ export default function TransportMap() {
           endLng={endLng}
           currentLat={currentLat}
           currentLng={currentLng}
-          height={280}
+          height={400}
         />
       </View>
 
@@ -273,21 +270,6 @@ export default function TransportMap() {
             </Text>
           </View>
         </View>
-      </View>
-
-      {/* 테스트용 버튼 */}
-      <View className="px-pageX mt-4">
-        <MainButton
-          label="(테스트) 100m 추가"
-          onPress={() => {
-            setDistance((prev) => {
-              const newDistance = prev + 100;
-              console.log("가짜 이동 거리 +100m, 현재:", newDistance, "m");
-              return newDistance;
-            });
-          }}
-          className="bg-blue-500 active:bg-blue-700"
-        />
       </View>
 
       {/* 종료 버튼 */}

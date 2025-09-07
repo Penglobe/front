@@ -1,3 +1,4 @@
+// TransportStart.jsx
 import React, { useEffect, useState } from "react";
 import { View, ActivityIndicator, Text, Alert } from "react-native";
 import * as Location from "expo-location";
@@ -10,19 +11,24 @@ import KakaoMapView from "@components/KakaoMapView";
 
 export default function TransportStart() {
   const [location, setLocation] = useState(null);
-  const [mode, setMode] = useState("TRANSIT"); // ✅ 기본값: 대중교통
+  const [mode, setMode] = useState("TRANSIT"); // 기본값: 대중교통
   const router = useRouter();
 
   // ✅ 권한 요청 & 현재 위치 가져오기
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("위치 권한이 필요합니다.");
-        return;
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("위치 권한이 필요합니다.");
+          return;
+        }
+        let loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc.coords);
+      } catch (err) {
+        console.error("위치 가져오기 실패:", err);
+        Alert.alert("현재 위치를 가져올 수 없습니다.");
       }
-      let loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
     })();
   }, []);
 
@@ -30,6 +36,7 @@ export default function TransportStart() {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
+        <Text className="mt-3 text-gray-600">현재 위치를 불러오는 중...</Text>
       </View>
     );
   }
@@ -39,16 +46,19 @@ export default function TransportStart() {
       <BgGradient />
       <HeaderBar title="환경 걸음" className="px-pageX" />
 
-      {/* ✅ 공통 카카오맵 */}
-      <View className="h-[250px] m-[17px] rounded-xl overflow-hidden">
+      {/* ✅ KakaoMapView에 key 추가 */}
+      <View className="mb-5 overflow-hidden">
         <KakaoMapView
+          key={`${location.latitude}-${location.longitude}`} // ⭐️ 위치 바뀔 때마다 강제 리렌더
           startLat={location.latitude}
           startLng={location.longitude}
-          height={250}
+          currentLat={location.latitude}
+          currentLng={location.longitude}
+          height={280}
         />
       </View>
 
-      {/* ✅ 타이틀 */}
+      {/* 타이틀 */}
       <View className="px-pageX mb-4">
         <Text
           className="text-xl text-[#318643]"
@@ -58,7 +68,7 @@ export default function TransportStart() {
         </Text>
       </View>
 
-      {/* ✅ 이동수단 선택 */}
+      {/* 이동수단 선택 */}
       <View className="px-pageX flex-row flex-wrap justify-between">
         <View className="w-[48%]">
           <TransportButton
@@ -87,10 +97,10 @@ export default function TransportStart() {
         <View className="w-[48%]" />
       </View>
 
-      {/* ✅ 다음 버튼 */}
+      {/* 다음 버튼 */}
       <View className="px-pageX">
         <MainButton
-          className="m-16"
+          className="mt-10"
           label="다음"
           onPress={() =>
             router.push({
