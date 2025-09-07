@@ -20,6 +20,11 @@ export default function BookmarkEdit() {
   const [label, setLabel] = useState(placeName || "");
 
   const handleSave = async () => {
+    if (!label.trim()) {
+      Alert.alert("북마크 이름을 입력해주세요.");
+      return;
+    }
+
     try {
       await updateBookmark(bookmarkId, {
         bookmarkLabel: label,
@@ -31,12 +36,13 @@ export default function BookmarkEdit() {
       Alert.alert("북마크 수정 완료", "", [
         {
           text: "확인",
-          onPress: () => router.back(), // ✅ 수정 후 관리 페이지로 돌아감
+          onPress: () =>
+            router.replace("/pages/transport/bookmarkManage"), // ✅ 확실히 관리 페이지로 복귀
         },
       ]);
     } catch (err) {
       console.error("북마크 수정 실패:", err);
-      Alert.alert("북마크 수정 실패");
+      Alert.alert("북마크 수정 실패", "잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -46,7 +52,7 @@ export default function BookmarkEdit() {
       <HeaderBar title="북마크 수정" />
 
       <View className="px-pageX mt-6">
-        {/* ✅ 캐릭터 + 안내 텍스트 */}
+        {/* 안내 텍스트 */}
         <View className="flex-row items-center px-pageX mb-5">
           <Ipa width={40} height={40} style={{ marginRight: 8 }} />
           <Text className="text-gray-700 font-sf-b text-2xl">
@@ -55,7 +61,7 @@ export default function BookmarkEdit() {
         </View>
 
         <View className="bg-white rounded-2xl shadow-md px-5 py-6">
-          {/* Input + 수정 아이콘 */}
+          {/* Input */}
           <View className="flex-row items-center bg-white rounded-xl px-3 py-3 border border-gray-200">
             <TextInput
               value={label}
@@ -74,11 +80,11 @@ export default function BookmarkEdit() {
 
           {/* 지도 */}
           <View className="rounded-xl overflow-hidden mt-5">
-            <KakaoMapView currentLat={lat} currentLng={lng} height={220} />
+            <KakaoMapView endLat={lat} endLng={lng} height={220} />
           </View>
 
           {/* 주소 */}
-          <View className="flex-row items-center bg-gray-50 mt-5">
+          <View className="flex-row items-center bg-gray-50 mt-5 p-2 rounded-lg">
             <Ionicons
               name="location-outline"
               size={22}
@@ -89,13 +95,13 @@ export default function BookmarkEdit() {
           </View>
         </View>
 
-        {/* ✅ 캐릭터 영역 */}
+        {/* 캐릭터 */}
         <View className="items-end m-1 pr-pageX">
           <Tori width={110} height={200} />
         </View>
 
         {/* 버튼 */}
-        <View className="px-pageX mt-auto mb-10">
+        <View className="px-pageX mt-auto mb-15">
           <MainButton label="수정하기" onPress={handleSave} />
         </View>
       </View>
