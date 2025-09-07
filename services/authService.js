@@ -193,3 +193,37 @@ export async function signupLocal(payload) {
     data: json?.data ?? null,
   };
 }
+
+// 카카오 로그인/회원가입
+export async function loginWithKakaoOnServer(me) {
+  // RN 네이티브 모듈에서 받은 카카오 accessToken 사용
+  const payload = { accessToken: me?.accessToken };
+
+  const res = await fetch(`${BASE_URL}/auth/kakao`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json?.success === false) {
+    throw new Error(json?.message || "카카오 서버 로그인 실패");
+  }
+
+  const data = json?.data ?? json;
+
+  // 서버가 발급한 JWT 토큰 추출
+  const accessToken =
+    data?.accessToken || data?.token || data?.jwt || data?.access_token;
+  const refreshToken = data?.refreshToken || data?.refresh_token || null;
+
+  if (accessToken) {
+    await setTokens({ accessToken, refreshToken });
+  }
+
+  // 서버가 내려주는 user 객체 반환
+  return data?.user ?? null;
+}
