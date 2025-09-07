@@ -32,7 +32,7 @@ class FoodLensModule: NSObject {
     let s = FoodLensCoreService(type: .foodlens)  // 필요하면 .sandbox/.staging
     s.setLanguage(.ko)
     s.setImageResizingType(.normal)
-    s.setNutritionRetrievalOption(.no)
+    s.setNutritionRetrievalOption(.all)
     do { try configureFoodLens(s) }                // ← 여기서 토큰 주입
     catch { NSLog("[FoodLens] configure error: \(error.localizedDescription)") }
     return s
