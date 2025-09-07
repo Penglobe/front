@@ -11,16 +11,13 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "SERVER_URL": "https://45c27a11b237.ngrok-free.app",
-        "KAKAO_API_KEY": "1e474aca0d447911cc5ac4ce631864c1"
+        "SERVER_URL": "https://penglobe.shinhanacademy.co.kr"
       }
-
     },
     "production": {
       "autoIncrement": true,
-       "env": {
-        "SERVER_URL": "https://45c27a11b237.ngrok-free.app",
-        "KAKAO_API_KEY": "1e474aca0d447911cc5ac4ce631864c1"
+      "env": {
+        "SERVER_URL": "https://penglobe.shinhanacademy.co.kr"
       }
     }
   },
