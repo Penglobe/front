@@ -1,6 +1,5 @@
 // 외부 JSON -> 최소 페이로드
 
-// 한 음식 안에서 "채워진 값"이 많은 걸 우선
 function pickBestCandidate(candidates = []) {
   const score = (c) => {
     const v = (x) => (x != null && x !== -1 ? 1 : 0);
@@ -16,11 +15,8 @@ function pickBestCandidate(candidates = []) {
   return [...candidates].sort((a, b) => score(b) - score(a))[0] ?? null;
 }
 
-// -1 → null
-// -1은 FoodLens가 "모름"으로 표시하는 값
 const nz = (x) => (x === -1 ? null : x);
 
-// 같은 음식 합치기 : name+brand+unit 기준으로 totalSize 합산
 function mergeSameItems(items) {
   const keyOf = (it) =>
     [it.name ?? "", it.brand ?? "", it.amount.unit ?? ""].join("|");
@@ -38,8 +34,11 @@ function mergeSameItems(items) {
   return [...map.values()];
 }
 
-// 외부(AI) JSON -> 백엔드에 보낼 최소 페이로드
-export function toCarbonRequestPayload(aiJson, opts = { merge: true }) {
+// 최소 페이로드 생성
+export function toCarbonRequestPayload(
+  aiJson,
+  opts = { merge: true, userId: null }
+) {
   const items = (aiJson?.foods || []).map((f) => {
     const c = pickBestCandidate(f.candidates || []) || {};
     const unit = c.unit ?? "g";
@@ -54,10 +53,9 @@ export function toCarbonRequestPayload(aiJson, opts = { merge: true }) {
       name: c.foodName ?? f.name ?? null,
       id: c.id ?? null,
       brand: c.manufacturer ?? null,
-      serving: { size: servingSize, unit }, // 1회 제공량
-      amount: { multiplier, totalSize, unit }, // 총량, 배수
+      serving: { size: servingSize, unit },
+      amount: { multiplier, totalSize, unit },
       nutrition: {
-        // 칼로리, 탄, 단, 지
         energyKcal: nz(c.energy),
         carbG: nz(c.carbohydrate),
         proteinG: nz(c.protein),
@@ -66,8 +64,6 @@ export function toCarbonRequestPayload(aiJson, opts = { merge: true }) {
     };
   });
 
-  // 이름이 없는 음식, 양이 없는 음식은 필터링
-  // 총량이 비어 있으면 servingSize * multiplier로 채움
   const cleaned = items
     .filter(
       (x) => x.name && (x.amount.totalSize != null || x.serving.size != null)
@@ -82,8 +78,7 @@ export function toCarbonRequestPayload(aiJson, opts = { merge: true }) {
   const finalItems = opts.merge ? mergeSameItems(cleaned) : cleaned;
 
   return {
-    timestamp: Date.now(),
-    source: "FoodLens",
+    userId: opts.userId,
     items: finalItems,
   };
 }

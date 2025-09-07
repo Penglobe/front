@@ -1,6 +1,6 @@
 // (tabs)/shop/index.jsx
 import React, { useRef, useState } from "react";
-import { toCarbonRequestPayload } from "@utils/transformFoodlens";
+import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/carbonApi";
 import {
   View,
@@ -175,15 +175,19 @@ export default function ShopScreen() {
       setLastError(null);
 
       // 1) FoodLens API 호출 -> 음식 json 받기 
-      const userId = "1";
-      const jsonStr = await FoodLensModule.predictBase64(photo.base64, userId);
-      const result = JSON.parse(jsonStr || "{}");
+      const result = await FoodLensModule.predictBase64(photo.base64);
+      console.log(result); // OK
 
       setRaw(result);
       setFoods(extractFoods(result));
 
       // 2) json -> 백엔드 전송용 최소 페이로드 변환
-      const payload = toCarbonRequestPayload(result, { merge: true });
+        const userId = Number(globalThis?.currentUser?.id ?? 5); 
+        const payload = {
+        ...toCarbonRequestPayload(result, { merge: true }),
+        userId, 
+        };
+        console.log("[carbon] payload =", payload);
 
       // 3) 탄소배출량 계산 API 호출 
       const carbon = await requestCarbon(payload);
