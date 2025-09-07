@@ -57,17 +57,9 @@
       [
         "expo-build-properties",
         {
-          "ios": {
-            "deploymentTarget": "15.1"
-          }
+          "ios": { "deploymentTarget": "15.1" }
         }
       ]
-    ],
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "0972239a-6c5c-41b4-9162-e73f1e2382aa"
-      }
-    }
+    ]
   }
 }

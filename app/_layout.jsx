@@ -49,6 +49,6 @@ export default function RootLayout() {
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <Stack screenOptions={{ headerShown: false }} />
       </View>
-    </AuthProvider>
+     </AuthProvider>
   );
 }

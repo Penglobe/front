@@ -103,6 +103,7 @@ export default function TabBar({ state, descriptors, navigation }) {
         accessibilityRole="tab"
         accessibilityLabel="계산기"
       >
+
         <Animated.View
           pointerEvents="none"
           style={{

@@ -84,4 +84,5 @@ export const Images = {
   Ipa_sad,
   ToriFace,
   Ipa_gif,
+  ToriFace,
 };

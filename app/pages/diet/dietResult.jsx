@@ -120,7 +120,7 @@ export default function DietResult() {
           <Text className="font-sf-md text-[16px]">보통 한 끼 식사에서 약 12kg CO2가 배출돼요!</Text>
         </View>
 
-        <MainButton className="mt-16" label="포인트 받기" onPress={() => router.push("/home")}/>
+        <MainButton className="mt-16" label="포인트 받기" onPress={() => router.push("/pages/diet/Test")}/>
 </View>
         </ScrollView>
         </View>
