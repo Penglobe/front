@@ -4,37 +4,16 @@ import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from "react-native";
+import { View, Text, ScrollView, StyleSheet, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { ResultStore } from "@utils/storage";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-/* FoodLens 원본에서 간단 후보 리스트 뽑기 (기존 유지) */
-function extractFoods(result) {
-  const candidates = result?.foods || result?.items || result?.candidates || result?.results || [];
-  return Array.isArray(candidates)
-    ? candidates.map((it, idx) => ({
-        id: it.id ?? idx,
-        name: it.name ?? it.title ?? it.displayName ?? "이름 없음",
-        amount: it.amount ?? it.weight ?? it.gram ?? it.size ?? null,
-        probability: it.probability ?? it.score ?? null,
-      }))
-    : [];
-}
-
-/* 날짜 표기 유틸: 문자열/epoch 둘 다 수용 */
-function formatDate(raw) {
-  if (!raw) return "";
+// 날짜
+function formatDate(dateObj) {
   try {
-    // "2024-04-25 16:24:24" 같은 문자열이면 그대로 Date로 파싱 시도
-    const d = typeof raw === "string" && raw.includes("-")
-      ? new Date(raw.replace(" ", "T"))
-      : new Date(
-          // epoch sec/ms 구분
-          typeof raw === "number" && raw < 2e10 ? raw * 1000 : raw
-        );
-    if (Number.isNaN(d.getTime())) return "";
+    const d = dateObj instanceof Date ? dateObj : new Date();
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
@@ -44,33 +23,73 @@ function formatDate(raw) {
   }
 }
 
-/* 숫자 포맷 유틸 */
 const fmt = (n, digits = 1) => (n == null ? "-" : Number(n).toFixed(digits));
 
 export default function DietResult() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  // 원본(FoodLens) + 사진
-  const result = ResultStore.data;
+  // 사진
   const photoUri = ResultStore.photoUri;
-  const foods = extractFoods(result);
+  const result = ResultStore.data;
 
-  // 탄소 계산 결과(백엔드 응답)
-  const carbon = ResultStore.carbon; // { totalCo2eq, items: [{ name, co2eq }] }
-  // g → kg 변환
-  const totalKg = carbon?.totalCo2eq != null ? carbon.totalCo2eq / 1000 : null;
+  // 탄소 계산 결과
+  const rawCarbon = ResultStore.carbon;
+  const carbon = rawCarbon?.data ?? rawCarbon; 
+  const totalKg = typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
 
-  // 비교용(임시): "보통 한 끼 12 kg" 기준 (실제 서비스 값으로 교체 권장)
+  // 한 끼 식사 평균 배출량 (임시)
   const typicalMealKg = 12;
-  const savedKg =
-    totalKg != null ? Math.max(0, typicalMealKg - totalKg) : null;
+  const savedKg = totalKg != null ? Math.max(0, typicalMealKg - totalKg) : null;
 
-  const dateStr =
-    formatDate(result?.date) || formatDate(ResultStore?.carbonPayload?.timestamp) || ""; // 둘 중 있는 값 사용
+  // 날짜 문자열
+  const dateStr = formatDate(new Date());
 
-  const [showRaw, setShowRaw] = React.useState(false);
-  const [showCarbonRaw, setShowCarbonRaw] = React.useState(false);
+  // 저장 관련 상태/설정
+  const [saving, setSaving] = React.useState(false);
+  const userId = 5;     
+
+  // 절약량 저장
+  const saveDietRecord = async () => {
+    try {
+      if (savedKg == null) {
+        Alert.alert("저장 불가", "절약량을 먼저 계산해 주세요.");
+        return;
+      }
+      if (savedKg <= 0) {
+        Alert.alert("저장 불가", "절약한 탄소가 0kg 입니다.");
+        return;
+      }
+
+      setSaving(true);
+      const body = {
+        userId,
+        co2Kg: Number(savedKg.toFixed(1)), // 소수 1자리 반올림
+      };
+
+      const res = await fetch(`${process.env.SERVER_URL}/diet`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        const msg = json?.message || res.statusText || "요청 실패";
+        throw new Error(msg);
+      }
+
+      Alert.alert("저장 완료", "절약한 탄소량이 기록되었습니다.", [
+        { text: "확인", onPress: () => router.push("/pages/diet/Test") },
+      ]);
+    } catch (e) {
+      Alert.alert("저장 실패", String(e?.message || e));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <View className="flex-1">
@@ -99,78 +118,25 @@ export default function DietResult() {
               </View>
             )}
 
-            {/* 인식 결과(간단 리스트) */}
-            <View className="w-full bg-white rounded-[12px] px-[16px] py-[14px]">
-              <Text className="font-sf-b text-[16px] mb-2">인식 결과</Text>
-
-              {foods.length > 0 ? (
-                foods.map((f) => (
-                  <View
-                    key={f.id}
-                    className="bg-white rounded-[10px] px-[12px] py-[10px] mb-[8px] border border-[#eee]"
-                    style={{
-                      shadowColor: "#000",
-                      shadowOpacity: 0.06,
-                      shadowRadius: 4,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 1,
-                    }}
-                  >
-                    <Text className="font-sf-b">{f.name}</Text>
-                    {f.amount != null && <Text>양: {f.amount}</Text>}
-                    {f.probability != null && (
-                      <Text>신뢰도: {Math.round(f.probability * 100)}%</Text>
-                    )}
-                  </View>
-                ))
-              ) : (
-                <Text>후보가 없습니다.</Text>
-              )}
-
-              {/* FoodLens 원본 JSON 토글 */}
-              <Pressable
-                onPress={() => setShowRaw((v) => !v)}
-                className="mt-3 self-start px-3 py-2 rounded-[8px] bg-zinc-100 active:bg-zinc-200"
-              >
-                <Text className="font-sf-md">
-                  {showRaw ? "원본 JSON 숨기기" : "원본 JSON 보기"}
-                </Text>
-              </Pressable>
-              {showRaw && (
-                <View className="mt-2">
-                  <Text
-                    style={{
-                      fontFamily: Platform.select({ ios: "Menlo", android: "monospace" }),
-                      fontSize: 12,
-                      lineHeight: 16,
-                    }}
-                  >
-                    {JSON.stringify(result, null, 2)}
-                  </Text>
-                </View>
-              )}
-            </View>
-
             {/* 탄소 배출 결과 카드 */}
             <View className="w-[100%] bg-white rounded-[12px] px-[18px] py-[20px] gap-[8px] border-green border-2">
               <Text className="font-grotesk-b text-[28px] text-green">
-                {/* totalCo2eq는 gCO2eq → kg로 변환하여 표시 */}
-                {totalKg != null ? fmt(totalKg, 2) : "—"}
+                {totalKg != null ? fmt(totalKg, 1) : "—"}
                 <Text className="text-[18px] font-sf-md text-green">
                   {" "}kg (CO
                   <Text className="text-[10px]">2</Text>eq)
                 </Text>
               </Text>
 
-              {/* 비교 문구 (임시 기준값 활용) */}
+              {/* 비교 문구 */}
               <Text className="font-sf-md text-black text-[16px]">
                 {savedKg != null
-                  ? `한 끼 식사로 ${fmt(savedKg, 2)} kg CO₂eq 를 절약했어요!`
+                  ? `한 끼 식사로 ${fmt(savedKg, 1)} kg CO₂eq 를 절약했어요!`
                   : "탄소 배출량을 계산 중이에요."}
               </Text>
             </View>
 
-            {/* 일반 정보/툴팁 */}
+            {/* 일반 정보 */}
             <View className="w-[100%] ml-1 items-center flex-row gap-2">
               <Images.IpaFace width={28} height={29} />
               <Text className="font-sf-md text-[16px]">
@@ -183,47 +149,31 @@ export default function DietResult() {
               <View className="w-full bg-white rounded-[12px] px-[16px] py-[14px] mt-2">
                 <Text className="font-sf-b text-[16px] mb-2">항목별 배출량</Text>
                 {carbon.items.map((it, idx) => {
-                  const kg = it?.co2eq != null ? it.co2eq / 1000 : null;
+                  const kg = typeof it?.co2Kg === "number" ? it.co2Kg : null;
                   return (
                     <View
                       key={`${it.name}-${idx}`}
                       className="bg-white rounded-[10px] px-[12px] py-[10px] mb-[8px] border border-[#eee]"
                     >
                       <Text className="font-sf-b">{it.name ?? "이름 없음"}</Text>
-                      <Text>{kg != null ? `${fmt(kg, 3)} kg CO₂eq` : "—"}</Text>
+                      <Text>{kg != null ? `${fmt(kg, 1)} kg CO₂eq` : "—"}</Text>
                     </View>
                   );
                 })}
-
-                {/* 탄소 API 응답 토글 (디버깅/검증용) */}
-                <Pressable
-                  onPress={() => setShowCarbonRaw((v) => !v)}
-                  className="mt-3 self-start px-3 py-2 rounded-[8px] bg-zinc-100 active:bg-zinc-200"
-                >
-                  <Text className="font-sf-md">
-                    {showCarbonRaw ? "탄소 JSON 숨기기" : "탄소 JSON 보기"}
-                  </Text>
-                </Pressable>
-                {showCarbonRaw && (
-                  <View className="mt-2">
-                    <Text
-                      style={{
-                        fontFamily: Platform.select({ ios: "Menlo", android: "monospace" }),
-                        fontSize: 12,
-                        lineHeight: 16,
-                      }}
-                    >
-                      {JSON.stringify(ResultStore.carbon, null, 2)}
-                    </Text>
-                  </View>
-                )}
               </View>
             )}
 
-            {/* CTA */}
+            {/* 저장 버튼 */}
             <MainButton
               className="mt-16"
-              label="포인트 받기"
+              label={saving ? "저장 중..." : "포인트 받기"}
+              onPress={saveDietRecord}
+              disabled={saving || totalKg == null || savedKg == null || savedKg <= 0}
+            />
+
+            <MainButton
+              className="mt-4"
+              label="지도 테스트"
               onPress={() => router.push("/pages/diet/Test")}
             />
           </View>

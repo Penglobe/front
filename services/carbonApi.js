@@ -1,5 +1,5 @@
 export async function requestCarbon(payload) {
-  const url = `${process.env.SERVER_URL}/diet/ingest`;
+  const url = `${process.env.SERVER_URL}/diet/ingest/calc`;
   console.log("요청 URL:", url);
   console.log("요청 Payload:", payload);
 
