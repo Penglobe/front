@@ -32,6 +32,7 @@ module.exports = function (api) {
             "@styles": "./styles",
             "@services": "./services",
             "@utils": "./utils",
+            "@auth": "./app/auth",
           },
         },
       ],

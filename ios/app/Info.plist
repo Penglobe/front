@@ -40,10 +40,20 @@
     </dict>
   </array>
 
+  <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <!-- Login with Kakao Talk -->
+      <string>kakaokompassauth</string>
+      <!-- Kakao Talk Share -->
+      <string>kakaolink</string>
+      <!-- (카카오채널 기능 쓰면) -->
+      <string>kakaoplus</string>
+    </array>
+
   <key>CFBundleVersion</key>
   <string>1</string>
 
-  <!-- 커스텀 키(토큰)는 그대로 두셔도 됩니다 -->
+  <!-- 커스텀 키 -->
   <key>FoodLensAppToken</key>
   <string>0b6fbe431b4144f190423b9630b6354a</string>
   <key>FoodLensCompanyToken</key>

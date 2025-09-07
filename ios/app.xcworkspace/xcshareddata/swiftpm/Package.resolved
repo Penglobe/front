@@ -1,6 +1,15 @@
 {
-  "originHash" : "412e95bab9fa2b4c4910d43a19f882491c691a0fd027b185e461750dc49e9883",
+  "originHash" : "1ffca9c845b647d98260e5b1fdd04970c131bb98ed7118a00fcc06a8427417bd",
   "pins" : [
+    {
+      "identity" : "alamofire",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Alamofire/Alamofire.git",
+      "state" : {
+        "revision" : "513364f870f6bfc468f9d2ff0a95caccc10044c5",
+        "version" : "5.10.2"
+      }
+    },
     {
       "identity" : "ios_foodlenscoresdk",
       "kind" : "remoteSourceControl",
@@ -8,6 +17,15 @@
       "state" : {
         "revision" : "8c1a2a0505c7f0ba7cca9d15cfd890558960d985",
         "version" : "3.1.1"
+      }
+    },
+    {
+      "identity" : "kakao-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kakao/kakao-ios-sdk",
+      "state" : {
+        "revision" : "f17e30773062d9df4c8e0e211da9ac22dfb2e5c1",
+        "version" : "2.24.6"
       }
     },
     {

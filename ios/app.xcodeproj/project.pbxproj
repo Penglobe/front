@@ -8,17 +8,22 @@
 
 /* Begin PBXBuildFile section */
 		044D15923E95E73BEE9E5ACD /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */; };
-		0A09422D2E69ED9400D4E6D7 /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0A09422C2E69ED9400D4E6D7 /* FoodLensCore */; };
-		0A0942302E69EDAA00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 0A09422F2E69EDAA00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic */; };
-		0A0942312E69EDAF00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 0A09422F2E69EDAA00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		0A210CBA2E6DEBAB00C23BB3 /* KakaoAuthModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */; };
+		0A210CBC2E6DEBDC00C23BB3 /* KakaoAuthModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */; };
 		0A24A2162E674C0200F04B69 /* FoodLensModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2142E674C0200F04B69 /* FoodLensModule.m */; };
 		0A24A2172E674C0200F04B69 /* FoodLensModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2152E674C0200F04B69 /* FoodLensModule.swift */; };
 		0A917D0A2E69CAA9009D0697 /* RNKakaoMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */; };
 		0A917D0C2E69CAC0009D0697 /* RNKakaoMapViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */; };
 		0A917D132E69CB72009D0697 /* RNKakaoMapViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */; };
-		0D85F50F14D0886A37CFBB24 /* libPods-app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18A4D72C618013D97AFE2778 /* libPods-app.a */; };
+		0AAEF1732E6E03D2003877DF /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1722E6E03D2003877DF /* KakaoSDKAuth */; };
+		0AAEF1752E6E03D2003877DF /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1742E6E03D2003877DF /* KakaoSDKCommon */; };
+		0AAEF1772E6E03D2003877DF /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1762E6E03D2003877DF /* KakaoSDKUser */; };
+		0AAEF17A2E6E03E2003877DF /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1792E6E03E2003877DF /* FoodLensCore */; };
+		0AAEF17F2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */; };
+		0AAEF1802E6E0401003877DF /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+		64BED6546EB217E5A65244F9 /* libPods-app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BE3E1D0CB0D6B202D8B1A9D /* libPods-app.a */; };
 		6FF9F81F38E805910EFFA6F2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -31,7 +36,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				0A0942312E69EDAF00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */,
+				0AAEF1802E6E0401003877DF /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -39,6 +44,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KakaoAuthModule.swift; sourceTree = "<group>"; };
+		0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KakaoAuthModule.m; sourceTree = "<group>"; };
 		0A24A2142E674C0200F04B69 /* FoodLensModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FoodLensModule.m; sourceTree = "<group>"; };
 		0A24A2152E674C0200F04B69 /* FoodLensModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLensModule.swift; sourceTree = "<group>"; };
 		0A24A2182E67590A00F04B69 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -48,11 +55,11 @@
 		13B07F961A680F5B00A75B9A /* app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = app/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = app/Info.plist; sourceTree = "<group>"; };
-		18A4D72C618013D97AFE2778 /* libPods-app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-app/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		575805192D25F1844C974DAA /* Pods-app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.debug.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.debug.xcconfig"; sourceTree = "<group>"; };
-		5F6A94988CACD8465394D922 /* Pods-app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.release.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.release.xcconfig"; sourceTree = "<group>"; };
+		57D88D2A4D35F18B0F627B60 /* Pods-app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.release.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.release.xcconfig"; sourceTree = "<group>"; };
+		7BE3E1D0CB0D6B202D8B1A9D /* libPods-app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = app/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A51B1EECD983974AA186D0BC /* Pods-app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.debug.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.debug.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = app/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -64,9 +71,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0A09422D2E69ED9400D4E6D7 /* FoodLensCore in Frameworks */,
-				0A0942302E69EDAA00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic in Frameworks */,
-				0D85F50F14D0886A37CFBB24 /* libPods-app.a in Frameworks */,
+				0AAEF17A2E6E03E2003877DF /* FoodLensCore in Frameworks */,
+				0AAEF1772E6E03D2003877DF /* KakaoSDKUser in Frameworks */,
+				0AAEF17F2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic in Frameworks */,
+				0AAEF1752E6E03D2003877DF /* KakaoSDKCommon in Frameworks */,
+				0AAEF1732E6E03D2003877DF /* KakaoSDKAuth in Frameworks */,
+				64BED6546EB217E5A65244F9 /* libPods-app.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,7 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				18A4D72C618013D97AFE2778 /* libPods-app.a */,
+				7BE3E1D0CB0D6B202D8B1A9D /* libPods-app.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -114,6 +124,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */,
+				0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */,
 				0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */,
 				0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */,
 				0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */,
@@ -142,8 +154,8 @@
 		97F550EF227695F657D5638D /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				575805192D25F1844C974DAA /* Pods-app.debug.xcconfig */,
-				5F6A94988CACD8465394D922 /* Pods-app.release.xcconfig */,
+				A51B1EECD983974AA186D0BC /* Pods-app.debug.xcconfig */,
+				57D88D2A4D35F18B0F627B60 /* Pods-app.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -172,15 +184,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "app" */;
 			buildPhases = (
-				CD1CFB1ACB88321A40E2D9AA /* [CP] Check Pods Manifest.lock */,
+				260CDDD8B45189E7F2206B02 /* [CP] Check Pods Manifest.lock */,
 				9C46D17CD27371A582CE9CFD /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				0A09422A2E69E82200D4E6D7 /* Embed Frameworks */,
-				9227E935976FD2EDFBACFF5D /* [CP] Embed Pods Frameworks */,
-				8EF08176C7E1F27411DC2086 /* [CP] Copy Pods Resources */,
+				FA2DDF6EC4B31C88E1201DD6 /* [CP] Embed Pods Frameworks */,
+				8529D447F221EBC275A8E9F5 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -215,8 +227,9 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				0A09422B2E69ED9400D4E6D7 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
-				0A09422E2E69EDAA00D4E6D7 /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */,
+				0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
+				0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -257,88 +270,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		8EF08176C7E1F27411DC2086 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/Alamofire/Alamofire.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXTaskManager/ExpoTaskManager_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/KakaoSDKCommon/KakaoSDKCommon.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Alamofire.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoTaskManager_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/KakaoSDKCommon.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SDWebImage.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9227E935976FD2EDFBACFF5D /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9C46D17CD27371A582CE9CFD /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-app/expo-configure-project.sh\"\n";
-		};
-		CD1CFB1ACB88321A40E2D9AA /* [CP] Check Pods Manifest.lock */ = {
+		260CDDD8B45189E7F2206B02 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -360,6 +292,83 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		8529D447F221EBC275A8E9F5 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXTaskManager/ExpoTaskManager_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoTaskManager_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SDWebImage.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9C46D17CD27371A582CE9CFD /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-app/expo-configure-project.sh\"\n";
+		};
+		FA2DDF6EC4B31C88E1201DD6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -374,6 +383,8 @@
 				0A917D132E69CB72009D0697 /* RNKakaoMapViewManager.m in Sources */,
 				0A917D0A2E69CAA9009D0697 /* RNKakaoMapView.swift in Sources */,
 				0A24A2172E674C0200F04B69 /* FoodLensModule.swift in Sources */,
+				0A210CBC2E6DEBDC00C23BB3 /* KakaoAuthModule.m in Sources */,
+				0A210CBA2E6DEBAB00C23BB3 /* KakaoAuthModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,7 +393,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 575805192D25F1844C974DAA /* Pods-app.debug.xcconfig */;
+			baseConfigurationReference = A51B1EECD983974AA186D0BC /* Pods-app.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -518,7 +529,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5F6A94988CACD8465394D922 /* Pods-app.release.xcconfig */;
+			baseConfigurationReference = 57D88D2A4D35F18B0F627B60 /* Pods-app.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -703,10 +714,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -763,10 +771,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -799,7 +804,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0A09422B2E69ED9400D4E6D7 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
+		0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.24.6;
+			};
+		};
+		0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://bitbucket.org/doing-lab/ios_foodlenscoresdk";
 			requirement = {
@@ -807,7 +820,7 @@
 				minimumVersion = 3.1.1;
 			};
 		};
-		0A09422E2E69EDAA00D4E6D7 /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */ = {
+		0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM.git";
 			requirement = {
@@ -818,14 +831,29 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0A09422C2E69ED9400D4E6D7 /* FoodLensCore */ = {
+		0AAEF1722E6E03D2003877DF /* KakaoSDKAuth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0A09422B2E69ED9400D4E6D7 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
+			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKAuth;
+		};
+		0AAEF1742E6E03D2003877DF /* KakaoSDKCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCommon;
+		};
+		0AAEF1762E6E03D2003877DF /* KakaoSDKUser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKUser;
+		};
+		0AAEF1792E6E03E2003877DF /* FoodLensCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
 			productName = FoodLensCore;
 		};
-		0A09422F2E69EDAA00D4E6D7 /* KakaoMapsSDK-SPM-Dynamic */ = {
+		0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0A09422E2E69EDAA00D4E6D7 /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */;
+			package = 0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */;
 			productName = "KakaoMapsSDK-SPM-Dynamic";
 		};
 /* End XCSwiftPackageProductDependency section */
