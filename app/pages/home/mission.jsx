@@ -187,6 +187,7 @@ export default function MissionScreen() {
         <MainButton label="확인" onPress={() => setOpen(false)} />
       </Modal>
 
+      {/* 하단 고정 버튼들 */}
       <View
         style={{
           position: "absolute",
@@ -195,14 +196,32 @@ export default function MissionScreen() {
           bottom: 16,
         }}
       >
+        {/* ✅ 상품 추가 페이지 이동 버튼 */}
         <Pressable
-          onPress={onLogout}
+          onPress={() => router.push("/pages/newproducts")}
+          android_ripple={{ color: "#ffffff30" }}
           style={{
             height: 48,
             borderRadius: 12,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#ef4444",
+            backgroundColor: "#10B981", // emerald-600
+            marginBottom: 8, // 로그아웃 버튼과 간격
+          }}
+        >
+          <Text className="text-white font-sf-b text-[16px]">상품 추가</Text>
+        </Pressable>
+
+        {/* 기존 로그아웃 버튼 */}
+        <Pressable
+          onPress={onLogout}
+          android_ripple={{ color: "#ffffff30" }}
+          style={{
+            height: 48,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#ef4444", // red-500
           }}
         >
           <Text className="text-white font-sf-b text-[16px]">로그아웃</Text>

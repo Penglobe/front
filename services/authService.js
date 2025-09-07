@@ -1,9 +1,9 @@
-// 로그인, 토큰 관리d
+// 로그인, 토큰 관리
 import * as SecureStore from "expo-secure-store";
 import { SERVER_URL } from "@env";
 
 // ====== 설정 ======
-const BASE_URL = SERVER_URL; // 예: http://10.0.2.2:8080 (Android 에뮬레이터)
+const BASE_URL = SERVER_URL; // 예: http://192.168.0.149:8080
 const K_AT = "accessToken";
 const K_RT = "refreshToken";
 
@@ -35,16 +35,15 @@ async function refreshAccessToken() {
   const res = await fetch(`${BASE_URL}/auth/refresh`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      // 서버 규약에 맞게 전달 (여기선 X-Refresh-Token 사용)
+      // 서버 규약에 맞게 전달
       "X-Refresh-Token": rt,
+      "Content-Type": "application/json",
     },
   });
 
   if (!res.ok) return null;
 
-  const json = await res.json();
-  // 서버 응답 형태 유연 처리
+  const json = await res.json().catch(() => null);
   const payload = json?.data ?? json;
   const newAT =
     payload?.accessToken ||
@@ -64,27 +63,66 @@ export async function apiFetch(path, options = {}) {
   const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
   const at = await getAccessToken();
 
+  const baseHeaders = options.headers || {};
+  const bodyInput = options.body;
+
+  const hasHeader = (name) =>
+    Object.keys(baseHeaders).some(
+      (k) => k.toLowerCase() === name.toLowerCase()
+    );
+
+  // FormData 판별 (RN 호환)
+  const isFormData =
+    (typeof FormData !== "undefined" && bodyInput instanceof FormData) ||
+    (bodyInput &&
+      typeof bodyInput === "object" &&
+      typeof bodyInput.append === "function");
+
+  const isBlob = typeof Blob !== "undefined" && bodyInput instanceof Blob;
+  const isAB =
+    typeof ArrayBuffer !== "undefined" && bodyInput instanceof ArrayBuffer;
+  const isStringBody = typeof bodyInput === "string";
+
+  // JSON 바디 자동 stringify (FormData/Blob/ArrayBuffer/문자열은 건드리지 않음)
+  let body = bodyInput;
+  if (
+    !isFormData &&
+    !isBlob &&
+    !isAB &&
+    bodyInput != null &&
+    typeof bodyInput === "object" &&
+    !isStringBody
+  ) {
+    body = JSON.stringify(bodyInput);
+  }
+
+  // 헤더 구성
   const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...baseHeaders,
     ...(at ? { Authorization: `Bearer ${at}` } : {}),
+    ...(!isFormData && !hasHeader("content-type")
+      ? { "Content-Type": "application/json; charset=utf-8" }
+      : {}),
+    ...(!hasHeader("accept") ? { Accept: "application/json" } : {}),
   };
 
-  const res = await fetch(url, { ...options, headers });
+  let res = await fetch(url, { ...options, headers, body });
   if (res.status !== 401) return res;
 
   // 401 → 조용히 재발급 시도
   const newAT = await refreshAccessToken();
   if (!newAT) {
     await clearTokens();
-    if (typeof onLogout === "function") onLogout(); // 예: router.replace("/")
+    if (typeof onLogout === "function") onLogout();
     throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
   }
 
   // 새 토큰으로 1회 재시도
+  const retryHeaders = { ...headers, Authorization: `Bearer ${newAT}` };
   const retryRes = await fetch(url, {
     ...options,
-    headers: { ...headers, Authorization: `Bearer ${newAT}` },
+    headers: retryHeaders,
+    body,
   });
 
   if (retryRes.status === 401) {
@@ -92,7 +130,6 @@ export async function apiFetch(path, options = {}) {
     if (typeof onLogout === "function") onLogout();
     throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
   }
-
   return retryRes;
 }
 
@@ -100,16 +137,14 @@ export async function apiFetch(path, options = {}) {
 export async function login(email, password) {
   const res = await apiFetch("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: { email, password }, // 객체로 보내면 apiFetch가 자동 stringify
   });
 
   const json = await res.json();
   if (!res.ok) throw new Error(json?.message || "로그인 실패");
 
-  // 서버 래퍼 대응
   const payload = json?.data ?? json;
 
-  // 유연한 키 추출
   const accessToken =
     payload?.accessToken ||
     payload?.token ||
@@ -117,15 +152,11 @@ export async function login(email, password) {
     payload?.access_token;
   const refreshToken = payload?.refreshToken || payload?.refresh_token || null;
 
-  if (!accessToken) {
-    // 한 번 콘솔로 실제 응답 구조를 확인해보면 디버깅 빨라짐
-    // console.log("login raw:", JSON.stringify(json));
+  if (!accessToken)
     throw new Error("서버 응답에 accessToken/token이 없습니다.");
-  }
 
   await setTokens({ accessToken, refreshToken });
 
-  // 사용자 정보 리턴(없으면 기본값)
   return (
     payload?.user || {
       userId: payload?.userId,
@@ -138,7 +169,6 @@ export async function logout() {
   await clearTokens();
 }
 
-// 내 정보 조회 (보호 API 예시)
 export async function me() {
   const res = await apiFetch("/users/me");
   const json = await res.json();
@@ -146,24 +176,18 @@ export async function me() {
   return json?.data ?? json;
 }
 
-// 회원가입
 export async function signupLocal(payload) {
   const res = await apiFetch("/auth/signup", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: payload, // 객체 → 자동 stringify
   });
 
   const json = await res.json();
 
-  if (!res.ok) {
+  if (!res.ok || json?.success === false) {
     throw new Error(json?.message || "회원가입 실패");
   }
 
-  if (json?.success === false) {
-    throw new Error(json?.message || "회원가입 실패");
-  }
-
-  // 성공: message 포함해서 리턴
   return {
     message: json?.message || "회원가입 완료",
     data: json?.data ?? null,
