@@ -39,7 +39,7 @@ export default function TransportBookmark() {
       setBookmarks(data);
     } catch (err) {
       console.error("북마크 조회 실패:", err);
-      Alert.alert("북마크 조회 실패");
+      Alert.alert("북마크 조회 실패", "잠시 후 다시 시도해주세요.");
     }
   }, [userId]);
 
@@ -58,12 +58,16 @@ export default function TransportBookmark() {
       const data = await searchAddress(query);
       setSearchResults(data.documents || []);
     } catch (err) {
-      console.error(err);
-      Alert.alert("주소 검색 실패", "카카오 API 호출 실패");
+      console.error("주소 검색 실패:", err);
+      Alert.alert("주소 검색 실패", "카카오 API 호출에 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
+
+  // ✅ 고유 key 생성 함수 (검색 결과용)
+  const getSearchKey = (item, idx) =>
+    item.id || `s-${item.x}-${item.y}-${idx}`;
 
   // ✅ 확인 버튼
   const handleConfirm = () => {
@@ -85,7 +89,7 @@ export default function TransportBookmark() {
           placeName: isBookmark
             ? selectedPlace.bookmarkLabel
             : selectedPlace.place_name,
-          mode: mode || "TRANSIT",
+          mode,
         },
       });
 
@@ -105,7 +109,7 @@ export default function TransportBookmark() {
                 address: selectedPlace.address_name,
                 startLat,
                 startLng,
-                mode: mode || "TRANSIT",
+                mode,
               },
             }),
         },
@@ -148,12 +152,16 @@ export default function TransportBookmark() {
           ) : (
             <FlatList
               data={searchResults}
-              keyExtractor={(_, idx) => "s-" + idx}
-              renderItem={({ item }) => (
+              keyExtractor={getSearchKey}
+              renderItem={({ item, index }) => (
                 <PlaceCard
                   item={item}
                   isBookmark={false}
-                  isSelected={selectedPlace?.id === item.id}
+                  isSelected={
+                    !selectedPlace?.bookmarkId &&
+                    selectedPlace?.x === item.x &&
+                    selectedPlace?.y === item.y
+                  }
                   onSelect={setSelectedPlace}
                 />
               )}
