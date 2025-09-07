@@ -17,6 +17,7 @@ import { SERVER_URL } from "@env";
 import { useRouter } from "expo-router";
 import { apiFetch, logout } from "@services/authService";
 
+
 // TODO: 실제 호스트로 교체
 const API_BASE = SERVER_URL;
 

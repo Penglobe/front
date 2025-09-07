@@ -5,7 +5,7 @@ import React
 
 @objc(FoodLensModule)
 class FoodLensModule: NSObject {
-
+  
   @objc static func requiresMainQueueSetup() -> Bool { true }
 
   // 1) 토큰 설정 함수 추가
