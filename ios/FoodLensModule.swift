@@ -32,36 +32,37 @@ class FoodLensModule: NSObject {
     let s = FoodLensCoreService(type: .foodlens)  // 필요하면 .sandbox/.staging
     s.setLanguage(.ko)
     s.setImageResizingType(.normal)
-    s.setNutritionRetrievalOption(.no)
+    s.setNutritionRetrievalOption(.all)
     do { try configureFoodLens(s) }                // ← 여기서 토큰 주입
     catch { NSLog("[FoodLens] configure error: \(error.localizedDescription)") }
     return s
   }()
 
   // 3) 나머지는 그대로
-  @objc(predictBase64:userId:resolver:rejecter:)
+  @objc(predictBase64:resolver:rejecter:)
   func predictBase64(
-    _ base64: NSString,
-    userId: NSString,
+    _ base64: String,
     resolver resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
     guard
-      let data = Data(base64Encoded: base64 as String, options: .ignoreUnknownCharacters),
+      let data = Data(base64Encoded: base64, options: .ignoreUnknownCharacters),
       let image = UIImage(data: data)
     else {
       reject("E_DECODE", "Invalid base64 image", nil)
       return
     }
 
-    Task.detached {
-      let result = await self.service.predict(image: image, userId: userId as String)
-      DispatchQueue.main.async {
+    Task {
+      let result = await self.service.predict(image: image)
+      await MainActor.run {
         switch result {
         case .success(let response):
           do {
-            let json = try JSONEncoder().encode(response)
-            resolve(String(data: json, encoding: .utf8) ?? "{}")
+            let data = try JSONEncoder().encode(response)
+            let obj = try JSONSerialization.jsonObject(with: data, options: [])
+            resolve(obj)
+
           } catch {
             reject("E_ENCODE", "JSON encode failed: \(error.localizedDescription)", error)
           }

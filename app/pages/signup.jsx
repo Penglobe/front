@@ -38,8 +38,7 @@ export default function Signup() {
   const [regionId, setRegionId] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 지역 선택용
-  const [regionLabel, setRegionLabel] = useState("");
+  const [regionLabel, setRegionLabel] = useState();
   const [regionOpen, setRegionOpen] = useState(false);
   const [regions, setRegions] = useState([]);
 

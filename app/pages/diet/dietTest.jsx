@@ -1,5 +1,7 @@
 // (tabs)/shop/index.jsx
 import React, { useRef, useState } from "react";
+import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
+import { requestCarbon } from "@services/carbonApi";
 import {
   View,
   Text,
@@ -18,11 +20,13 @@ import { ShutterButton } from "@pages/diet/ShutterButton";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+
+// 로컬 상태 저장소 (촬영→결과 페이지 간 데이터 전달용)
 import { ResultStore } from "@utils/storage";
 
 const { FoodLensModule } = NativeModules;
 
-/* ---------- 에러 포맷터: 네이티브 Error를 보기 좋게 ---------- */
+// 네이티브 에러 포맷팅
 function formatNativeError(e) {
   const raw = e;
   const codeField = e?.code ?? e?.errorCode ?? null; // RCTPromiseRejectBlock → Error.code 로 옴
@@ -30,7 +34,7 @@ function formatNativeError(e) {
   let domain = null,
     numCode = null;
 
-  // Swift에서 reject("${domain}#${code}", msg, error) 형태를 보냈다면 분해
+  // Swift에서 reject("도메인#코드", msg, err) 형태로 온 경우 분해
   if (typeof codeField === "string") {
     const m = codeField.match(/^([^#]+)#(-?\d+)$/);
     if (m) {
@@ -43,10 +47,9 @@ function formatNativeError(e) {
     numCode = codeField;
   }
 
-  // 힌트(자주 나오는 케이스 매핑)
+  // 자주 발생하는 에러
   const hints = [];
   if (domain?.includes("NSURLErrorDomain") || [-1009, -1001, -1200].includes(numCode)) {
-    // -1009 오프라인, -1001 타임아웃, -1200 SSL/ATS
     hints.push("네트워크 연결/방화벽/ATS(HTTPS) 설정을 확인하세요.");
   }
   if (codeField === "E_DECODE" || /base64/i.test(msg)) {
@@ -64,7 +67,7 @@ function formatNativeError(e) {
   };
 }
 
-/* ---------- 결과 파싱 유틸 ---------- */
+// 결과에서 음식 배열만 추출 
 function extractFoods(result) {
   const candidates =
     result?.foods || result?.items || result?.candidates || result?.results || [];
@@ -82,8 +85,10 @@ export default function ShopScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  // 권한/카메라
+  // 카메라 권한 상태
   const [perm, requestPerm] = useCameraPermissions();
+
+  // 카메라 ref
   const camRef = useRef(null);
   const [cameraReady, setCameraReady] = useState(false);
 
@@ -94,10 +99,10 @@ export default function ShopScreen() {
   const [lastError, setLastError] = useState(null);
 
   // 미리보기 상태
-  const [photo, setPhoto] = useState(null); 
-  const [preview, setPreview] = useState(false);
+  const [photo, setPhoto] = useState(null);   // 촬영된 사진 
+  const [preview, setPreview] = useState(false);  // 미리보기 모드 여부
 
-  // --- 권한 단계 처리 ---
+  // 권한 확인
   if (!perm) {
     return (
       <View style={styles.center}>
@@ -116,7 +121,7 @@ export default function ShopScreen() {
     );
   }
 
-  // --- 촬영: 촬영만 하고 미리보기 열기 ---
+  // 사진 촬영 
   const takePhoto = async () => {
     try {
       if (!camRef.current) {
@@ -125,6 +130,7 @@ export default function ShopScreen() {
       }
       setLastError(null);
 
+      // expo-camera 옵션 
       const opts = { base64: true, quality: 0.9, skipProcessing: false };
       let shot;
       if (camRef.current.takePhotoAsync) {
@@ -136,8 +142,8 @@ export default function ShopScreen() {
       }
 
       if (!shot?.uri) throw new Error("촬영 실패");
-      setPhoto(shot);
-      setPreview(true);
+      setPhoto(shot);  // 사진 저장
+      setPreview(true);  // 미리보기 모드 ON
     } catch (e) {
       const info = formatNativeError(e);
       setLastError(info);
@@ -145,13 +151,13 @@ export default function ShopScreen() {
     }
   };
 
-  // --- 다시 찍기 ---
+  // 다시 찍기 
   const retake = () => {
     setPreview(false);
     setPhoto(null);
   };
 
-  // --- 확인 후 예측 API 호출 ---
+  // 확인 후 : FoodLens + 백엔드 API 호출 
   const confirmAndPredict = async () => {
     try {
       if (!FoodLensModule) {
@@ -168,17 +174,30 @@ export default function ShopScreen() {
       setFoods([]);
       setLastError(null);
 
-      const userId = "1";
-      const jsonStr = await FoodLensModule.predictBase64(photo.base64, userId);
-      const result = JSON.parse(jsonStr || "{}");
+      // 1) FoodLens API 호출 -> 음식 json 받기 
+      const result = await FoodLensModule.predictBase64(photo.base64);
+      console.log(result); // OK
 
       setRaw(result);
       setFoods(extractFoods(result));
 
-      // 미리보기 닫기 
+      // 2) json -> 백엔드 전송용 최소 페이로드 변환
+        const userId = Number(globalThis?.currentUser?.id ?? 5); 
+        const payload = {
+        ...toCarbonRequestPayload(result, { merge: true }),
+        userId, 
+        };
+        console.log("[carbon] payload =", payload);
+
+      // 3) 탄소배출량 계산 API 호출 
+      const carbon = await requestCarbon(payload);
+
+      // 4) 결과 저장 후 dietResult 페이지로 이동 
       setPreview(false);
-      ResultStore.data = result;
+      ResultStore.data = result;  // 원본 JSON
       ResultStore.photoUri = photo?.uri ?? null;
+      ResultStore.carbon = carbon;   // 탄소 계산 결과 
+      ResultStore.carbonPayload = payload;   // 전송 페이로드 기록 
       router.push("/pages/diet/dietResult");
     } catch (e) {
       const info = formatNativeError(e);
@@ -191,7 +210,7 @@ export default function ShopScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 1) 카메라: 화면 꽉 채우기 */}
+      {/* 1) 카메라 뷰 */}
       <CameraView
         ref={camRef}
         style={StyleSheet.absoluteFillObject}
@@ -200,7 +219,7 @@ export default function ShopScreen() {
         onCameraReady={() => setCameraReady(true)}
       />
 
-      {/* 2) 초기화 오버레이 */}
+      {/* 2) 로딩/오류/권한 대기 중 오버레이 */}
       {!cameraReady && (
         <View style={[StyleSheet.absoluteFillObject, styles.center, { backgroundColor: "rgba(0,0,0,0.2)" }]}>
           <ActivityIndicator />
@@ -222,7 +241,7 @@ export default function ShopScreen() {
           }}
         >
           <ShutterButton
-            onPress={takePhoto} // ✅ 촬영만
+            onPress={takePhoto} 
             disabled={loading || !cameraReady}
             loading={loading}
           />
@@ -235,7 +254,7 @@ export default function ShopScreen() {
           {/* 찍은 사진 꽉 채우기 */}
           <ExpoImage source={{ uri: photo.uri }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
 
-          {/* 하단 액션 바 */}
+          {/* 하단 액션 바 : 다시찍기 or 계산하기 */}
           <View
             style={{
               position: "absolute",
@@ -245,7 +264,7 @@ export default function ShopScreen() {
               paddingBottom: insets.bottom + 16,
               paddingTop: 12,
               paddingHorizontal: 16,
-              backgroundColor: "rgba(0,0,0,0.35)", // 필요시 "transparent"
+              backgroundColor: "rgba(0,0,0,0.35)", 
               flexDirection: "row",
               gap: 12,
             }}
@@ -275,7 +294,7 @@ export default function ShopScreen() {
                   }}
                 >
                 <Text style={{ color: "white", fontWeight: "700" }}>
-                  {loading ? "전송 중…" : "계산하기"}
+                  {loading ? "분석 중…" : "계산하기"}
                 </Text>
               </Pressable>
             </View>

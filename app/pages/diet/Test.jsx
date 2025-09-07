@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text } from "react-native";
 import { requireNativeComponent, UIManager } from "react-native";
-import { styled } from "nativewind";
+import { cssInterop } from "nativewind";
 
 const NAME = "RNKakaoMapView";
 
@@ -11,10 +11,10 @@ const hasView = !!UIManager.getViewManagerConfig?.(NAME);
 // 네이티브 뷰 참조 (존재하지 않으면 null)
 const NativeKakaoMapView = hasView ? requireNativeComponent(NAME) : null;
 
-// nativewind가 className을 적용할 수 있도록 감싸기
-const RNKakaoMapView = NativeKakaoMapView
-  ? styled(NativeKakaoMapView)
-  : null;
+// className -> style 매핑
+if (NativeKakaoMapView) {
+  cssInterop(NativeKakaoMapView, { className: "style" });
+}
 
 export default function MapWithMyLocation() {
   // 레이아웃 사이즈 -> 엔진 준비 조건
@@ -25,7 +25,7 @@ export default function MapWithMyLocation() {
   const [distance, setDistance] = useState(0);
 
   // 네이티브 뷰가 로드되지 않았을 때
-  if (!hasView || !RNKakaoMapView) {
+  if (!hasView || !NativeKakaoMapView) {
     return (
       <View className="flex-1 items-center justify-center">
         <Text>네이티브 뷰가 로드되지 않았어요.</Text>
@@ -44,7 +44,7 @@ export default function MapWithMyLocation() {
       }}
     >
 
-      <RNKakaoMapView
+      <NativeKakaoMapView
         className="w-full h-[860px]"
         // 엔진 준비 조건: 레이아웃 사이즈가 0보다 클 때만 생성
         shouldCreate={shouldCreate && size.w > 0 && size.h > 0}
@@ -68,7 +68,7 @@ export default function MapWithMyLocation() {
 
       {/* 누적 이동 거리 */}
       <View className="absolute bottom-5 left-5">
-        <Text className="text-white text-lg">
+        <Text className="text-green text-lg">
           누적 거리: {distance.toFixed(1)} m
         </Text>
       </View>
