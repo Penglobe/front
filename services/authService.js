@@ -179,7 +179,7 @@ export async function me() {
 export async function signupLocal(payload) {
   const res = await apiFetch("/auth/signup", {
     method: "POST",
-    body: payload, // 객체 → 자동 stringify
+    body: JSON.stringify(payload), // 객체 → 자동 stringify
   });
 
   const json = await res.json();
