@@ -258,7 +258,6 @@ export default function Survey() {
           <MainButton
             label="제출하기"
             onPress={submitHandler}
-            disabled={submittedToday}
             className="mt-5 mb-5"
           />
         </View>
