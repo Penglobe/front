@@ -17,7 +17,7 @@ export default function KakaoMapView({
   // ✅ 서버 URL
   const SERVER_URL =
     Constants.expoConfig?.extra?.SERVER_URL ||
-    "https://45c27a11b237.ngrok-free.app";
+    "https://penglobe.shinhanacademy.co.kr";
 
   // ✅ 값이 있을 때만 파라미터 추가
   const params = new URLSearchParams();
@@ -48,7 +48,7 @@ export default function KakaoMapView({
         ref={webviewRef}
         originWhitelist={["*"]}
         source={{ uri }}
-        style={{ flex: 1, minHeight: height }}  
+        style={{ flex: 1, minHeight: height }}
         javaScriptEnabled={true}
         domStorageEnabled={true}
         mixedContentMode="always"
