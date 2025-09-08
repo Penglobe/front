@@ -66,8 +66,7 @@ export default function TransportBookmark() {
   };
 
   // ✅ 고유 key 생성 함수 (검색 결과용)
-  const getSearchKey = (item, idx) =>
-    item.id || `s-${item.x}-${item.y}-${idx}`;
+  const getSearchKey = (item, idx) => item.id || `s-${item.x}-${item.y}-${idx}`;
 
   // ✅ 확인 버튼
   const handleConfirm = () => {
@@ -207,7 +206,7 @@ export default function TransportBookmark() {
       </View>
 
       {/* 확인 버튼 */}
-      <View className="px-pageX mb-8">
+      <View className="px-pageX mb-10">
         <MainButton label="출발" onPress={handleConfirm} />
       </View>
     </View>
