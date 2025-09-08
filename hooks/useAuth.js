@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
     if (!at) return setUser(null);
     try {
       const profile = await me();
+
       setUser(profile);
     } catch {
       setUser(null);

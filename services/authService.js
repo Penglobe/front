@@ -170,9 +170,9 @@ export async function logout() {
 }
 
 export async function me() {
-  const res = await apiFetch("/users/me");
-  const json = await res.json();
-  if (!res.ok) throw new Error(json?.message || "내 정보 조회 실패");
+  const res = await apiFetch("/user/me", { method: "GET" });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(json?.message || "me 조회 실패");
   return json?.data ?? json;
 }
 
