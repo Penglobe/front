@@ -1,6 +1,6 @@
 // TransportStart.jsx
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Text, Alert } from "react-native";
+import { View, ActivityIndicator, Text, Alert, ScrollView } from "react-native";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import BgGradient from "@components/BgGradient";
@@ -11,7 +11,7 @@ import KakaoMapView from "@components/KakaoMapView";
 
 export default function TransportStart() {
   const [location, setLocation] = useState(null);
-  const [mode, setMode] = useState("TRANSIT"); // 기본값: 대중교통
+  const [mode, setMode] = useState("TRANSIT");
   const router = useRouter();
 
   // ✅ 권한 요청 & 현재 위치 가져오기
@@ -46,74 +46,80 @@ export default function TransportStart() {
       <BgGradient />
       <HeaderBar title="환경 걸음" className="px-pageX" />
 
-      {/* ✅ KakaoMapView에 key 추가 */}
-      <View className="mb-5 overflow-hidden">
-        <KakaoMapView
-          key={`${location.latitude}-${location.longitude}`} // ⭐️ 위치 바뀔 때마다 강제 리렌더
-          startLat={location.latitude}
-          startLng={location.longitude}
-          currentLat={location.latitude}
-          currentLng={location.longitude}
-          height={280}
-        />
-      </View>
-
-      {/* 타이틀 */}
-      <View className="px-pageX mb-4">
-        <Text
-          className="text-xl text-[#318643]"
-          style={{ fontFamily: "SFPro-Bold" }}
-        >
-          이동 수단을 선택해 주세요
-        </Text>
-      </View>
-
-      {/* 이동수단 선택 */}
-      <View className="px-pageX flex-row flex-wrap justify-between">
-        <View className="w-[48%]">
-          <TransportButton
-            label="대중교통"
-            icon="bus-outline"
-            selected={mode === "TRANSIT"}
-            onPress={() => setMode("TRANSIT")}
+      {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ✅ KakaoMapView */}
+        <View className="mb-5 overflow-hidden">
+          <KakaoMapView
+            key={`${location.latitude}-${location.longitude}`}
+            startLat={location.latitude}
+            startLng={location.longitude}
+            currentLat={location.latitude}
+            currentLng={location.longitude}
+            height={280}
           />
         </View>
-        <View className="w-[48%]">
-          <TransportButton
-            label="도보"
-            icon="walk-outline"
-            selected={mode === "WALK"}
-            onPress={() => setMode("WALK")}
-          />
-        </View>
-        <View className="w-[48%]">
-          <TransportButton
-            label="자전거"
-            icon="bicycle-outline"
-            selected={mode === "BIKE"}
-            onPress={() => setMode("BIKE")}
-          />
-        </View>
-        <View className="w-[48%]" />
-      </View>
 
-      {/* 다음 버튼 */}
-      <View className="px-pageX">
-        <MainButton
-          className="mt-10"
-          label="다음"
-          onPress={() =>
-            router.push({
-              pathname: "/pages/transport/transportBookmark",
-              params: {
-                startLat: location.latitude,
-                startLng: location.longitude,
-                mode,
-              },
-            })
-          }
-        />
-      </View>
+        {/* 타이틀 */}
+        <View className="px-pageX mb-4">
+          <Text
+            className="text-xl text-[#318643]"
+            style={{ fontFamily: "SFPro-Bold" }}
+          >
+            이동 수단을 선택해 주세요
+          </Text>
+        </View>
+
+        {/* 이동수단 선택 */}
+        <View className="px-pageX flex-row flex-wrap justify-between">
+          <View className="w-[48%]">
+            <TransportButton
+              label="대중교통"
+              icon="bus-outline"
+              selected={mode === "TRANSIT"}
+              onPress={() => setMode("TRANSIT")}
+            />
+          </View>
+          <View className="w-[48%]">
+            <TransportButton
+              label="도보"
+              icon="walk-outline"
+              selected={mode === "WALK"}
+              onPress={() => setMode("WALK")}
+            />
+          </View>
+          <View className="w-[48%]">
+            <TransportButton
+              label="자전거"
+              icon="bicycle-outline"
+              selected={mode === "BIKE"}
+              onPress={() => setMode("BIKE")}
+            />
+          </View>
+          <View className="w-[48%]" />
+        </View>
+
+        {/* 다음 버튼 */}
+        <View className="px-pageX">
+          <MainButton
+            className="mt-10"
+            label="다음"
+            onPress={() =>
+              router.push({
+                pathname: "/pages/transport/transportBookmark",
+                params: {
+                  startLat: location.latitude,
+                  startLng: location.longitude,
+                  mode,
+                },
+              })
+            }
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
