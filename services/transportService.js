@@ -1,8 +1,8 @@
 // services/transportService.js
 import axios from "axios";
-import { SERVER_URL } from "@env";
+import Constants from "expo-constants";
 
-const BASE_URL = `${SERVER_URL}/transport`;
+const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/transport`;
 
 /* ===================== 🚗 이동 관련 ===================== */
 // 이동 시작
@@ -58,8 +58,11 @@ export async function deleteBookmark(bookmarkId) {
 
 /* ===================== 🗺️ 카카오 API 프록시 ===================== */
 export async function searchAddress(query) {
-  const res = await axios.get(`${SERVER_URL}/api/kakao/search`, {
-    params: { query },
-  });
+  const res = await axios.get(
+    `${Constants.expoConfig.extra.SERVER_URL}/api/kakao/search`,
+    {
+      params: { query },
+    }
+  );
   return res.data.data; // ApiResponse.data
 }
