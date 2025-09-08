@@ -1,22 +1,40 @@
-export async function requestCarbon(payload) {
-  const url = `${process.env.SERVER_URL}/diet/ingest/calc`;
-  console.log("요청 URL:", url);
-  console.log("요청 Payload:", payload);
+// services/carbonApi.js
+import { apiFetch } from "@services/authService";
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+export async function requestCarbon(payload, { timeoutMs = 15000 } = {}) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
 
-  // 응답 실패
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`식단 API ${res.status}: ${text || res.statusText}`);
+  try {
+    const res = await apiFetch("/diet/ingest/calc", {
+      method: "POST",
+      body: payload,
+      signal: ctrl.signal,
+    });
+
+    const ct = res.headers.get("content-type") || "";
+    let parsed = null;
+    if (ct.includes("application/json")) {
+      parsed = await res.json().catch(() => null);
+    } else {
+      const text = await res.text().catch(() => "");
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = { raw: text };
+      }
+    }
+
+    if (!res.ok) {
+      const msg = parsed?.message || parsed?.error || res.statusText;
+      throw new Error(`식단 API ${res.status}: ${msg}`);
+    }
+
+    return parsed?.data ?? parsed;
+  } catch (e) {
+    if (e.name === "AbortError") throw new Error("요청이 시간초과되었습니다.");
+    throw e;
+  } finally {
+    clearTimeout(timer);
   }
-
-  // 응답 성공
-  return res.json();
 }
