@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Alert, Platform } from "react-native";
+import { View, Text, Alert, Platform, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -11,7 +11,7 @@ import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
 
 const TASK_NAME = "TRANSPORT_TRACKING_TASK";
-const SPEED_LIMITS = { WALK: 5, BIKE: 12 }; // m/s
+const SPEED_LIMITS = { WALK: 5, BIKE: 12 };
 const LOCATION_OPTIONS = {
   accuracy: Location.Accuracy.High,
   distanceInterval: 5,
@@ -35,7 +35,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// TaskManager 정의 (중복 방지)
+// TaskManager 정의
 if (!TaskManager.isTaskDefined(TASK_NAME)) {
   TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
     if (error) {
@@ -49,8 +49,14 @@ if (!TaskManager.isTaskDefined(TASK_NAME)) {
 }
 
 export default function TransportMap() {
-  const { startLat, startLng, endLat, endLng, placeName, mode: rawMode } =
-    useLocalSearchParams();
+  const {
+    startLat,
+    startLng,
+    endLat,
+    endLng,
+    placeName,
+    mode: rawMode,
+  } = useLocalSearchParams();
   const mode = rawMode || "TRANSIT";
   const router = useRouter();
 
@@ -88,9 +94,11 @@ export default function TransportMap() {
 
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("위치 권한 필요", "서비스 이용을 위해 권한을 허용해주세요.", [
-            { text: "확인", onPress: () => router.back() },
-          ]);
+          Alert.alert(
+            "위치 권한 필요",
+            "서비스 이용을 위해 권한을 허용해주세요.",
+            [{ text: "확인", onPress: () => router.back() }]
+          );
           return;
         }
         if (Platform.OS === "ios") {
@@ -200,10 +208,7 @@ export default function TransportMap() {
         return;
       }
 
-      const result = await stopTransport(
-        transportId,
-        Math.round(usedDistance)
-      );
+      const result = await stopTransport(transportId, Math.round(usedDistance));
 
       router.replace({
         pathname: "/pages/transport/transportFinish",
@@ -228,58 +233,64 @@ export default function TransportMap() {
       <BgGradient />
       <HeaderBar title="이동 중" className="px-pageX" />
 
-      {/* 지도 */}
-      <View className="mb-5 overflow-hidden">
-        <KakaoMapView
-          startLat={startLat}
-          startLng={startLng}
-          endLat={endLat}
-          endLng={endLng}
-          currentLat={currentLat}
-          currentLng={currentLng}
-          height={400}
-        />
-      </View>
+      {/* ✅ ScrollView 적용 */}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 지도 */}
+        <View className="mb-5 overflow-hidden">
+          <KakaoMapView
+            startLat={startLat}
+            startLng={startLng}
+            endLat={endLat}
+            endLng={endLng}
+            currentLat={currentLat}
+            currentLng={currentLng}
+            height={400}
+          />
+        </View>
 
-      {/* 이동 정보 */}
-      <View className="px-pageX mt-5">
-        <View className="bg-white rounded-2xl shadow-md px-6 py-5">
-          <View className="flex-row items-center mb-3">
-            <Ionicons
-              name="location-outline"
-              size={22}
-              color="#318643"
-              style={{ marginRight: 6 }}
-            />
-            <Text className="font-sf-b text-lg text-gray-800">
-              도착지: {placeName}
-            </Text>
-          </View>
-          <View className="flex-row items-center">
-            <Ionicons
-              name="walk-outline"
-              size={20}
-              color="#555"
-              style={{ marginRight: 6 }}
-            />
-            <Text className="font-sf-md text-base text-gray-600">
-              이동 거리:{" "}
-              <Text className="font-sf-b text-[#318643]">
-                {Math.round(distance)} m
+        {/* 이동 정보 */}
+        <View className="px-pageX mt-5">
+          <View className="bg-white rounded-2xl shadow-md px-6 py-5">
+            <View className="flex-row items-center mb-3">
+              <Ionicons
+                name="location-outline"
+                size={22}
+                color="#318643"
+                style={{ marginRight: 6 }}
+              />
+              <Text className="font-sf-b text-lg text-gray-800">
+                도착지: {placeName}
               </Text>
-            </Text>
+            </View>
+            <View className="flex-row items-center">
+              <Ionicons
+                name="walk-outline"
+                size={20}
+                color="#555"
+                style={{ marginRight: 6 }}
+              />
+              <Text className="font-sf-md text-base text-gray-600">
+                이동 거리:{" "}
+                <Text className="font-sf-b text-[#318643]">
+                  {Math.round(distance)} m
+                </Text>
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* 종료 버튼 */}
-      <View className="px-pageX mt-auto mb-10">
-        <MainButton
-          label="이동 종료"
-          onPress={() => handleStop(false)}
-          className="bg-red-500 active:bg-red-700"
-        />
-      </View>
+        {/* 종료 버튼 */}
+        <View className="px-pageX mt-10 mb-10">
+          <MainButton
+            label="이동 종료"
+            onPress={() => handleStop(false)}
+            className="bg-red-500 active:bg-red-700"
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }

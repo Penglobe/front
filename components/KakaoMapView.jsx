@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
-import Constants from "expo-constants";
 
 export default function KakaoMapView({
   startLat = null,
@@ -15,9 +14,7 @@ export default function KakaoMapView({
   const webviewRef = useRef(null);
 
   // ✅ 서버 URL
-  const SERVER_URL =
-    Constants.expoConfig?.extra?.SERVER_URL ||
-    "https://penglobe.shinhanacademy.co.kr";
+  const SERVER_URL = "https://penglobe.shinhanacademy.co.kr";
 
   // ✅ 값이 있을 때만 파라미터 추가
   const params = new URLSearchParams();
