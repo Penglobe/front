@@ -11,7 +11,7 @@ import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
 
 const TASK_NAME = "TRANSPORT_TRACKING_TASK";
-const SPEED_LIMITS = { WALK: 5, BIKE: 12 };
+const SPEED_LIMITS = { WALK: 5, BIKE: 12 }; // m/s
 const LOCATION_OPTIONS = {
   accuracy: Location.Accuracy.High,
   distanceInterval: 5,
@@ -35,7 +35,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// TaskManager 정의
+// TaskManager 정의 (중복 방지)
 if (!TaskManager.isTaskDefined(TASK_NAME)) {
   TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
     if (error) {
@@ -231,13 +231,12 @@ export default function TransportMap() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="이동 중" className="px-pageX" />
-
-      {/* ✅ ScrollView 적용 */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
       >
+        <HeaderBar title="이동 중" className="px-pageX" />
+
         {/* 지도 */}
         <View className="mb-5 overflow-hidden">
           <KakaoMapView
@@ -282,13 +281,24 @@ export default function TransportMap() {
           </View>
         </View>
 
-        {/* 종료 버튼 */}
-        <View className="px-pageX mt-10 mb-10">
+        {/* 종료 버튼 & 테스트 버튼 */}
+        <View className="px-pageX mt-auto mb-10">
           <MainButton
             label="이동 종료"
             onPress={() => handleStop(false)}
             className="bg-red-500 active:bg-red-700"
           />
+
+          <View className="mt-3">
+            <MainButton
+              label="거리 +100m (테스트)"
+              onPress={() => {
+                setDistance((prev) => prev + 100);
+                distanceRef.current += 100;
+              }}
+              className="bg-blue-500 active:bg-blue-700"
+            />
+          </View>
         </View>
       </ScrollView>
     </View>
