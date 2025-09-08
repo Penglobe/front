@@ -6,6 +6,7 @@ import MainButton from "@components/MainButton";
 import { use, useEffect, useState } from "react";
 import Modal from "@components/Modal";
 import { useAuth } from "@hooks/useAuth";
+import Constants from "expo-constants";
 
 export default function QuizPage() {
   const router = useRouter();
