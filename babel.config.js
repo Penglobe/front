@@ -7,9 +7,20 @@ module.exports = function (api) {
     ],
     plugins: [
       [
+        "module:react-native-dotenv",
+        {
+          moduleName: "@env",
+          path: ".env",
+          blocklist: null,
+          allowlist: null,
+          safe: false,
+          allowUndefined: true,
+        },
+      ],
+      [
         "module-resolver",
         {
-          root: ["."],
+          root: ["."], // app 폴더를 절대 경로의 시작점으로 설정
           alias: {
             "@app": "./app",
             "@tabs": "./app/(tabs)",
