@@ -113,7 +113,7 @@ export default function Ranking() {
         <HeaderBar title="랭킹" />
 
         {/* 1. 전체 반투명 박스 */}
-        <View className="flex-1 bg-deactivateButton/50 rounded-3xl p-4 shadow mx-4 my-4">
+        <View className="flex-1 bg-deactivateButton/50 rounded-3xl shadow px-4">
           {/* 탭 메뉴 */}
           <View>
             <View className="flex-row justify-center mb-4 gap-5">
@@ -121,7 +121,7 @@ export default function Ranking() {
                 <Pressable
                   key={tab.key}
                   onPress={() => setActiveTab(tab.key)}
-                  className={`px-5 py-2 rounded-full ${
+                  className={`px-4 py-1 rounded-full ${
                     activeTab === tab.key ? "bg-green" : "bg-deactivateButton"
                   }`}
                 >
