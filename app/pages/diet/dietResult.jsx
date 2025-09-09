@@ -56,7 +56,7 @@ export default function DietResult() {
 
   // 저장 상태
   const [saving, setSaving] = React.useState(false);
-  const userId = user?.id ?? user?.userId ?? user?.user_id ?? null;
+  const userId = user?.userId;
 
   // 절약량 저장
   const saveDietRecord = async () => {
@@ -88,7 +88,7 @@ export default function DietResult() {
         throw new Error(msg);
       }
 
-      // 저장 직후 최신 유저정보로 갱신 → 홈에서 총 절감량 즉시 반영
+      // 유저 정보 갱신 
       await refreshUser?.();
 
       Alert.alert("저장 완료", "절약한 탄소량이 기록되었습니다.", [

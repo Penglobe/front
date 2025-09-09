@@ -1,4 +1,3 @@
-// services/carbonApi.js
 import { apiFetch } from "@services/authService";
 
 export async function requestCarbon(payload, { timeoutMs = 15000 } = {}) {
