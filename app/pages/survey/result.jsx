@@ -6,6 +6,7 @@ import { router, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useLocalSearchParams, useSearchParams } from "expo-router/build/hooks";
 import { Images } from "@constants/Images";
+import Co2Chart from "./Co2Chart";
 
 export default function SurveyResult() {
   const { userId, resultData } = useLocalSearchParams();
@@ -79,7 +80,7 @@ export default function SurveyResult() {
             </View>
 
             <View className="bg-white rounded-2xl px-6 py-5 mb-10">
-              <Text>차트</Text>
+              <Co2Chart />
             </View>
           </>
         ) : (

@@ -3,6 +3,9 @@ import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { getAccessToken, me } from "@services/authService";
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
 export default function GlobalRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -31,7 +34,7 @@ export default function GlobalRanking() {
         }
 
         const response = await fetch(
-          "http://192.168.0.79:8080/rankings/global",
+          `${BASE_URL}/rankings/global`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -128,6 +131,7 @@ export default function GlobalRanking() {
                 rank: myRank.rank,
                 nickname: currentUserNickname, // 백엔드 응답에 닉네임이 없으므로 직접 설정
                 score: myRank.score,
+                profile: myRank.profile,
               }}
               isProminent={true}
             />

@@ -6,8 +6,11 @@ import RegionRanking from "@pages/ranking/RegionRanking";
 import WeeklyRanking from "@pages/ranking/WeeklyRanking";
 import GlobalRanking from "@pages/ranking/GlobalRanking";
 import { getAccessToken, me } from "@services/authService";
+import Constants from "expo-constants";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
+const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
 const tabs = [
   { key: "regions", label: "지역 랭킹" },
@@ -17,34 +20,68 @@ const tabs = [
 
 export default function Ranking() {
   const [activeTab, setActiveTab] = useState("regions");
-  const [selectedRegion, setSelectedRegion] = useState("서울특별시");
+  const [selectedRegion, setSelectedRegion] = useState(null);
   const [rankingData, setRankingData] = useState([]);
 
+  // 1. Fetch user's region on mount
+  useEffect(() => {
+    const fetchUserRegion = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) {
+          console.warn("Not logged in, defaulting to Seoul.");
+          setSelectedRegion("서울특별시");
+          return;
+        }
+        const response = await fetch(`${BASE_URL}/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user info: ${response.status}`);
+        }
+
+        const apiResponse = await response.json();
+        const userInfo = apiResponse.data;
+
+        console.log("Ranking index.jsx - User Info for Region:", userInfo);
+        if (userInfo && userInfo.regionName) {
+          setSelectedRegion(userInfo.regionName);
+        } else {
+          console.warn("User region not found, defaulting to Seoul.");
+          setSelectedRegion("서울특별시"); // Default if not found
+        }
+      } catch (error) {
+        console.error("Error fetching user info, defaulting to Seoul:", error);
+        setSelectedRegion("서울특별시"); // Default on error
+      }
+    };
+    fetchUserRegion();
+  }, []);
+
+  // 2. Fetch ranking data when tab or region changes
   const fetchRegionRankingData = useCallback(async () => {
+    if (!selectedRegion) return; // Do not fetch if region is not set
+
     try {
       const token = await getAccessToken();
       if (!token) {
-        console.warn("로그인 필요");
+        console.warn("Not logged in, cannot fetch ranking data.");
         return;
       }
 
-      const userInfo = await me();
-      if (userInfo && userInfo.regionName) {
-        setSelectedRegion(userInfo.regionName);
-      }
-
-      const response = await fetch(
-        "http://192.168.0.79:8080/rankings/regions",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // ✅ JWT 붙이기
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/rankings/regions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
-        throw new Error(`서버 응답 에러: ${response.status}`);
+        throw new Error(`Server response error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -52,11 +89,13 @@ export default function Ranking() {
     } catch (error) {
       console.error("Error fetching region ranking:", error);
     }
-  }, []); // Empty dependency array for useCallback
+  }, [selectedRegion]); // Dependency on selectedRegion
 
   useEffect(() => {
-    fetchRegionRankingData();
-  }, [fetchRegionRankingData]);
+    if (activeTab === "regions") {
+      fetchRegionRankingData();
+    }
+  }, [activeTab, fetchRegionRankingData]);
 
   return (
     <View style={{ flex: 1 }}>

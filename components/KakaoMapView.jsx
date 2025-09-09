@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
-import Constants from "expo-constants";
 
 export default function KakaoMapView({
   startLat = null,

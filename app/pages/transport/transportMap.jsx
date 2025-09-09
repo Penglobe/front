@@ -49,8 +49,14 @@ if (!TaskManager.isTaskDefined(TASK_NAME)) {
 }
 
 export default function TransportMap() {
-  const { startLat, startLng, endLat, endLng, placeName, mode: rawMode } =
-    useLocalSearchParams();
+  const {
+    startLat,
+    startLng,
+    endLat,
+    endLng,
+    placeName,
+    mode: rawMode,
+  } = useLocalSearchParams();
   const mode = rawMode || "TRANSIT";
   const router = useRouter();
 
@@ -88,9 +94,11 @@ export default function TransportMap() {
 
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("위치 권한 필요", "서비스 이용을 위해 권한을 허용해주세요.", [
-            { text: "확인", onPress: () => router.back() },
-          ]);
+          Alert.alert(
+            "위치 권한 필요",
+            "서비스 이용을 위해 권한을 허용해주세요.",
+            [{ text: "확인", onPress: () => router.back() }]
+          );
           return;
         }
         if (Platform.OS === "ios") {
@@ -200,10 +208,7 @@ export default function TransportMap() {
         return;
       }
 
-      const result = await stopTransport(
-        transportId,
-        Math.round(usedDistance)
-      );
+      const result = await stopTransport(transportId, Math.round(usedDistance));
 
       router.replace({
         pathname: "/pages/transport/transportFinish",
@@ -273,12 +278,25 @@ export default function TransportMap() {
       </View>
 
       {/* 종료 버튼 */}
+      {/* 종료 버튼 */}
       <View className="px-pageX mt-auto mb-10">
         <MainButton
           label="이동 종료"
           onPress={() => handleStop(false)}
           className="bg-red-500 active:bg-red-700"
         />
+
+        {/* 🚀 테스트용 거리 증가 버튼 */}
+        <View className="mt-3">
+          <MainButton
+            label="거리 +100m (테스트)"
+            onPress={() => {
+              setDistance((prev) => prev + 100);
+              distanceRef.current += 100; // ref 값도 같이 증가시켜줘야 종료 시 반영됨
+            }}
+            className="bg-blue-500 active:bg-blue-700"
+          />
+        </View>
       </View>
     </View>
   );

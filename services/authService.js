@@ -2,8 +2,12 @@
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 
+
 // ====== 설정 ======
-const BASE_URL = "https://penglobe.shinhanacademy.co.kr";
+
+const { SERVER_URL } = Constants.expoConfig.extra;
+const BASE_URL = `${SERVER_URL}`;
+
 const K_AT = "accessToken";
 const K_RT = "refreshToken";
 
