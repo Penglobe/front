@@ -106,10 +106,6 @@ export default function BookmarkManage() {
           }
         />
       </View>
-
-      <View className="px-pageX mb-8">
-        <MainButton label="뒤로가기" onPress={() => router.back()} />
-      </View>
     </View>
   );
 }
