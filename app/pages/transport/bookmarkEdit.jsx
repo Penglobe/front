@@ -100,7 +100,7 @@ export default function BookmarkEdit() {
           </View>
 
           {/* 캐릭터 */}
-          <View className="items-end m-1 pr-pageX">
+          <View className="items-end pr-pageX">
             <Tori width={100} height={180} />
           </View>
 

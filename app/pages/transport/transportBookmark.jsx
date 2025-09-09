@@ -30,18 +30,16 @@ export default function TransportBookmark() {
   const [loading, setLoading] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
 
-  const userId = 1; // TODO: 로그인 사용자 ID 가져오기
-
   // ✅ 북마크 불러오기
   const fetchBookmarks = useCallback(async () => {
     try {
-      const data = await listBookmarks(userId);
+      const data = await listBookmarks(); // userId 필요 없음
       setBookmarks(data);
     } catch (err) {
       console.error("북마크 조회 실패:", err);
       Alert.alert("북마크 조회 실패", "잠시 후 다시 시도해주세요.");
     }
-  }, [userId]);
+  }, []);
 
   // ✅ 화면 focus될 때마다 북마크 새로 불러오기
   useFocusEffect(
@@ -152,7 +150,7 @@ export default function TransportBookmark() {
             <FlatList
               data={searchResults}
               keyExtractor={getSearchKey}
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <PlaceCard
                   item={item}
                   isBookmark={false}

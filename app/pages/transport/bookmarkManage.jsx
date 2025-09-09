@@ -8,22 +8,20 @@ import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
 import PlaceCard from "@components/PlaceCard";
 import { Feather } from "@expo/vector-icons";
-import Colors from "@constants/Colors.cjs";
 
 export default function BookmarkManage() {
   const router = useRouter();
   const [bookmarks, setBookmarks] = useState([]);
-  const userId = 1; // TODO: 로그인된 유저 ID 가져오기
 
   const fetchData = useCallback(async () => {
     try {
-      const data = await listBookmarks(userId);
+      const data = await listBookmarks(); // ✅ userId 제거
       setBookmarks(data);
     } catch (err) {
       console.error("북마크 조회 실패:", err);
       Alert.alert("북마크 조회 실패", "잠시 후 다시 시도해주세요.");
     }
-  }, [userId]);
+  }, []);
 
   // ✅ focus 시 북마크 새로고침
   useFocusEffect(
