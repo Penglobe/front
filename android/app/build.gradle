@@ -85,13 +85,13 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdkVersion 35
 
-    namespace 'com.anonymous.myapp'
+    namespace 'com.penglobe9.app'
     defaultConfig {
-        applicationId 'com.anonymous.myapp'
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        applicationId 'com.penglobe9.app'
+        minSdkVersion 26
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0.0"
     }
@@ -103,6 +103,11 @@ android {
             keyPassword 'android'
         }
     }
+
+    buildFeatures {
+        dataBinding true
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -149,7 +154,9 @@ android {
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
-    implementation("com.facebook.react:react-android")
+    implementation "com.facebook.react:react-android:+"
+
+    implementation "com.doinglab.foodlens:FoodLensSDK-core:3.0.9"
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
