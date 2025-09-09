@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Alert, Platform, ScrollView } from "react-native";
+import { View, Text, Alert, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -231,76 +231,73 @@ export default function TransportMap() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <HeaderBar title="이동 중" className="px-pageX" />
+      <HeaderBar title="이동 중" className="px-pageX" />
 
-        {/* 지도 */}
-        <View className="mb-5 overflow-hidden">
-          <KakaoMapView
-            startLat={startLat}
-            startLng={startLng}
-            endLat={endLat}
-            endLng={endLng}
-            currentLat={currentLat}
-            currentLng={currentLng}
-            height={400}
-          />
-        </View>
+      {/* 지도 */}
+      <View className="mb-5 overflow-hidden">
+        <KakaoMapView
+          startLat={startLat}
+          startLng={startLng}
+          endLat={endLat}
+          endLng={endLng}
+          currentLat={currentLat}
+          currentLng={currentLng}
+          height={400}
+        />
+      </View>
 
-        {/* 이동 정보 */}
-        <View className="px-pageX mt-5">
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5">
-            <View className="flex-row items-center mb-3">
-              <Ionicons
-                name="location-outline"
-                size={22}
-                color="#318643"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-b text-lg text-gray-800">
-                도착지: {placeName}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name="walk-outline"
-                size={20}
-                color="#555"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-md text-base text-gray-600">
-                이동 거리:{" "}
-                <Text className="font-sf-b text-[#318643]">
-                  {Math.round(distance)} m
-                </Text>
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 종료 버튼 & 테스트 버튼 */}
-        <View className="px-pageX mt-auto mb-10">
-          <MainButton
-            label="이동 종료"
-            onPress={() => handleStop(false)}
-            className="bg-red-500 active:bg-red-700"
-          />
-
-          <View className="mt-3">
-            <MainButton
-              label="거리 +100m (테스트)"
-              onPress={() => {
-                setDistance((prev) => prev + 100);
-                distanceRef.current += 100;
-              }}
-              className="bg-blue-500 active:bg-blue-700"
+      {/* 이동 정보 */}
+      <View className="px-pageX mt-5">
+        <View className="bg-white rounded-2xl shadow-md px-6 py-5">
+          <View className="flex-row items-center mb-3">
+            <Ionicons
+              name="location-outline"
+              size={22}
+              color="#318643"
+              style={{ marginRight: 6 }}
             />
+            <Text className="font-sf-b text-lg text-gray-800">
+              도착지: {placeName}
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons
+              name="walk-outline"
+              size={20}
+              color="#555"
+              style={{ marginRight: 6 }}
+            />
+            <Text className="font-sf-md text-base text-gray-600">
+              이동 거리:{" "}
+              <Text className="font-sf-b text-[#318643]">
+                {Math.round(distance)} m
+              </Text>
+            </Text>
           </View>
         </View>
-      </ScrollView>
+      </View>
+
+      {/* 종료 버튼 */}
+      {/* 종료 버튼 */}
+      <View className="px-pageX mt-auto mb-10">
+        <MainButton
+          label="이동 종료"
+          onPress={() => handleStop(false)}
+          className="bg-red-500 active:bg-red-700"
+        />
+
+        {/* 🚀 테스트용 거리 증가 버튼 */}
+        <View className="mt-3">
+          <MainButton
+            label="거리 +100m (테스트)"
+            onPress={() => {
+              setDistance((prev) => prev + 100);
+              distanceRef.current += 100; // ref 값도 같이 증가시켜줘야 종료 시 반영됨
+            }}
+            className="bg-blue-500 active:bg-blue-700"
+          />
+        </View>
+      </View>
     </View>
   );
 }
