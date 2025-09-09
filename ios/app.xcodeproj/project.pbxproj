@@ -52,7 +52,7 @@
 		0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNKakaoMapView.swift; sourceTree = "<group>"; };
 		0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNKakaoMapViewManager.swift; sourceTree = "<group>"; };
 		0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNKakaoMapViewManager.m; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = app.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* penglobe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = penglobe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = app/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = app/Info.plist; sourceTree = "<group>"; };
 		28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-app/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -146,7 +146,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* app.app */,
+				13B07F961A680F5B00A75B9A /* penglobe.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -200,7 +200,7 @@
 			);
 			name = app;
 			productName = app;
-			productReference = 13B07F961A680F5B00A75B9A /* app.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* penglobe.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -402,6 +402,8 @@
 				DEVELOPMENT_TEAM = CSY8JBQL89;
 				ENABLE_BITCODE = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FoodLensAppToken = 0b6fbe431b4144f190423b9630b6354a;
+				FoodLensCompanyToken = 774ee2d62e604f8a944242d471488ce6;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
@@ -506,6 +508,7 @@
 				);
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				KAKAO_APP_KEY = d7e4f67977821a83057f4a5563b41415;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -518,7 +521,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.penglobe9.app;
-				PRODUCT_NAME = app;
+				PRODUCT_NAME = penglobe;
 				SWIFT_OBJC_BRIDGING_HEADER = "app/App-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -537,6 +540,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CSY8JBQL89;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FoodLensAppToken = 0b6fbe431b4144f190423b9630b6354a;
+				FoodLensCompanyToken = 774ee2d62e604f8a944242d471488ce6;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_ROOT}/Headers/Public\"",
@@ -637,6 +642,7 @@
 				);
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				KAKAO_APP_KEY = d7e4f67977821a83057f4a5563b41415;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -649,7 +655,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.penglobe9.app;
-				PRODUCT_NAME = app;
+				PRODUCT_NAME = penglobe;
 				SWIFT_OBJC_BRIDGING_HEADER = "app/App-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

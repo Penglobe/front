@@ -1,19 +1,27 @@
 // constants/images.js
 // 배경
 import BgHome1 from "@assets/images/bg/bg-home-1.svg";
+import BgHome2 from "@assets/images/bg/bg-home-2.svg";
+import BgHome3 from "@assets/images/bg/bg-home-3.svg";
+import BgHome4 from "@assets/images/bg/bg-home-4.svg";
 import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 
 // 캐릭터
-import Ipa from "@assets/images/character/ipa.svg";
-import Tori from "@assets/images/character/tori.svg";
 import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
-import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Logo from "@assets/images/logo/logo.svg";
 import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 import ToriFace from "@assets/images/character/tori-face.svg";
 import Ipa_gif from "@assets/images/character/ipa.gif";
+import Ipa1 from "@assets/images/character/ipa-1.svg";
+import Ipa2 from "@assets/images/character/ipa-2.svg";
+import Ipa3 from "@assets/images/character/ipa-3.svg";
+import Ipa4 from "@assets/images/character/ipa-4.svg";
+import Tori1 from "@assets/images/character/tori-1.svg";
+import Tori2 from "@assets/images/character/tori-2.svg";
+import Tori3 from "@assets/images/character/tori-3.svg";
+import Tori4 from "@assets/images/character/tori-4.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -47,9 +55,10 @@ import NavSurvey from "@assets/nav/survey.svg";
 
 export const Images = {
   BgHome1,
+  BgHome2,
+  BgHome3,
+  BgHome4,
   BgQuiz,
-  Ipa,
-  Tori,
   Snow,
   Ice,
   Quiz,
@@ -78,11 +87,18 @@ export const Images = {
   Camera,
   IpaTori1,
   IpaFace,
-  Ipa2,
   Logo,
   Kakao,
   Ipa_sad,
   ToriFace,
   Ipa_gif,
   ToriFace,
+  Ipa1,
+  Ipa2,
+  Ipa3,
+  Ipa4,
+  Tori1,
+  Tori2,
+  Tori3,
+  Tori4,
 };

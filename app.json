@@ -23,11 +23,16 @@
         "NSCameraUsageDescription": "음식을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
         "NSLocalNetworkUsageDescription": "개발 서버(Metro)와 통신하기 위해 로컬 네트워크 접근이 필요합니다.",
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true
+          "NSAllowsArbitraryLoads": true,
+          "NSExceptionDomains": {
+            "penglobe.shinhanacademy.co.kr": {
+              "NSIncludesSubdomains": true,
+              "NSTemporaryExceptionAllowsInsecureHTTPSLoads": true,
+              "NSTemporaryExceptionMinimumTLSVersion": "TLSv1.2"
+            }
+          }
         },
-        "UIBackgroundModes": [
-          "location"
-        ]
+        "UIBackgroundModes": ["location"]
       }
     },
     "android": {
@@ -44,9 +49,7 @@
       ],
       "package": "com.anonymous.myapp"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
@@ -57,9 +60,20 @@
       [
         "expo-build-properties",
         {
-          "ios": { "deploymentTarget": "15.1" }
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "63934cda-fdb2-4f4b-bf3e-9a77877deba3"
+      },
+      "SERVER_URL": "http://192.168.0.20:8080"
+
+    },
+    "owner": "panicddd"
   }
 }

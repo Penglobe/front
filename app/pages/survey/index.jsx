@@ -14,6 +14,7 @@ export default function Survey() {
   const [answer, setAnswer] = useState({}); // { itemId: 선택값 }
   const [firstUnanswered, setFirstUnanswered] = useState(null); // 제출 시 답 안 한 문항 id
   const { user } = useAuth();
+  const [submittedToday, setSubmittedToday] = useState(false);
 
   //user
   const userId = user?.userId;
@@ -33,6 +34,7 @@ export default function Survey() {
         const data = result.data ?? result;
 
         setQuestions(data);
+        setSubmittedToday(data.submitted ?? true); // 오늘 제출 여부
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
         alert("질문 불러오기 실패");
@@ -59,7 +61,7 @@ export default function Survey() {
         answer: answerArray,
       };
 
-      //console.log("payload: ", payload);
+      console.log("payload: ", payload);
 
       const response = await fetch(
         `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
@@ -75,7 +77,7 @@ export default function Survey() {
       if (!response.ok) {
         const text = await response.text();
 
-        console.error("서버 에러:", text);
+        //console.error("서버 에러:", text);
         alert("서버 요청 실패: " + response.status);
         return;
       }
@@ -85,7 +87,6 @@ export default function Survey() {
       //console.log("데이터 : ", data.data.top3);
 
       // 결과 페이지로 이동
-
       const resultDataStr = encodeURIComponent(JSON.stringify(data.data));
 
       router.push({

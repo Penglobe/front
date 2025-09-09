@@ -1,14 +1,16 @@
-// app/(tabs)/home/index.jsx
 import React from "react";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
-import { View, Text, ScrollView, StyleSheet, Platform, Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { View, Text, ScrollView, StyleSheet, Alert } from "react-native";
 import { ResultStore } from "@utils/storage";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { useAuth } from "@hooks/useAuth";
+import { apiFetch } from "@services/authService"; 
 
 // 날짜
 function formatDate(dateObj) {
@@ -28,14 +30,21 @@ const fmt = (n, digits = 1) => (n == null ? "-" : Number(n).toFixed(digits));
 export default function DietResult() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { user, refreshUser } = useAuth();
 
-  // 사진
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshUser?.();
+    }, [refreshUser])
+  );
+
+  // 사진/결과
   const photoUri = ResultStore.photoUri;
   const result = ResultStore.data;
 
   // 탄소 계산 결과
   const rawCarbon = ResultStore.carbon;
-  const carbon = rawCarbon?.data ?? rawCarbon; 
+  const carbon = rawCarbon?.data ?? rawCarbon;
   const totalKg = typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
 
   // 한 끼 식사 평균 배출량 (임시)
@@ -45,13 +54,17 @@ export default function DietResult() {
   // 날짜 문자열
   const dateStr = formatDate(new Date());
 
-  // 저장 관련 상태/설정
+  // 저장 상태
   const [saving, setSaving] = React.useState(false);
-  const userId = 5;     
+  const userId = user?.id ?? user?.userId ?? user?.user_id ?? null;
 
   // 절약량 저장
   const saveDietRecord = async () => {
     try {
+      if (!userId) {
+        Alert.alert("로그인 필요", "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
+        return;
+      }
       if (savedKg == null) {
         Alert.alert("저장 불가", "절약량을 먼저 계산해 주세요.");
         return;
@@ -62,27 +75,24 @@ export default function DietResult() {
       }
 
       setSaving(true);
-      const body = {
-        userId,
-        co2Kg: Number(savedKg.toFixed(1)), // 소수 1자리 반올림
-      };
+      // 백엔드가 Authentication에서 userId 추출 → 바디엔 co2Kg만 보냄
+      const body = { co2Kg: Number(savedKg.toFixed(1)) };
 
-      const res = await fetch(`${process.env.SERVER_URL}/diet/ingest/save`, {
+      const res = await apiFetch("/diet/ingest/save", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+        body,
       });
-
       const json = await res.json().catch(() => null);
       if (!res.ok) {
         const msg = json?.message || res.statusText || "요청 실패";
         throw new Error(msg);
       }
 
+      // 저장 직후 최신 유저정보로 갱신 → 홈에서 총 절감량 즉시 반영
+      await refreshUser?.();
+
       Alert.alert("저장 완료", "절약한 탄소량이 기록되었습니다.", [
-        { text: "확인", onPress: () => router.push("/pages/diet/Test") },
+        { text: "확인", onPress: () => router.push("/(tabs)/home") },
       ]);
     } catch (e) {
       Alert.alert("저장 실패", String(e?.message || e));
@@ -98,7 +108,6 @@ export default function DietResult() {
         <BgGradient />
         <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
           <View className="flex-1 px-pageX gap-4">
-
             {/* 날짜 */}
             <View className="pt-[18px]">
               <Text className="font-sb-md text-black text-[12px]">식사 날짜</Text>
@@ -183,7 +192,7 @@ export default function DietResult() {
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "black" },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   card: {
@@ -197,4 +206,4 @@ const styles = {
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-};
+});
