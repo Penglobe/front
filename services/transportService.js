@@ -1,68 +1,82 @@
 // services/transportService.js
-import axios from "axios";
-import Constants from "expo-constants";
-
-const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/transport`;
+import { apiFetch } from "@services/authService";
 
 /* ===================== 🚗 이동 관련 ===================== */
 // 이동 시작
-export async function startTransport(userId, mode) {
-  const res = await axios.post(`${BASE_URL}/start`, null, {
-    params: { userId, mode },
+export async function startTransport(mode) {
+  console.log("🚀 startTransport 호출 mode:", mode, typeof mode);
+  const res = await apiFetch(`/transport/start?mode=${mode}`, {
+    method: "POST",
   });
-  return res.data.data;
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "이동 시작 실패");
+  return json?.data ?? null;
 }
 
 // 이동 종료
 export async function stopTransport(transportId, distanceM, pathGeojson) {
-  const res = await axios.post(
-    `${BASE_URL}/${transportId}/stop`,
-    pathGeojson || null,
+  const res = await apiFetch(
+    `/transport/${transportId}/stop?distanceM=${distanceM}`,
     {
-      params: { distanceM },
-      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: pathGeojson || null,
     }
   );
-  console.log("🚀 stopTransport response:", res.data);
-  return res.data.data;
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "이동 종료 실패");
+  return json?.data ?? null;
 }
 
 /* ===================== ⭐ 북마크 관련 ===================== */
 // 북마크 등록
-export async function createBookmark(userId, dto) {
-  const res = await axios.post(`${BASE_URL}/bookmarks`, dto, {
-    params: { userId },
+export async function createBookmark(dto) {
+  const res = await apiFetch(`/transport/bookmarks`, {
+    method: "POST",
+    body: dto,
   });
-  return res.data.data;
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "북마크 등록 실패");
+  return json?.data ?? null;
 }
 
 // 북마크 목록 조회
-export async function listBookmarks(userId) {
-  const res = await axios.get(`${BASE_URL}/bookmarks`, {
-    params: { userId },
-  });
-  return res.data.data;
+export async function listBookmarks() {
+  const res = await apiFetch(`/transport/bookmarks`, { method: "GET" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "북마크 조회 실패");
+  return json?.data ?? [];
 }
 
 // 북마크 수정
 export async function updateBookmark(bookmarkId, dto) {
-  const res = await axios.put(`${BASE_URL}/bookmarks/${bookmarkId}`, dto);
-  return res.data.data;
+  const res = await apiFetch(`/transport/bookmarks/${bookmarkId}`, {
+    method: "PUT",
+    body: dto,
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "북마크 수정 실패");
+  return json?.data ?? null;
 }
 
 // 북마크 삭제
 export async function deleteBookmark(bookmarkId) {
-  const res = await axios.delete(`${BASE_URL}/bookmarks/${bookmarkId}`);
-  return res.data.data;
+  const res = await apiFetch(`/transport/bookmarks/${bookmarkId}`, {
+    method: "DELETE",
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "북마크 삭제 실패");
+  return json?.data ?? null;
 }
 
 /* ===================== 🗺️ 카카오 API 프록시 ===================== */
 export async function searchAddress(query) {
-  const res = await axios.get(
-    `${Constants.expoConfig.extra.SERVER_URL}/api/kakao/search`,
+  const res = await apiFetch(
+    `/api/kakao/search?query=${encodeURIComponent(query)}`,
     {
-      params: { query },
+      method: "GET",
     }
   );
-  return res.data.data; // ApiResponse.data
+  const json = await res.json();
+  if (!res.ok) throw new Error(json?.message || "주소 검색 실패");
+  return json?.data ?? [];
 }

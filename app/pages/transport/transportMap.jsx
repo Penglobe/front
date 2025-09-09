@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Alert, Platform, ScrollView } from "react-native";
+import { View, Text, Alert, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -43,7 +43,7 @@ if (!TaskManager.isTaskDefined(TASK_NAME)) {
       return;
     }
     if (locations?.length > 0) {
-      console.log("Background location update:", locations[0].coords);
+      console.log("📍 Background location update:", locations[0].coords);
     }
   });
 }
@@ -59,8 +59,6 @@ export default function TransportMap() {
   } = useLocalSearchParams();
   const mode = rawMode || "TRANSIT";
   const router = useRouter();
-
-  const userId = 1; // TODO: 로그인 사용자 ID
 
   const [transportId, setTransportId] = useState(null);
   const [distance, setDistance] = useState(0);
@@ -89,7 +87,17 @@ export default function TransportMap() {
   useEffect(() => {
     (async () => {
       try {
-        const activity = await startTransport(userId, mode);
+        const activity = await startTransport(mode);
+        console.log("🚀 /transport/start 응답:", activity);
+
+        if (!activity || !activity.transportId) {
+          Alert.alert(
+            "이동 시작 실패",
+            "transportId를 가져올 수 없습니다.\n로그인을 다시 시도해주세요."
+          );
+          return;
+        }
+
         setTransportId(activity.transportId);
 
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -112,6 +120,10 @@ export default function TransportMap() {
         }
       } catch (err) {
         console.error("이동 시작 실패:", err);
+        Alert.alert(
+          "이동 시작 실패",
+          err.message || "서버와 통신할 수 없습니다."
+        );
       }
     })();
 
@@ -203,12 +215,13 @@ export default function TransportMap() {
       }
 
       if (!transportId) {
-        console.error("transportId 없음, stopTransport 불가");
-        Alert.alert("이동 종료 실패", "이동 ID가 없습니다.");
+        console.error("⚠️ transportId 없음");
+        Alert.alert("이동 종료 실패", "transportId가 없습니다.");
         return;
       }
 
       const result = await stopTransport(transportId, Math.round(usedDistance));
+      console.log("✅ /transport/{id}/stop 응답:", result);
 
       router.replace({
         pathname: "/pages/transport/transportFinish",
@@ -224,83 +237,82 @@ export default function TransportMap() {
       });
     } catch (err) {
       console.error("stopTransport 실패:", err);
-      Alert.alert("이동 종료 실패", "서버와 통신할 수 없습니다.");
+      Alert.alert(
+        "이동 종료 실패",
+        err.message || "서버와 통신할 수 없습니다."
+      );
     }
   };
 
   return (
     <View className="flex-1">
       <BgGradient />
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <HeaderBar title="이동 중" className="px-pageX" />
+      <HeaderBar title="이동 중" className="px-pageX" />
 
-        {/* 지도 */}
-        <View className="mb-5 overflow-hidden">
-          <KakaoMapView
-            startLat={startLat}
-            startLng={startLng}
-            endLat={endLat}
-            endLng={endLng}
-            currentLat={currentLat}
-            currentLng={currentLng}
-            height={400}
-          />
-        </View>
+      {/* 지도 */}
+      <View className="mb-5 overflow-hidden">
+        <KakaoMapView
+          startLat={startLat}
+          startLng={startLng}
+          endLat={endLat}
+          endLng={endLng}
+          currentLat={currentLat}
+          currentLng={currentLng}
+          height={400}
+        />
+      </View>
 
-        {/* 이동 정보 */}
-        <View className="px-pageX mt-5">
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5">
-            <View className="flex-row items-center mb-3">
-              <Ionicons
-                name="location-outline"
-                size={22}
-                color="#318643"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-b text-lg text-gray-800">
-                도착지: {placeName}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name="walk-outline"
-                size={20}
-                color="#555"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-md text-base text-gray-600">
-                이동 거리:{" "}
-                <Text className="font-sf-b text-[#318643]">
-                  {Math.round(distance)} m
-                </Text>
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 종료 버튼 & 테스트 버튼 */}
-        <View className="px-pageX mt-auto mb-10">
-          <MainButton
-            label="이동 종료"
-            onPress={() => handleStop(false)}
-            className="bg-red-500 active:bg-red-700"
-          />
-
-          <View className="mt-3">
-            <MainButton
-              label="거리 +100m (테스트)"
-              onPress={() => {
-                setDistance((prev) => prev + 100);
-                distanceRef.current += 100;
-              }}
-              className="bg-blue-500 active:bg-blue-700"
+      {/* 이동 정보 */}
+      <View className="px-pageX mt-5">
+        <View className="bg-white rounded-2xl shadow-md px-6 py-5">
+          <View className="flex-row items-center mb-3">
+            <Ionicons
+              name="location-outline"
+              size={22}
+              color="#318643"
+              style={{ marginRight: 6 }}
             />
+            <Text className="font-sf-b text-lg text-gray-800">
+              도착지: {placeName}
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons
+              name="walk-outline"
+              size={20}
+              color="#555"
+              style={{ marginRight: 6 }}
+            />
+            <Text className="font-sf-md text-base text-gray-600">
+              이동 거리:{" "}
+              <Text className="font-sf-b text-[#318643]">
+                {Math.round(distance)} m
+              </Text>
+            </Text>
           </View>
         </View>
-      </ScrollView>
+      </View>
+
+      {/* 종료 버튼 */}
+      <View className="px-pageX mt-auto mb-10">
+        <MainButton
+          label="이동 종료"
+          onPress={() => handleStop(false)}
+          className="bg-red-500 active:bg-red-700"
+        />
+
+        {/* 🚀 테스트용 거리 증가 버튼 */}
+        <View className="mt-3">
+          <MainButton
+            label="거리 +100m (테스트)"
+            onPress={() => {
+              setDistance((prev) => prev + 100);
+              distanceRef.current += 100;
+            }}
+            className="bg-blue-500 active:bg-blue-700"
+          />
+        </View>
+      </View>
     </View>
   );
 }

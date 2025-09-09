@@ -3,6 +3,9 @@ import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { getAccessToken, me } from "@services/authService";
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
 export default function GlobalRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -10,6 +13,7 @@ export default function GlobalRanking() {
   const [loading, setLoading] = useState(true);
   const [currentUserNickname, setCurrentUserNickname] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [showParticipationMessage, setShowParticipationMessage] = useState(false); // New state for message visibility
 
   useEffect(() => {
     const fetchGlobalRanking = async () => {
@@ -31,7 +35,7 @@ export default function GlobalRanking() {
         }
 
         const response = await fetch(
-          "http://192.168.0.79:8080/rankings/global",
+          `${BASE_URL}/rankings/global`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -47,12 +51,11 @@ export default function GlobalRanking() {
         setRankingList(data.top10);
         setMyRank(data.myRank);
 
-        // Check if myRank is null and display alert
+        // Check if myRank is null and display message
         if (!data.myRank) {
-          Alert.alert(
-            "랭킹 확인 불가",
-            "기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을 통해 탄소 절감량을 늘려보세요!"
-          );
+          setShowParticipationMessage(true); // Show message instead of alert
+        } else {
+          setShowParticipationMessage(false); // Hide message if rank is found
         }
       } catch (error) {
         console.error("Error fetching global ranking:", error);
@@ -79,7 +82,7 @@ export default function GlobalRanking() {
   }
 
   const myRankingFromTop10 = rankingList.find(
-    (item) => item.nickname === currentUserNickname
+    (item) => item.userId === currentUserId // Change to userId comparison
   );
 
   return (
@@ -102,10 +105,18 @@ export default function GlobalRanking() {
         </LinearGradient>
       )}
 
+      {/* 랭킹 확인 불가 메시지 */}
+      {showParticipationMessage && (
+          <View className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg">
+              <Text className="font-bold">랭킹 확인 불가</Text>
+              <Text>기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을 통해 탄소 절감량을 늘려보세요!</Text>
+          </View>
+      )}
+
       {/* 랭킹 리스트 (카드 형식) */}
       <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
         {rankingList.map((item) => {
-          const isCurrentUser = item.nickname === currentUserNickname;
+          const isCurrentUser = item.userId === currentUserId; // Change to userId comparison
           return (
             <RankingCard
               key={item.rank + item.nickname}
@@ -128,6 +139,7 @@ export default function GlobalRanking() {
                 rank: myRank.rank,
                 nickname: currentUserNickname, // 백엔드 응답에 닉네임이 없으므로 직접 설정
                 score: myRank.score,
+                profile: myRank.profile,
               }}
               isProminent={true}
             />

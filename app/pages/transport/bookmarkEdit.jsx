@@ -10,7 +10,7 @@ import KakaoMapView from "@components/KakaoMapView";
 import colors from "@constants/Colors.cjs";
 
 // ✅ SVG 캐릭터 import
-import Tori from "@assets/images/character/tori.svg";
+import Tori from "@assets/images/character/tori-1.svg";
 import Ipa from "@assets/images/character/ipa-face.svg";
 
 export default function BookmarkEdit() {
@@ -100,7 +100,7 @@ export default function BookmarkEdit() {
           </View>
 
           {/* 캐릭터 */}
-          <View className="items-end m-1 pr-pageX">
+          <View className="items-end pr-pageX">
             <Tori width={100} height={180} />
           </View>
 

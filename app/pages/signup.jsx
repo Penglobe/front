@@ -37,6 +37,7 @@ export default function Signup() {
   const [nickname, setNickname] = useState("");
   const [regionId, setRegionId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailCheck, setEmailCheck] = useState("idle");
 
   const [regionLabel, setRegionLabel] = useState();
   const [regionOpen, setRegionOpen] = useState(false);
@@ -52,8 +53,39 @@ export default function Signup() {
   const pw2Ref = useRef(null);
   const nickRef = useRef(null);
 
+  // 이메일 변경 시 중복확인 상태 초기화
+  const onChangeEmail = (v) => {
+    setEmail(v);
+    if (emailCheck !== "idle") setEmailCheck("idle");
+  };
+
+  // 중복 확인 호출
+  const onCheckEmail = async () => {
+    const target = email.trim();
+    if (!target) return Alert.alert("확인", "이메일을 입력하세요.");
+    // 간단한 형식 체크 (옵션)
+    const okFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target);
+    if (!okFormat)
+      return Alert.alert("확인", "이메일 형식이 올바르지 않습니다.");
+
+    try {
+      setEmailCheck("checking");
+      const res = await apiFetch(
+        `/auth/check-email?email=${encodeURIComponent(target)}`
+      );
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || "중복 확인 실패");
+      const exists = Boolean(json?.data?.exists ?? json?.exists);
+      setEmailCheck(exists ? "dup" : "ok");
+    } catch (e) {
+      setEmailCheck("idle");
+      Alert.alert("오류", e?.message ?? "중복 확인 중 오류가 발생했습니다.");
+    }
+  };
+
   const canSubmit =
     email.trim().length > 0 &&
+    emailCheck === "ok" &&
     nickname.trim().length > 0 &&
     password.trim().length >= 8 &&
     password === password2 &&
@@ -143,27 +175,94 @@ export default function Signup() {
             }}
           >
             <Labeled label="이메일">
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="example@email.com"
-                placeholderTextColor="gray"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                textContentType={Platform.select({
-                  ios: "emailAddress",
-                  android: "email",
-                })}
-                className="bg-white rounded-2xl px-4 text-black font-sf-md"
-                style={[
-                  styles.inputShadow,
-                  { height: INPUT_H, fontSize: FONT },
-                ]}
-                returnKeyType="next"
-                onSubmitEditing={() => pwRef.current?.focus()}
-              />
+              {/* 입력 + 버튼 한 줄 */}
+              <View
+                className="bg-white rounded-2xl flex-row items-center"
+                style={[styles.inputShadow, { height: INPUT_H }]}
+              >
+                <TextInput
+                  value={email}
+                  onChangeText={onChangeEmail}
+                  placeholder="example@email.com"
+                  placeholderTextColor="gray"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                  textContentType={Platform.select({
+                    ios: "emailAddress",
+                    android: "email",
+                  })}
+                  className="flex-1 px-4 text-black font-sf-md"
+                  style={{ fontSize: FONT }}
+                  returnKeyType="next"
+                  onSubmitEditing={() => pwRef.current?.focus()}
+                />
+
+                {/* 오른쪽 중복확인 버튼 */}
+                <Pressable
+                  onPress={async () => {
+                    const target = email.trim();
+                    if (!target) {
+                      setEmailCheck("idle");
+                      return;
+                    }
+
+                    // ✅ 형식 검사 (형식 틀리면 서버 호출하지 않음)
+                    const okFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target);
+                    if (!okFormat) {
+                      setEmailCheck("invalid");
+                      return;
+                    }
+
+                    try {
+                      setEmailCheck("checking");
+                      const res = await apiFetch(
+                        `/auth/check-email?email=${encodeURIComponent(target)}`
+                      );
+                      const json = await res.json().catch(() => null);
+                      if (!res.ok)
+                        throw new Error(json?.message || "중복 확인 실패");
+
+                      const exists = Boolean(
+                        json?.data?.exists ?? json?.exists
+                      );
+                      setEmailCheck(exists ? "dup" : "ok");
+                    } catch (e) {
+                      // 네트워크/서버 오류 시 상태 초기화
+                      setEmailCheck("idle");
+                    }
+                  }}
+                  disabled={emailCheck === "checking"}
+                  className="mr-3 px-3 py-2 rounded-xl"
+                  style={{
+                    backgroundColor: "green",
+                    opacity: emailCheck === "checking" ? 0.7 : 1,
+                  }}
+                  hitSlop={8}
+                >
+                  <Text className="text-white font-sf-b">
+                    {emailCheck === "checking" ? "확인중..." : "중복확인"}
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* 아래 상태 메시지 */}
+              {email.trim().length > 0 && emailCheck === "ok" && (
+                <Text className="mt-2 text-green font-sf-md">
+                  사용 가능한 이메일입니다.
+                </Text>
+              )}
+              {email.trim().length > 0 && emailCheck === "dup" && (
+                <Text className="mt-2 text-rose-600 font-sf-md">
+                  이미 사용 중인 이메일입니다.
+                </Text>
+              )}
+              {email.trim().length > 0 && emailCheck === "invalid" && (
+                <Text className="mt-2 text-amber-600 font-sf-md">
+                  이메일 형식이 올바르지 않습니다.
+                </Text>
+              )}
             </Labeled>
 
             <Labeled label="비밀번호(8자 이상)">

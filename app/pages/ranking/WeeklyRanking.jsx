@@ -10,12 +10,21 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { getAccessToken, me } from "@services/authService";
+import Constants from "expo-constants";
+import { useAuth } from "@hooks/useAuth"; // Import useAuth hook
 
 export default function WeeklyRanking({ fetchRegionRankingData }) {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserNickname, setCurrentUserNickname] = useState(null);
+  const [userId, setUserId] = useState(null); // Declare userId state variable
+  const [showParticipationMessage, setShowParticipationMessage] =
+    useState(false); // New state for message visibility
+
+  const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
+
+  const { user, isLoading: isAuthLoading } = useAuth(); // Add useAuth() hook call and user declaration
 
   // --- Refactored Data Fetching Logic ---
   const fetchRankingData = useCallback(async () => {
@@ -33,7 +42,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
         setCurrentUserNickname(userInfo.nickname);
       }
 
-      const response = await fetch("http://192.168.0.79:8080/rankings/weekly", {
+      const response = await fetch(`${BASE_URL}/rankings/weekly`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -49,10 +58,9 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       setMyRank(data.myRank || null);
 
       if (!data.myRank) {
-        Alert.alert(
-          "랭킹 참여 조건 미달",
-          "주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! \n이번 주에 출석을 완료하고 다음 주에 다시 도전해보세요!"
-        );
+        setShowParticipationMessage(true); // Show message instead of alert
+      } else {
+        setShowParticipationMessage(false); // Hide message if rank is found
       }
     } catch (error) {
       console.error("Error fetching weekly ranking:", error);
@@ -63,7 +71,14 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]); // Add userId to dependency array
+
+  useEffect(() => {
+    if (user && user.userId && user.nickname) {
+      setUserId(user.userId);
+      setCurrentUserNickname(user.nickname);
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchRankingData();
@@ -73,15 +88,12 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   const handleAddDummyData = async () => {
     try {
       const token = await getAccessToken();
-      const response = await fetch(
-        "http://192.168.0.79:8080/users/me/add-dummy-data",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/users/me/add-dummy-data`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add dummy data");
@@ -110,7 +122,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   }
 
   const myRankingFromTop10 = rankingList.find(
-    (item) => item.nickname === currentUserNickname
+    (item) => item.userId === userId // Change to userId comparison
   );
 
   return (
@@ -138,17 +150,29 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
         </LinearGradient>
       )}
 
+      {/* 랭킹 참여 조건 미달 메시지 */}
+      {showParticipationMessage && (
+        <View className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg">
+          <Text className="font-bold">랭킹 참여 조건 미달</Text>
+          <Text>
+            주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! 이번 주에
+            출석을 완료하고 다음 주에 다시 도전해보세요!
+          </Text>
+        </View>
+      )}
+
       {/* 랭킹 리스트 (카드 형식) */}
       <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
         {rankingList.map((item) => {
-          const isCurrentUser = item.nickname === currentUserNickname;
+          const isCurrentUser = item.userId === userId; // Change to userId comparison
           return (
             <RankingCard
-              key={item.rank + item.nickname}
+              key={item.rank + item.nickname} // Keep key as is, or change to item.userId if unique
               item={{
                 rank: item.rank,
                 nickname: item.nickname,
                 score: item.score,
+                profile: item.profile,
               }}
               isProminent={isCurrentUser}
             />
@@ -172,16 +196,18 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       </ScrollView>
 
       {/* 테스트 버튼 */}
-      <View className="flex-row justify-around mt-4">
-        <TouchableOpacity
-          onPress={handleAddDummyData}
-          className="bg-blue-500 p-3 rounded-lg"
-        >
-          <Text className="text-white font-bold">
-            랭킹 참여/점수 추가 (테스트)
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {userId === 115 && ( // Conditionally render for userId 115
+        <View className="flex-row justify-around mt-4">
+          <TouchableOpacity
+            onPress={handleAddDummyData}
+            className="bg-blue-500 p-3 rounded-lg"
+          >
+            <Text className="text-white font-bold">
+              랭킹 참여/점수 추가 (테스트)
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
