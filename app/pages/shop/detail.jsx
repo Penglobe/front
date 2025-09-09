@@ -181,11 +181,9 @@ export default function ProductDetailPage() {
         >
           <MainButton onPress={openConfirm} className="w-full">
             <View className="flex-row items-center">
-              <Text className="text-white font-sf-b mr-1">
-                {total.toLocaleString()}
+              <Text className="text-white font-sf-b ml-2 text-[16px]">
+                구매하기
               </Text>
-              <Images.Ice width={18} height={18} />
-              <Text className="text-white font-sf-b ml-1">결제하기</Text>
             </View>
           </MainButton>
         </View>
@@ -217,7 +215,13 @@ export default function ProductDetailPage() {
           </Text>
           <Images.Ice width={25} height={25} />
         </View>
-        <MainButton label="구매하기" onPress={handleBuy} />
+        <MainButton onPress={handleBuy}>
+          <View className="flex-row items-center">
+            <Text className="text-white font-sf-b ml-2 text-[16px]">
+              결제하기
+            </Text>
+          </View>
+        </MainButton>
       </Modal>
     </View>
   );

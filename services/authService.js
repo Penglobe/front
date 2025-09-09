@@ -2,7 +2,6 @@
 import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 
-
 // ====== 설정 ======
 
 const { SERVER_URL } = Constants.expoConfig.extra;
@@ -174,7 +173,7 @@ export async function logout() {
 }
 
 export async function me() {
-  const res = await apiFetch("/user/me", { method: "GET" });
+  const res = await apiFetch("/users/me", { method: "GET" });
   const json = await res.json().catch(() => null);
   if (!res.ok) throw new Error(json?.message || "me 조회 실패");
   return json?.data ?? json;
