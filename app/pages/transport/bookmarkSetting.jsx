@@ -10,7 +10,7 @@ import KakaoMapView from "@components/KakaoMapView";
 import colors from "@constants/Colors.cjs";
 
 // ✅ SVG 캐릭터 import
-import Tori from "@assets/images/character/tori.svg";
+import Tori from "@assets/images/character/tori-1.svg";
 import Ipa from "@assets/images/character/ipa-face.svg";
 
 export default function BookmarkSetting() {

@@ -6,58 +6,61 @@
   <true/>
   <key>CFBundleDevelopmentRegion</key>
   <string>$(DEVELOPMENT_LANGUAGE)</string>
+
   <key>CFBundleDisplayName</key>
   <string>펭글로브</string>
+
   <key>CFBundleExecutable</key>
   <string>$(EXECUTABLE_NAME)</string>
+
   <key>CFBundleIdentifier</key>
   <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
+
   <key>CFBundleName</key>
   <string>$(PRODUCT_NAME)</string>
+
   <key>CFBundlePackageType</key>
   <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+
   <key>CFBundleShortVersionString</key>
   <string>1.0.0</string>
+
   <key>CFBundleSignature</key>
   <string>????</string>
 
 	  <key>KAKAO_APP_KEY</key>
-  <string>d7e4f67977821a83057f4a5563b41415</string>
+  <string>$(KAKAO_APP_KEY)</string>
 
-  <!-- URL Schemes: 한 번만 선언 -->
   <key>CFBundleURLTypes</key>
   <array>
     <dict>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>penglobe</string>
-        <string>com.penglobe9.app</string>
-        <!-- 카카오: 네이티브 앱 키로 교체 (예: kakao1234567890abcdef) -->
-        <string>kakaod7e4f67977821a83057f4a5563b41415</string>
+        <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+        <string>kakao$(KAKAO_APP_KEY)</string>
       </array>
     </dict>
   </array>
 
   <key>LSApplicationQueriesSchemes</key>
     <array>
-      <!-- Login with Kakao Talk -->
       <string>kakaokompassauth</string>
-      <!-- Kakao Talk Share -->
       <string>kakaolink</string>
-      <!-- (카카오채널 기능 쓰면) -->
       <string>kakaoplus</string>
     </array>
 
   <key>CFBundleVersion</key>
   <string>1</string>
 
-  <!-- 커스텀 키 -->
   <key>FoodLensAppToken</key>
-  <string>0b6fbe431b4144f190423b9630b6354a</string>
+  <string>$(FoodLensAppToken)</string>
+
   <key>FoodLensCompanyToken</key>
-  <string>774ee2d62e604f8a944242d471488ce6</string>
+  <string>$(FoodLensCompanyToken)</string>
 
   <key>NSLocalNetworkUsageDescription</key>
   <string>개발 서버(Metro)와 통신하기 위해 로컬 네트워크 접근이 필요합니다.</string>
