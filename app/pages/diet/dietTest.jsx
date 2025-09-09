@@ -22,6 +22,16 @@ import { ResultStore } from "@utils/storage";
 
 const { FoodLensModule } = NativeModules;
 
+const jlog = (event, data = {}) => {
+  try {
+    const safe = JSON.stringify(
+      { ts: new Date().toISOString(), tag: "diet-test", event, ...data }
+    );
+    console.log(safe);
+  } catch (e) {
+    console.log(JSON.stringify({ ts: new Date().toISOString(), tag: "diet-test", event, note: "stringify-failed" }));
+  }
+};
 
 export default function DietTest() {
   const insets = useSafeAreaInsets();
@@ -30,6 +40,7 @@ export default function DietTest() {
 
   useFocusEffect(
     React.useCallback(() => {
+      jlog("focus.refreshUser.call");
       refreshUser?.();
     }, [refreshUser])
   );
@@ -112,6 +123,10 @@ export default function DietTest() {
     setLastError(null);
 
     const result = await FoodLensModule.predictBase64(photo.base64);
+    jlog("predict.ok", {
+        foodsCount:
+          (result?.foods ?? result?.items ?? result?.candidates ?? result?.results ?? []).length,
+      });
 
     const userId = user?.id ?? user?.userId ?? user?.user_id ?? null;
     if (!userId) {
