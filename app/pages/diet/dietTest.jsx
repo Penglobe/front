@@ -1,15 +1,7 @@
 import React, { useRef, useState } from "react";
 import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/carbonApi";
-import {
-  View,
-  Text,
-  Button,
-  Alert,
-  ActivityIndicator,
-  StyleSheet,
-  Pressable,
-} from "react-native";
+import { View, Text, Button, Alert, ActivityIndicator, StyleSheet, Pressable } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { NativeModules } from "react-native";
 import { ShutterButton } from "@pages/diet/ShutterButton";
@@ -36,14 +28,7 @@ const jlog = (event, data = {}) => {
 export default function DietTest() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, refreshUser } = useAuth();
-
-  useFocusEffect(
-    React.useCallback(() => {
-      jlog("focus.refreshUser.call");
-      refreshUser?.();
-    }, [refreshUser])
-  );
+  const { user } = useAuth();
 
   const [perm, requestPerm] = useCameraPermissions();
   const camRef = useRef(null);
@@ -111,7 +96,7 @@ export default function DietTest() {
   const confirmAndPredict = async () => {
   try {
     if (!FoodLensModule) {
-      Alert.alert("네이티브 모듈 없음", "iOS를 다시 빌드하세요: npx expo run:ios");
+      Alert.alert("네이티브 모듈 없음", "iOS를 다시 빌드하세요");
       return;
     }
     if (!photo?.base64) {
@@ -128,7 +113,7 @@ export default function DietTest() {
           (result?.foods ?? result?.items ?? result?.candidates ?? result?.results ?? []).length,
       });
 
-    const userId = user?.id ?? user?.userId ?? user?.user_id ?? null;
+    const userId = user?.userId;
     if (!userId) {
       Alert.alert("로그인 필요", "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
       return;
