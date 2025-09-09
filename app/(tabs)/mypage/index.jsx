@@ -5,7 +5,9 @@ import BgGradient from "@components/BgGradient";
 import { getAccessToken, me } from "@services/authService";
 import Constants from "expo-constants";
 import { Calendar } from "react-native-calendars";
+import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
 const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
@@ -22,7 +24,14 @@ const getAvatarRenderComponent = (profileKey) => {
 export default function MyPage() {
   const [myPageInfo, setMyPageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(null); // State for selected date
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const day = String(today.getDate()).padStart(2, "0");
+  const todayDateString = `${year}-${month}-${day}`;
+
+  const [selectedDate, setSelectedDate] = useState(todayDateString); // State for selected date, default to today
   const [dailyReductionData, setDailyReductionData] = useState(null); // State for daily data
   const [dailyLoading, setDailyLoading] = useState(false); // Loading state for daily data
   const [attendanceDates, setAttendanceDates] = useState([]); // State for attendance dates
@@ -140,10 +149,73 @@ export default function MyPage() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchMyPageInfo();
-    fetchAttendanceDates(); // Fetch attendance dates on mount
+  useFocusEffect(
+    useCallback(() => {
+      fetchMyPageInfo();
+      fetchAttendanceDates();
+    }, [fetchMyPageInfo, fetchAttendanceDates])
+  );
+
+  const handleResetAttendance = useCallback(async () => {
+    Alert.alert(
+      "초기화 확인",
+      "출석 데이터와 관련 활동 기록을 모두 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "초기화",
+          onPress: async () => {
+            try {
+              const token = await getAccessToken();
+              if (!token) {
+                console.warn("로그인 필요");
+                return;
+              }
+
+              const response = await fetch(
+                `${BASE_URL}/users/me/reset-attendance`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error(`출석 데이터 초기화 에러: ${response.status}`);
+              }
+
+              const apiResponse = await response.json();
+              if (apiResponse.status === 200) {
+                Alert.alert(
+                  "성공",
+                  "출석 데이터가 성공적으로 초기화되었습니다."
+                );
+                // Refresh data after reset
+                fetchMyPageInfo();
+                fetchAttendanceDates();
+              } else {
+                Alert.alert(
+                  "오류",
+                  apiResponse.message || "출석 데이터 초기화에 실패했습니다."
+                );
+              }
+            } catch (error) {
+              console.error("Error resetting attendance data:", error);
+              Alert.alert("오류", "출석 데이터 초기화 중 오류가 발생했습니다.");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   }, [fetchMyPageInfo, fetchAttendanceDates]);
+
+  useEffect(() => {
+    fetchDailyReductionData(todayDateString); // Fetch daily data for today
+  }, [fetchDailyReductionData, todayDateString]); // Only fetch daily data on initial mount or date change
 
   // Handler for calendar day press
   const handleDayPress = (day) => {
@@ -171,9 +243,10 @@ export default function MyPage() {
           currentStreakStart = currentDate;
         }
 
-        const isLastDayOfStreak = 
-          !nextDate || 
-          new Date(nextDate).getTime() - new Date(currentDate).getTime() > 24 * 60 * 60 * 1000;
+        const isLastDayOfStreak =
+          !nextDate ||
+          new Date(nextDate).getTime() - new Date(currentDate).getTime() >
+            24 * 60 * 60 * 1000;
 
         if (isLastDayOfStreak) {
           const streakEndDate = currentDate;
@@ -184,7 +257,7 @@ export default function MyPage() {
               color: "#2E8B57", // SeaGreen for attendance
               textColor: "white",
               startingDay: formattedTempDate === currentStreakStart,
-              endingDay: formattedTempDate === streakEndDate,
+              endingDay: formattedTempDate === streakEndDate, // Fixed typo here
             };
             tempDate.setDate(tempDate.getDate() + 1);
           }
@@ -202,11 +275,12 @@ export default function MyPage() {
         ...marked[selectedDate], // Keep starting/ending day properties if they exist
         color: selectionColor,
         // If it's not an attendance day, we need to make it a standalone period (a circle)
-        startingDay: !isAttendanceDay ? true : marked[selectedDate]?.startingDay,
+        startingDay: !isAttendanceDay
+          ? true
+          : marked[selectedDate]?.startingDay,
         endingDay: !isAttendanceDay ? true : marked[selectedDate]?.endingDay,
       };
     }
-
     return marked;
   };
 
@@ -236,12 +310,12 @@ export default function MyPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          paddingBottom: 100,
+          paddingBottom: 150,
         }}
       >
         <HeaderBar title="마이페이지" />
 
-        <ScrollView className="flex-1 p-4">
+        <ScrollView className="flex-1 px-pageX">
           <View className="bg-white rounded-xl p-4 shadow mb-4">
             <Text className="text-lg font-bold mb-2">사용자 정보</Text>
             <Text>사용자 ID: {myPageInfo.userId}</Text>
@@ -256,7 +330,10 @@ export default function MyPage() {
                   : null}
               </View>
             )}
-            <Text>얼음 이미지: {myPageInfo.totalPoint}</Text>
+            <View className="flex-row items-center">
+              <Text>얼음 이미지: {myPageInfo.totalPoint}</Text>
+              <Images.Ice width={20} height={20} style={{ marginLeft: 5 }} />
+            </View>
             <Text>누적 출석일: {myPageInfo.attendanceTotalDays}</Text>
             <Text>최장 연속 출석일: {myPageInfo.longestAttendanceStreak}</Text>
             {myPageInfo.regionName && (
@@ -296,10 +373,16 @@ export default function MyPage() {
           </View>
 
           {/* 추가 정보 섹션 (필요시 확장) */}
+          {/* 추가 정보 섹션 (필요시 확장) */}
           <View className="bg-white rounded-xl p-4 shadow mt-4">
             <Text className="text-lg font-bold mb-2">기타 정보</Text>
             <Text>현재 연속 출석일: {myPageInfo.attendanceStreakDays}</Text>
             {/* 여기에 다른 마이페이지 관련 정보를 추가할 수 있습니다. */}
+            <MainButton
+              label="출석 데이터 초기화 (테스트용)"
+              onPress={handleResetAttendance}
+              className="mt-4 bg-red-500"
+            />
           </View>
         </ScrollView>
       </View>
