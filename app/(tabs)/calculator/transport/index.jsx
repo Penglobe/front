@@ -48,7 +48,7 @@ export default function TransportStart() {
 
       {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 200 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ✅ KakaoMapView */}

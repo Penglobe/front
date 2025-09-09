@@ -53,7 +53,7 @@ export default function TransportFinish() {
       </Pressable>
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 200 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ✅ 본문 */}

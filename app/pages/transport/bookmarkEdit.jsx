@@ -52,7 +52,7 @@ export default function BookmarkEdit() {
 
       {/* ✅ ScrollView 적용 */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 200 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="px-pageX mt-6">

@@ -477,30 +477,29 @@ export default function Signup() {
                 </View>
               )}
             </Labeled>
-          </ScrollView>
-
-          {/* 하단 버튼 */}
-          <Pressable
-            onPress={onSubmit}
-            disabled={!canSubmit || loading}
-            className="mt-2 rounded-2xl items-center justify-center"
-            style={[
-              styles.loginBtnShadow,
-              {
-                height: BTN_H,
-                backgroundColor: canSubmit ? "#10B981" : "#E5E7EB",
-                opacity: loading ? 0.7 : 1,
-              },
-            ]}
-          >
-            <Text
-              className={`font-sf-b text-[18px] ${
-                canSubmit ? "text-white" : "text-[#9CA3AF]"
-              }`}
+            {/* 하단 버튼 */}
+            <Pressable
+              onPress={onSubmit}
+              disabled={!canSubmit || loading}
+              className="mt-2 rounded-2xl items-center justify-center"
+              style={[
+                styles.loginBtnShadow,
+                {
+                  height: BTN_H,
+                  backgroundColor: canSubmit ? "#10B981" : "#E5E7EB",
+                  opacity: loading ? 0.7 : 1,
+                },
+              ]}
             >
-              {loading ? "처리 중..." : "가입하기"}
-            </Text>
-          </Pressable>
+              <Text
+                className={`font-sf-b text-[18px] ${
+                  canSubmit ? "text-white" : "text-[#9CA3AF]"
+                }`}
+              >
+                {loading ? "처리 중..." : "가입하기"}
+              </Text>
+            </Pressable>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </View>
