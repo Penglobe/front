@@ -1,6 +1,13 @@
 // app/(tabs)/home/index.jsx
 
-import { View, StyleSheet, Pressable, Dimensions, Alert, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Dimensions,
+  Alert,
+  Text,
+} from "react-native";
 import { Images } from "@constants/Images";
 import { useFocusEffect, useRouter } from "expo-router";
 import Animated, {
@@ -140,9 +147,9 @@ export default function Home() {
   const level = Number(totalScore) || 0;
   const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
 
-  const IpaComp  = Images[`Ipa${stage}`]  ?? Images.Ipa1;
+  const IpaComp = Images[`Ipa${stage}`] ?? Images.Ipa1;
   const ToriComp = Images[`Tori${stage}`] ?? Images.Tori1;
-  const BgComp   = Images[`BgHome${stage}`] ?? Images.BgHome1;
+  const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
 
   const translateY = useSharedValue(0);
   useEffect(() => {
@@ -153,13 +160,12 @@ export default function Home() {
       ),
       -1,
       true
-
     );
   }, []);
   const animatedStyle = useAnimatedStyle(() => {
     const elev = interpolate(translateY.value, [-8, 0], [6, 4]);
     const radius = interpolate(translateY.value, [-8, 0], [8, 4]);
-    
+
     return {
       transform: [{ translateY: translateY.value }],
       shadowRadius: radius,
@@ -169,8 +175,8 @@ export default function Home() {
 
   const { width } = Dimensions.get("window");
   const TORI_W = Math.min(width * 0.42, 220);
-  const IPA_W  = Math.min(width * 0.36, 200);
-  const IPA_H  = IPA_W * 1.4; 
+  const IPA_W = Math.min(width * 0.36, 200);
+  const IPA_H = IPA_W * 1.4;
 
   return (
     <View className="flex-1">
@@ -187,19 +193,35 @@ export default function Home() {
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
           className="flex-row items-center justify-between bg-blue rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
-          style={{ shadowColor:"#065A93", shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:2, elevation:4 }}
+          style={{
+            shadowColor: "#065A93",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 2,
+            elevation: 4,
+          }}
         >
           <Images.Snow width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">{streakDays.toLocaleString("ko-KR")}일</Text>
+          <Text className="text-white font-sf-md text-[16px]">
+            {streakDays.toLocaleString("ko-KR")}일
+          </Text>
         </Pressable>
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
           className="flex-row items-center justify-between bg-green rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
-          style={{ shadowColor:"#318643", shadowOffset:{width:0,height:2}, shadowOpacity:1, shadowRadius:2, elevation:4 }}
+          style={{
+            shadowColor: "#318643",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 1,
+            shadowRadius: 2,
+            elevation: 4,
+          }}
         >
           <Images.Ice width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">{totalPoint.toLocaleString("ko-KR")}</Text>
+          <Text className="text-white font-sf-md text-[16px]">
+            {totalPoint.toLocaleString("ko-KR")}
+          </Text>
         </Pressable>
       </View>
 
@@ -216,33 +238,57 @@ export default function Home() {
             elevation: 4,
           }}
         >
-          <Text className="text-black font-sf-md text-[18px]">총 탄소 절감량</Text>
+          <Text className="text-black font-sf-md text-[18px]">
+            총 탄소 절감량
+          </Text>
           <Text className="font-grotesk-b text-[24px] text-green">
             {(Number(totalScore) || 0).toFixed(1)}
             <Text className="text-black"> kg</Text>
-            <Text className="text-[14px] font-sf-md text-black"> (CO<Text className="text-[10px]">2</Text> 기준)</Text>
+            <Text className="text-[14px] font-sf-md text-black">
+              {" "}
+              (CO<Text className="text-[10px]">2</Text> 기준)
+            </Text>
           </Text>
         </Pressable>
       </View>
 
       <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
         {/* 토리: 왼쪽 하단 */}
-        <View style={{ position:"absolute", right: 20, top: 200 }}>
-          <ToriComp width={TORI_W} height={TORI_W} preserveAspectRatio="xMidYMid meet" />
+        <View style={{ position: "absolute", right: 20, top: 200 }}>
+          <ToriComp
+            width={TORI_W}
+            height={TORI_W}
+            preserveAspectRatio="xMidYMid meet"
+          />
         </View>
 
         {/* 이파: 오른쪽 하단 (살짝 위) */}
-        <Animated.View style={[{ position:"absolute", left: 20, bottom: 300 }]}>
-          <IpaComp width={IPA_W} height={IPA_H} preserveAspectRatio="xMidYMid meet" />
+        <Animated.View
+          style={[{ position: "absolute", left: 20, bottom: 300 }]}
+        >
+          <IpaComp
+            width={IPA_W}
+            height={IPA_H}
+            preserveAspectRatio="xMidYMid meet"
+          />
         </Animated.View>
       </View>
 
       {/* 퀴즈 버튼 */}
-      <Animated.View className="mt-auto items-center mb-[180px]" style={animatedStyle}>
+      <Animated.View
+        className="mt-auto items-center mb-[180px]"
+        style={animatedStyle}
+      >
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
           className="flex-row items-center justify-center rounded-[32px] px-6 py-3.5 gap-2 bg-yellow active:bg-amber-300"
-          style={{ shadowColor:"#F9C332", shadowOffset:{width:0,height:4}, shadowOpacity:0.18, shadowRadius:4, elevation:4 }}
+          style={{
+            shadowColor: "#F9C332",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.18,
+            shadowRadius: 4,
+            elevation: 4,
+          }}
         >
           <Images.Quiz width={24} height={24} />
           <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>

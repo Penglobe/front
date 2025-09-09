@@ -20,6 +20,7 @@ export default function SurveyResult() {
   } catch (e) {
     console.error("resultData 파싱 실패:", e);
   }
+
   return (
     <View className="flex-1">
       {/* 배경 */}
@@ -28,11 +29,8 @@ export default function SurveyResult() {
       {/* 헤더 */}
       <HeaderBar title="설문조사" />
 
-      <ScrollView
-        className="px-pageX"
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
-        <View className="flex-row items-center mb-2 mt-5">
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <View className="px-pageX flex-row items-center mb-2 mt-5">
           <Images.ToriFace width={40} height={40} />
           <Text className="text-2xl font-sf-b text-green-700 ml-2">
             오늘의 설문 결과를 확인해볼까요?
@@ -80,7 +78,13 @@ export default function SurveyResult() {
               </View>
 
               <View className="bg-white rounded-2xl px-6 py-5 mb-5">
-                <Text>피드백</Text>
+                <Text className="font-sf-md text-lg">피드백 </Text>
+                <Text className="font-sf-md text-sm mb-3">
+                  ※ AI 기반 환경 피드백입니다.
+                </Text>
+                <Text className="font-sf-b text-base text-[#318643]">
+                  {data.feedback}
+                </Text>
               </View>
 
               <View className="bg-white rounded-2xl px-6 py-5 mb-10">
@@ -103,8 +107,8 @@ export default function SurveyResult() {
       <Modal visible={showInfo} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="bg-white rounded-2xl p-5 w-4/5 max-w-md">
-            <Text className="text-base font-sf-b mb-2">계산 기준</Text>
-            <Text className="text-sm text-gray-700 leading-1">
+            <Text className="text-lg font-sf-b mb-2">계산 기준</Text>
+            <Text className="text-base text-gray-700 leading-1">
               • 재활용 분리배출:{"\n"}
               모두 잘함 50g / 일부 20g / 못함 0g{"\n"}• 일회용품 사용:{"\n"}
               0회 240g / 1~2회 120g / 3회 이상 0g{"\n"}• 음식물 쓰레기:{"\n"}

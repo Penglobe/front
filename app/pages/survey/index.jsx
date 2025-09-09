@@ -181,29 +181,31 @@ export default function Survey() {
 
   return (
     <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
-      <View className="flex-1">
-        {/* 배경 */}
-        <BgGradient />
+      {/* 배경 */}
+      <BgGradient />
 
-        {/* 헤더 */}
-        <HeaderBar title="설문조사" />
+      {/* 헤더 */}
+      <HeaderBar title="설문조사" />
 
-        <View className="px-pageX">
+      <View className="px-pageX">
+        <View>
           {/* 타이틀 */}
-          <View className="bg-secondary rounded-xl px-pageX py-2 self-start mt-2 flex-row items-center gap-1">
+          <View className="px-pageX bg-secondary rounded-xl px-pageX py-2 self-start mt-2 flex-row items-center gap-1">
             <Images.IpaFace width={50} height={50} />
             <Text className="text-black text-sm font-bold">
               <Text className="text-red-500 text-base mb-3">
-                ※ 여러 번 응답할 수 있지만, {"\n"}
+                여러 번 응답할 수 있지만, {"\n"}
                 최초 응답의 탄소 절감량만 기록됩니다. {"\n"}
               </Text>
-              <Text>
-                응답은 오후에 작성하는 것이 {"\n"}가장 정확합니다. {"\n"}
-              </Text>
+              <View className="h-12 rounded-lg mt-2 py-1">
+                <Text className="text-sm">
+                  ※ 오후에 작성하는 것이 가장 정확합니다. {"\n"}
+                </Text>
+              </View>
             </Text>
 
             {/*결과보기*/}
-            <View className="flex-row justify-end mt-10">
+            <View className="mt-12 ml-0 self-start">
               <SurveyResultButton label="결과보기" onPress={resultHandler} />
             </View>
           </View>
