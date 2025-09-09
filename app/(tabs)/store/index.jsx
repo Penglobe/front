@@ -18,13 +18,14 @@ import { apiFetch } from "@services/authService";
 import { Images } from "@constants/Images";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SERVER_URL } from "@env";
+import Constants from "expo-constants";
 
+const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 function toUri(path) {
   if (!path) return null;
   return path.startsWith("http")
     ? path
-    : `${SERVER_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    : `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
 export default function StoreListPage() {
@@ -88,7 +89,7 @@ export default function StoreListPage() {
   const clearQuery = () => setQuery("");
 
   const goDetail = (id) => {
-    router.push({ pathname: "/pages/detail", params: { id: String(id) } });
+    router.push({ pathname: "/pages/shop/detail", params: { id: String(id) } });
   };
 
   const renderItem = ({ item, index }) => {
