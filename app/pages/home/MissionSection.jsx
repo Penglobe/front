@@ -62,7 +62,7 @@ export default function MissionSection({
       <View className="flex-row items-center mb-3">
         <View className="mr-1">{icon}</View>
         <Text className="text-xl font-sf-b text-black">{title}</Text>
-        {unit === "kg" && <Text className="text-[#D1D5DB] ml-1">(kg)</Text>}
+        {unit === "kg" && <Text className="text-black ml-1">(kg)</Text>}
       </View>
 
       {/* 바 모드(출석) */}
@@ -134,16 +134,24 @@ export default function MissionSection({
               zIndex: 0,
             }}
           >
-            {/* 회색 베이스 라인 */}
-            <View className="h-2 bg-[#E5E7EB] rounded-full mx-8" />
-            {/* 진행 라인 (구간 기반 퍼센트 반영) */}
             <View
-              className="h-2 rounded-full mx-8 -mt-2"
               style={{
-                width: `${Math.max(0, Math.min(1, progressPct)) * 100}%`,
-                backgroundColor: accent === "yellow" ? "#FDE68A" : "#A7F3D0",
+                marginHorizontal: 32,
+                overflow: "hidden",
+                borderRadius: 9999,
               }}
-            />
+            >
+              {/* 회색 베이스 라인 */}
+              <View className="h-2 bg-[#E5E7EB] rounded-full mx-8" />
+              {/* 진행 라인 (구간 기반 퍼센트 반영) */}
+              <View
+                className="h-2 rounded-full mx-8 -mt-2"
+                style={{
+                  width: `${Math.max(0, Math.min(1, progressPct)) * 100}%`,
+                  backgroundColor: accent === "yellow" ? "#FDE68A" : "#A7F3D0",
+                }}
+              />
+            </View>
           </View>
 
           {/* 스텝(아이콘/버튼) */}

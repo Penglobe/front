@@ -1,7 +1,6 @@
 // app/(tabs)/home/index.jsx
-import { View, StyleSheet, Button, Pressable } from "react-native";
+import { View, StyleSheet, Pressable, Alert, Text } from "react-native";
 import { Images } from "@constants/Images";
-import { Text } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import Animated, {
   useSharedValue,
@@ -12,34 +11,128 @@ import Animated, {
   Easing,
   interpolate,
 } from "react-native-reanimated";
-
 import { Image as ExpoImage } from "expo-image";
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@hooks/useAuth";
+import MainButton from "@components/MainButton";
+import Modal from "@components/Modal";
+import { apiFetch } from "@services/authService";
+import AttendanceReward from "@components/AttendanceReward";
 
 export default function Home() {
   const router = useRouter();
   const { user, refreshUser } = useAuth();
 
+  const [att, setAtt] = useState({ visible: false, loading: false });
+  const [preview, setPreview] = useState(null); // 미리보기 포인트
+  const [loadingPrev, setLoadingPrev] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [chestClicked, setChestClicked] = useState(false); // 상자 클릭 여부
+
+  // 모달 표시 여부
+  const checkAttendancePopup = useCallback(async () => {
+    try {
+      const res = await apiFetch("/attendance/popup");
+      const t = await res.text();
+      let json = null;
+      try {
+        json = JSON.parse(t);
+      } catch {}
+      setAtt({
+        visible: !!(res.ok && json?.data?.show === true),
+        loading: false,
+      });
+      if (res.ok && json?.data?.show === true) {
+        // 모달 뜰 때 선조회(선택)
+        setLoadingPrev(true);
+        const pRes = await apiFetch("/attendance/preview");
+        const pt = await pRes.text();
+        let pj = null;
+        try {
+          pj = JSON.parse(pt);
+        } catch {}
+        if (pRes.ok) setPreview(Number(pj?.data?.rewardPoints ?? 0));
+        setLoadingPrev(false);
+        setChestClicked(false);
+      } else {
+        setPreview(null);
+        setChestClicked(false);
+      }
+    } catch {
+      setAtt((s) => ({ ...s, loading: false }));
+    }
+  }, []);
+
+  // 상자 터치 시(미리보기 없으면 요청)
+  const onChestReveal = useCallback(async () => {
+    setChestClicked(true);
+    if (preview != null) return;
+    try {
+      setLoadingPrev(true);
+      const res = await apiFetch("/attendance/preview");
+      const t = await res.text();
+      let json = null;
+      try {
+        json = JSON.parse(t);
+      } catch {}
+      if (res.ok) setPreview(Number(json?.data?.rewardPoints ?? 0));
+    } finally {
+      setLoadingPrev(false);
+    }
+  }, [preview]);
+
+  // 보상 받기(실제 지급)
+  const claimAttendance = useCallback(async () => {
+    try {
+      setClaiming(true);
+      const res = await apiFetch("/attendance/claim", { method: "POST" });
+      const t = await res.text();
+      let json = null;
+      try {
+        json = JSON.parse(t);
+      } catch {}
+      if (!res.ok)
+        throw new Error(json?.message || "보상 지급에 실패했습니다.");
+
+      const reward = Number(json?.data?.rewardPoints ?? preview ?? 0);
+
+      // 모달 닫고 한 틱 뒤 알럿(안드로이드 RNModal 겹침 회피)
+      setAtt({ visible: false, loading: false });
+      setPreview(null);
+      setChestClicked(false);
+      setTimeout(() => {
+        Alert.alert(
+          "출석 보상",
+          `${reward.toLocaleString("ko-KR")}얼음이 지급되었습니다.`
+        );
+        refreshUser?.();
+      }, 80);
+    } catch (e) {
+      setTimeout(() => {
+        Alert.alert("오류", e?.message ?? "보상 지급에 실패했습니다.");
+      }, 50);
+    } finally {
+      setClaiming(false);
+    }
+  }, [preview, refreshUser]);
+
   useFocusEffect(
     useCallback(() => {
       refreshUser();
-    }, [refreshUser])
+      checkAttendancePopup();
+    }, [refreshUser, checkAttendancePopup])
   );
 
-  // counters가 user.counters 나 평평한 user로 올 수 있어 모두 대응
-  const counters = user?.counters ?? user ?? {};
+  useEffect(() => {
+    checkAttendancePopup();
+  }, [checkAttendancePopup]);
 
-  // 연속 출석일(우선순위: camel -> snake)
+  const counters = user?.counters ?? user ?? {};
   const streakDays =
     Number(
       counters?.attendanceStreakDays ?? counters?.attendance_streak_days ?? 0
     ) || 0;
-
-  // 총 포인트(우선순위: camel -> snake)
   const totalPoint = Number(user?.totalPoint ?? user?.total_point ?? 0) || 0;
-
-  // 총 탄소 절감량(kg) — camel/snake + counters 모두 대응
   const totalScore =
     Number(
       user?.totalScore ??
@@ -49,35 +142,24 @@ export default function Home() {
         0
     ) || 0;
 
-  // Y축 이동값 (0 기준)
   const translateY = useSharedValue(0);
-
   useEffect(() => {
-    // -10 내려갔다가 10으로
     translateY.value = withRepeat(
       withSequence(
-        withTiming(-10, {
-          duration: 1200,
-          easing: Easing.inOut(Easing.quad),
-        }),
-        withTiming(10, {
-          duration: 1200,
-          easing: Easing.inOut(Easing.quad),
-        })
+        withTiming(-10, { duration: 1200, easing: Easing.inOut(Easing.quad) }),
+        withTiming(10, { duration: 1200, easing: Easing.inOut(Easing.quad) })
       ),
-      -1, // -1 = 무한 반복
-      true // reverse 효과
+      -1,
+      true
     );
   }, []);
-
   const animatedStyle = useAnimatedStyle(() => {
-    // 떠오를 때 그림자/높이 살짝 증폭
     const elev = interpolate(translateY.value, [-8, 0], [6, 4]);
     const radius = interpolate(translateY.value, [-8, 0], [8, 4]);
     return {
       transform: [{ translateY: translateY.value }],
-      shadowRadius: radius, // iOS
-      elevation: elev, // Android
+      shadowRadius: radius,
+      elevation: elev,
     };
   });
 
@@ -92,8 +174,8 @@ export default function Home() {
         pointerEvents="none"
       />
 
+      {/* 상단 요약 */}
       <View className="mt-[66px] px-pageX flex-row justify-between">
-        {/* 출석 */}
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
           className="flex-row items-center justify-between bg-blue rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
@@ -111,7 +193,6 @@ export default function Home() {
           </Text>
         </Pressable>
 
-        {/* 얼음 */}
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
           className="flex-row items-center justify-between bg-green rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
@@ -130,17 +211,17 @@ export default function Home() {
         </Pressable>
       </View>
 
-      {/* 탄소 절감량 */}
+      {/* 탄소 절감량 카드 */}
       <View className="mt-[22px] px-pageX">
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
           className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
           style={{
-            shadowColor: "#000000",
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.08,
-            shadowRadius: 4, //Blur : 4
-            elevation: 4, //Spread=2 정도
+            shadowRadius: 4,
+            elevation: 4,
           }}
         >
           <Text className="text-black font-sf-md text-[18px]">
@@ -151,30 +232,26 @@ export default function Home() {
             <Text className="text-black"> kg</Text>
             <Text className="text-[14px] font-sf-md text-black">
               {" "}
-              (CO
-              <Text className="text-[10px]">2</Text> 기준)
+              (CO<Text className="text-[10px]">2</Text> 기준)
             </Text>
           </Text>
         </Pressable>
       </View>
 
-      {/* 토리 */}
-      <View className="mt-[80px] ml-20 items-center ml-5">
+      {/* 캐릭터/퀴즈 */}
+      <View className="mt-[80px] ml-5">
         <Images.Tori />
       </View>
-
-      {/* 이파 */}
       <View className="mt-[-60px] ml-5">
         <ExpoImage
           source={require("../../../assets/images/character/ipa.gif")}
           style={{ width: 160, height: 240, borderRadius: 10 }}
           contentFit="fill"
-          transition={20} // 페이드인 (옵션)
-          cachePolicy="memory-disk" // 캐시 (옵션)
+          transition={20}
+          cachePolicy="memory-disk"
         />
       </View>
 
-      {/* 퀴즈 */}
       <Animated.View
         className="mt-auto items-center mb-[180px]"
         style={animatedStyle}
@@ -186,14 +263,56 @@ export default function Home() {
             shadowColor: "#F9C332",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.18,
-            shadowRadius: 4, //Blur : 4
-            elevation: 4, //Spread=2 정도
+            shadowRadius: 4,
+            elevation: 4,
           }}
         >
           <Images.Quiz width={24} height={24} />
           <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>
         </Pressable>
       </Animated.View>
+
+      {/* ✅ 출석 보상 모달: 상자 + 보상받기 */}
+      <Modal visible={att.visible}>
+        <View className="flex-row items-center mb-3 justify-center relative">
+          {/* 제목 */}
+          <Text className="text-[25px] font-sf-b">출석 보상 🎉</Text>
+
+          {/* 닫기 버튼 (오른쪽 끝) */}
+          <Pressable
+            onPress={() => {
+              setAtt({ visible: false, loading: false });
+              setPreview(null);
+              setChestClicked(false);
+            }}
+            className="absolute right-0"
+            style={{ padding: 4 }}
+          >
+            <Text className="text-2xl text-gray-400">✕</Text>
+          </Pressable>
+        </View>
+
+        <Text className="text-center text-[16px] text-black font-sf-md mb-3">
+          상자를 클릭하여 랜덤 보상을 확인해보세요.
+        </Text>
+
+        <AttendanceReward
+          previewPoints={preview}
+          loadingPreview={loadingPrev}
+          onReveal={onChestReveal}
+        />
+
+        <View className="mt-6">
+          <MainButton
+            onPress={claimAttendance}
+            disabled={claiming || !chestClicked || preview == null}
+          >
+            <Text className="text-white font-sf-b text-[16px]">
+              {claiming ? "지급 중..." : "보상 받기"}
+            </Text>
+          </MainButton>
+        </View>
+      </Modal>
     </View>
   );
 }

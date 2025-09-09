@@ -13,13 +13,8 @@ import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
-import { SERVER_URL } from "@env";
 import { useRouter } from "expo-router";
 import { apiFetch, logout } from "@services/authService";
-
-
-// TODO: 실제 호스트로 교체
-const API_BASE = SERVER_URL;
 
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
@@ -199,7 +194,7 @@ export default function MissionScreen() {
       >
         {/* ✅ 상품 추가 페이지 이동 버튼 */}
         <Pressable
-          onPress={() => router.push("/pages/newproducts")}
+          onPress={() => router.push("/pages/shop/newproducts")}
           android_ripple={{ color: "#ffffff30" }}
           style={{
             height: 48,

@@ -5,10 +5,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { apiFetch } from "@services/authService";
-import { SERVER_URL } from "@env";
 import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
+import Modal from "@components/Modal";
+import Constants from "expo-constants";
 
+const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
 function toUri(path) {
   if (!path) return null;
@@ -25,6 +27,7 @@ export default function ProductDetailPage() {
 
   const [item, setItem] = useState(null);
   const [qty, setQty] = useState(1);
+  const [confirmVisible, setConfirmVisible] = useState(false); //구매 확인 모달 상태
 
   const load = useCallback(async () => {
     if (!pid) return;
@@ -50,6 +53,12 @@ export default function ProductDetailPage() {
   const minus = () => setQty((n) => Math.max(1, n - 1));
   const plus = () => setQty((n) => n + 1);
 
+  // 모달 열기
+  const openConfirm = () => {
+    setConfirmVisible(true);
+  };
+
+  // 구매 처리 API
   const handleBuy = useCallback(async () => {
     try {
       const res = await apiFetch(`/shop/orders`, {
@@ -61,18 +70,20 @@ export default function ProductDetailPage() {
       if (!res.ok) throw new Error(json?.message || `구매 실패(${res.status})`);
       const data = json?.data ?? json;
 
+      setConfirmVisible(false); //모달 닫기
+
       Alert.alert(
         "구매 완료",
         `${item.name} x${qty}\n사용 포인트: ${
           data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
         }점`,
         [
-          { text: "주문내역 보기", onPress: () => router.push("/orders") },
+          { text: "주문내역 보기", onPress: () => router.push("/shop/orders") },
           { text: "확인", onPress: () => router.back() },
         ]
       );
     } catch (e) {
-      Alert.alert("구매 실패", e?.message ?? "구매 중 문제가 발생했습니다.");
+      Alert.alert("구매 실패", "잔액이 부족합니다.");
     }
   }, [item, qty, router]);
 
@@ -168,7 +179,7 @@ export default function ProductDetailPage() {
           }}
           className="px-pageX pb-3"
         >
-          <MainButton onPress={handleBuy} className="w-full">
+          <MainButton onPress={openConfirm} className="w-full">
             <View className="flex-row items-center">
               <Text className="text-white font-sf-b mr-1">
                 {total.toLocaleString()}
@@ -179,6 +190,35 @@ export default function ProductDetailPage() {
           </MainButton>
         </View>
       </View>
+
+      {/* 구매 확인 모달 */}
+      <Modal visible={confirmVisible}>
+        <View className="mb-4">
+          <Text className="text-black text-[25px] font-sf-b mb-6 text-center">
+            주문 확인{" "}
+          </Text>
+          <Pressable
+            onPress={() => setConfirmVisible(false)}
+            style={{ position: "absolute", right: 10, top: 0, padding: 2 }}
+          >
+            <Text className="text-[23px] text-gray-400">✕</Text>
+          </Pressable>
+        </View>
+
+        <Text className="text-black font-sf-md mb-5 text-[18px]">
+          구매 상품: {item.name}
+        </Text>
+        <Text className="text-black font-sf-md mb-5 text-[18px]">
+          구매 수량: {qty}개
+        </Text>
+        <View className="flex-row mb-8">
+          <Text className="mb-4 text-[18px] text-black font-sf-md">
+            구매 포인트: {total.toLocaleString()}
+          </Text>
+          <Images.Ice width={25} height={25} />
+        </View>
+        <MainButton label="구매하기" onPress={handleBuy} />
+      </Modal>
     </View>
   );
 }
