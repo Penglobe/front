@@ -74,8 +74,9 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   }, [userId]); // Add userId to dependency array
 
   useEffect(() => {
-    if (user && user.userId && user.nickname) {
-      setUserId(user.userId);
+    if (user && user.id && user.nickname) {
+      // Changed user.userId to user.id
+      setUserId(user.id); // Changed user.userId to user.id
       setCurrentUserNickname(user.nickname);
     }
   }, [user]);
@@ -152,7 +153,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
 
       {/* 랭킹 참여 조건 미달 메시지 */}
       {showParticipationMessage && (
-        <View className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg">
+        <View className="bg-deactivateButton border-l-4 border-500 text-yellow-700 p-4 mb-4 rounded-lg">
           <Text className="font-bold">랭킹 참여 조건 미달</Text>
           <Text>
             주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! 이번 주에
@@ -197,7 +198,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
 
       {/* 테스트 버튼 */}
       {userId === 115 && ( // Conditionally render for userId 115
-        <View className="flex-row justify-around mt-4">
+        <View className="flex-row justify-around mt-4 pb-10">
           <TouchableOpacity
             onPress={handleAddDummyData}
             className="bg-blue-500 p-3 rounded-lg"

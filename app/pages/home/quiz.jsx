@@ -8,6 +8,10 @@ import Modal from "@components/Modal";
 import { useAuth } from "@hooks/useAuth";
 import Constants from "expo-constants";
 
+const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/quiz`;
+
+//console.log(`${BASE_URL}/today`);
+
 export default function QuizPage() {
   const router = useRouter();
   const [question, setQuestion] = useState(null); //질문 가져오기
@@ -17,7 +21,11 @@ export default function QuizPage() {
   const { user } = useAuth();
 
   /*user*/
-  const userId = user?.userId;
+  const id = user?.userId;
+  //console.log("user", user); // 먼저 전체 객체를 찍어보세요
+  //console.log("userId", user.id);
+
+  //console.log("userId", user.id);
 
   /*날짜*/
   const today = new Date();
@@ -37,7 +45,7 @@ export default function QuizPage() {
 
   /*퀴즈 가져오기*/
   useEffect(() => {
-    fetch("http://192.168.0.51:8080/quiz/today")
+    fetch(`${BASE_URL}/today`)
       .then((response) => response.json())
       .then((data) => {
         //console.log("질문", data);
@@ -51,13 +59,13 @@ export default function QuizPage() {
     if (!question || !answer) return;
 
     try {
-      const res = await fetch("http://192.168.0.51:8080/quiz/submit", {
+      const res = await fetch(`${BASE_URL}/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId, //: 1, //임시 userId***************************************************
+          userId: user.id,
           quizId: question.quizId,
           answer: answer === "O",
         }),

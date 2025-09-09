@@ -7,6 +7,9 @@ import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import SurveyResultButton from "@components/SurveyResultButton";
 import { useAuth } from "@hooks/useAuth";
+import Constants from "expo-constants";
+
+const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/surveys`;
 
 export default function Survey() {
   const router = useRouter();
@@ -17,7 +20,9 @@ export default function Survey() {
   const [submittedToday, setSubmittedToday] = useState(false);
 
   //user
-  const userId = user?.userId;
+  const id = user?.userId;
+  //console.log("user", user); // 먼저 전체 객체를 찍어보세요
+  //console.log("userId", user.id);
 
   // 스크롤뷰 관련
   const scrollRef = useRef(null);
@@ -27,7 +32,7 @@ export default function Survey() {
   useEffect(() => {
     async function fetchQuestion() {
       try {
-        const response = await fetch("http://192.168.0.51:8080/surveys/today");
+        const response = await fetch(`${BASE_URL}/today`);
         const result = await response.json();
 
         // 서버 응답 구조에 맞춰서 접근
@@ -57,22 +62,19 @@ export default function Survey() {
       );
 
       const payload = {
-        userId,
+        userId: user.id,
         answer: answerArray,
       };
 
-      console.log("payload: ", payload);
+      //console.log("payload: ", payload);
 
-      const response = await fetch(
-        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const text = await response.text();
@@ -92,7 +94,7 @@ export default function Survey() {
       router.push({
         pathname: "/pages/survey/result",
         params: {
-          userId: payload.userId,
+          userId: user.id,
           resultData: resultDataStr, // 문자열로 전달
         },
       });
@@ -136,20 +138,17 @@ export default function Survey() {
       );
 
       const payload = {
-        userId,
+        userId: user.id,
         answer: answerArray,
       };
 
-      const response = await fetch(
-        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const text = await response.text();
@@ -182,29 +181,31 @@ export default function Survey() {
 
   return (
     <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
-      <View className="flex-1">
-        {/* 배경 */}
-        <BgGradient />
+      {/* 배경 */}
+      <BgGradient />
 
-        {/* 헤더 */}
-        <HeaderBar title="설문조사" />
+      {/* 헤더 */}
+      <HeaderBar title="설문조사" />
 
-        <View className="px-pageX">
+      <View className="px-pageX">
+        <View>
           {/* 타이틀 */}
-          <View className="bg-secondary rounded-xl px-pageX py-2 self-start mt-2 flex-row items-center gap-1">
+          <View className="px-pageX bg-secondary rounded-xl px-pageX py-2 self-start mt-2 flex-row items-center gap-1">
             <Images.IpaFace width={50} height={50} />
             <Text className="text-black text-sm font-bold">
               <Text className="text-red-500 text-base mb-3">
-                ※ 여러 번 응답할 수 있지만, {"\n"}
+                여러 번 응답할 수 있지만, {"\n"}
                 최초 응답의 탄소 절감량만 기록됩니다. {"\n"}
               </Text>
-              <Text>
-                응답은 오후에 작성하는 것이 {"\n"}가장 정확합니다. {"\n"}
-              </Text>
+              <View className="h-12 rounded-lg mt-2 py-1">
+                <Text className="text-sm">
+                  ※ 오후에 작성하는 것이 가장 정확합니다. {"\n"}
+                </Text>
+              </View>
             </Text>
 
             {/*결과보기*/}
-            <View className="flex-row justify-end mt-10">
+            <View className="mt-12 ml-0 self-start">
               <SurveyResultButton label="결과보기" onPress={resultHandler} />
             </View>
           </View>
