@@ -12,3 +12,6 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 # Add any project specific keep options here:
+-keep public class com.doinglab.foodlens.sdk.core.** {
+       *;
+}

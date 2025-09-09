@@ -2,4 +2,6 @@
   <string name="app_name">펭글로브</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="foodlens_app_token">0b6fbe431b4144f190423b9630b6354a</string>
+<string name="foodlens_company_token">774ee2d62e604f8a944242d471488ce6</string>
 </resources>
