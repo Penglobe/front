@@ -27,7 +27,6 @@ export default function BookmarkSetting() {
   const mode = rawMode || "TRANSIT"; // ✅ 기본값 보장
   const router = useRouter();
 
-  const userId = 1; // TODO: 로그인 사용자 ID 연동
   const [label, setLabel] = useState(placeName || "");
 
   // ✅ 북마크 저장
@@ -38,7 +37,7 @@ export default function BookmarkSetting() {
     }
 
     try {
-      await createBookmark(userId, {
+      await createBookmark({
         bookmarkLabel: label,
         address,
         lat,
@@ -120,12 +119,12 @@ export default function BookmarkSetting() {
           </View>
 
           {/* ✅ 캐릭터 영역 */}
-          <View className="items-end m-1 pr-pageX">
-            <Tori width={110} height={200} />
+          <View className="items-end pr-pageX">
+            <Tori width={100} height={180} />
           </View>
 
           {/* 버튼 */}
-          <View className="px-pageX mt-10 mb-10">
+          <View className="px-pageX mb-10">
             <MainButton label="등록하기" onPress={handleSave} />
           </View>
         </View>
