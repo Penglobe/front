@@ -10,12 +10,15 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { getAccessToken, me } from "@services/authService";
+import Constants from "expo-constants";
 
 export default function WeeklyRanking({ fetchRegionRankingData }) {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserNickname, setCurrentUserNickname] = useState(null);
+
+  const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
   // --- Refactored Data Fetching Logic ---
   const fetchRankingData = useCallback(async () => {
@@ -33,7 +36,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
         setCurrentUserNickname(userInfo.nickname);
       }
 
-      const response = await fetch("http://192.168.0.79:8080/rankings/weekly", {
+      const response = await fetch(`${BASE_URL}/rankings/weekly`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -73,15 +76,12 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   const handleAddDummyData = async () => {
     try {
       const token = await getAccessToken();
-      const response = await fetch(
-        "http://192.168.0.79:8080/users/me/add-dummy-data",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${BASE_URL}/users/me/add-dummy-data`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add dummy data");
@@ -149,6 +149,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
                 rank: item.rank,
                 nickname: item.nickname,
                 score: item.score,
+                profile: item.profile,
               }}
               isProminent={isCurrentUser}
             />
