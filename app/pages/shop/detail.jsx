@@ -134,18 +134,11 @@ export default function ProductDetailPage() {
 
               {!!item.description && (
                 <View className="mt-6">
-                  <Section title="상품구성">
+                  <Section title="상품 설명">
                     <Text className="text-gray-700">{item.description}</Text>
                   </Section>
                 </View>
               )}
-
-              <Section title="유효기간">
-                <Text className="text-gray-700">구매일로부터 6개월</Text>
-              </Section>
-              <Section title="사용가능매장">
-                <Text className="text-gray-700">전 매장 사용 가능</Text>
-              </Section>
 
               <View className="mt-10">
                 <Text className="text-base font-sf-b mb-3">수량</Text>

@@ -72,26 +72,37 @@ export default function TabBar({ state, descriptors, navigation }) {
   const leftRoutes = [findBy("home"), findBy("ranking")].filter(Boolean);
   const rightRoutes = [findBy("store"), findBy("mypage")].filter(Boolean);
 
-  function CalculatorButton({ onPress, spinActive, children }) {
-    const rotate = useRef(new Animated.Value(0)).current;
+  // ✅ TabBar.jsx 내 CalculatorButton 교체: Hollow Halo Pulse (중앙 비움)
+  function CalculatorButton({ onPress, children }) {
+    const t = useRef(new Animated.Value(0)).current;
 
-    // animation
     useEffect(() => {
-      rotate.setValue(0);
       const loop = Animated.loop(
-        Animated.timing(rotate, {
-          toValue: 1,
-          duration: 3000, // 3초에 한 바퀴
-          useNativeDriver: true,
-        })
+        Animated.sequence([
+          Animated.timing(t, {
+            toValue: 1,
+            duration: 950,
+            useNativeDriver: true,
+          }),
+          Animated.timing(t, {
+            toValue: 0,
+            duration: 950,
+            useNativeDriver: true,
+          }),
+        ])
       );
       loop.start();
-      return () => loop?.stop();
-    }, []);
+      return () => loop.stop();
+    }, [t]);
 
-    const spin = rotate.interpolate({
+    // 퍼짐 정도(스케일) & 투명도
+    const ringScale = t.interpolate({
       inputRange: [0, 1],
-      outputRange: ["0deg", "360deg"], //rotate = 0 → "0deg"
+      outputRange: [0.72, 0.88],
+    });
+    const ringOpacity = t.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0.5, 0.7],
     });
 
     return (
@@ -103,39 +114,27 @@ export default function TabBar({ state, descriptors, navigation }) {
         accessibilityRole="tab"
         accessibilityLabel="계산기"
       >
-
+        {/* 🟢 바깥 링(중앙 비움) */}
         <Animated.View
           pointerEvents="none"
           style={{
             position: "absolute",
-            transform: [{ rotate: spin }],
+            width: 84, // 링 크기
+            height: 84,
+            borderRadius: 42,
+            borderWidth: 7, // 🔧 두께(굵기)
+            borderColor: "green",
+            opacity: ringOpacity,
+            transform: [{ scale: ringScale }],
           }}
-        >
-          <Svg width={80} height={80} viewBox="0 0 100 100">
-            <Defs>
-              <LinearGradient id="calcRing" x1="0%" y1="0%" x2="100%" y2="0%">
-                <Stop offset="0%" stopColor={Gradients.background[0]} />
-                <Stop offset="100%" stopColor={Gradients.background[1]} />
-              </LinearGradient>
-            </Defs>
-            <Circle
-              cx="50" // 원 중심의 x좌표
-              cy="50" // 원 중심의 y좌표
-              r="45" // 반지름(px 단위)
-              stroke="url(#calcRing)"
-              strokeWidth="8" // 두께
-              fill="transparent"
-              strokeDasharray="282" // 둘레 길이
-              strokeDashoffset="75" // 일부만 보이게
-              strokeLinecap="round"
-            />
-          </Svg>
-        </Animated.View>
+        />
 
+        {/* 중앙 버튼/아이콘(흰색 유지) */}
         {children}
       </TouchableOpacity>
     );
   }
+
   const renderItem = (route) => {
     const { options } = descriptors[route.key];
     const idx = state.routes.findIndex((x) => x.name === route.name);

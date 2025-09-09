@@ -161,16 +161,6 @@ export default function Home() {
       true
     );
   }, []);
-  const animatedStyle = useAnimatedStyle(() => {
-    const elev = interpolate(translateY.value, [-8, 0], [6, 4]);
-    const radius = interpolate(translateY.value, [-8, 0], [8, 4]);
-
-    return {
-      transform: [{ translateY: translateY.value }],
-      shadowRadius: radius,
-      elevation: elev,
-    };
-  });
 
   const { width } = Dimensions.get("window");
   const TORI_W = Math.min(width * 0.42, 220);
@@ -274,10 +264,7 @@ export default function Home() {
       </View>
 
       {/* 퀴즈 버튼 */}
-      <Animated.View
-        className="mt-auto items-center mb-[180px]"
-        style={animatedStyle}
-      >
+      <Animated.View className="mt-auto items-center mb-[180px]">
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
           className="flex-row items-center justify-center rounded-[32px] px-6 py-3.5 gap-2 bg-yellow active:bg-amber-300"
