@@ -7,6 +7,9 @@ import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import SurveyResultButton from "@components/SurveyResultButton";
 import { useAuth } from "@hooks/useAuth";
+import Constants from "expo-constants";
+
+const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/surveys`;
 
 export default function Survey() {
   const router = useRouter();
@@ -17,7 +20,9 @@ export default function Survey() {
   const [submittedToday, setSubmittedToday] = useState(false);
 
   //user
-  const userId = user?.userId;
+  const id = user?.userId;
+  //console.log("user", user); // 먼저 전체 객체를 찍어보세요
+  //console.log("userId", user.id);
 
   // 스크롤뷰 관련
   const scrollRef = useRef(null);
@@ -27,7 +32,7 @@ export default function Survey() {
   useEffect(() => {
     async function fetchQuestion() {
       try {
-        const response = await fetch("http://192.168.0.51:8080/surveys/today");
+        const response = await fetch(`${BASE_URL}/today`);
         const result = await response.json();
 
         // 서버 응답 구조에 맞춰서 접근
@@ -57,22 +62,19 @@ export default function Survey() {
       );
 
       const payload = {
-        userId,
+        userId: user.id,
         answer: answerArray,
       };
 
-      console.log("payload: ", payload);
+      //console.log("payload: ", payload);
 
-      const response = await fetch(
-        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const text = await response.text();
@@ -92,7 +94,7 @@ export default function Survey() {
       router.push({
         pathname: "/pages/survey/result",
         params: {
-          userId: payload.userId,
+          userId: user.id,
           resultData: resultDataStr, // 문자열로 전달
         },
       });
@@ -136,20 +138,17 @@ export default function Survey() {
       );
 
       const payload = {
-        userId,
+        userId: user.id,
         answer: answerArray,
       };
 
-      const response = await fetch(
-        `http://192.168.0.51:8080/surveys/submit/${payload.userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const text = await response.text();
