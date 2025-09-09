@@ -1,9 +1,9 @@
 // 로그인, 토큰 관리
 import * as SecureStore from "expo-secure-store";
-import { SERVER_URL } from "@env";
+import Constants from "expo-constants";
 
-// ====== 설정 ======
-const BASE_URL = SERVER_URL; // 예: http://192.168.0.149:8080
+const { SERVER_URL } = Constants.expoConfig.extra;
+const BASE_URL = `${SERVER_URL}`;
 const K_AT = "accessToken";
 const K_RT = "refreshToken";
 
