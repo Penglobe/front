@@ -36,6 +36,8 @@
       }
     },
     "android": {
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo/logo.png",
         "backgroundColor": "#ffffff"
@@ -47,7 +49,7 @@
         "ACCESS_BACKGROUND_LOCATION",
         "FOREGROUND_SERVICE"
       ],
-      "package": "com.anonymous.myapp"
+      "package": "com.penglobe9.app"
     },
     "assetBundlePatterns": ["**/*"],
     "web": {
