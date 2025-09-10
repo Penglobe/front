@@ -30,9 +30,9 @@ export default function SurveyResult() {
       <HeaderBar title="빙하 리포트" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <View className="px-pageX flex-row items-center mb-5 mt-5">
+        <View className="px-pageX flex-row items-center mb-llg mt-llg">
           <Images.ToriFace width={40} height={40} />
-          <Text className="text-2xl font-sf-md text-green-700 ml-2">
+          <Text className="text-2xl font-sf-md text-green-700 ml-sm">
             오늘의 설문 결과를 확인해볼까요?
           </Text>
         </View>
@@ -40,19 +40,19 @@ export default function SurveyResult() {
         <View className="px-pageX">
           {data ? (
             <>
-              <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
+              <View className="bg-white rounded-2xl shadow-md px-2xl py-llg mb-llg">
                 <Text className="text-lg">
                   오늘의 탄소{" "}
                   <Text className="text-red-500 text-lg font-bold">절감량</Text>
                 </Text>
                 <View className="items-end">
-                  <Text className="text-3xl font-sf-b text-[#318643] mt-1">
+                  <Text className="text-3xl font-sf-b text-[#318643] mt-xs">
                     {data.totalCo2} kg CO₂
                   </Text>
                 </View>
               </View>
 
-              <View className="bg-white rounded-2xl px-6 py-5 mb-5">
+              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
                 <View className="flex-row items-center justify-between mb-2">
                   <Text className="font-sf-md text-lg">
                     오늘의 탄소 절감 상위 TOP3
@@ -64,16 +64,16 @@ export default function SurveyResult() {
                 </View>
                 {data.top3.map((item, index) => (
                   <View key={index}>
-                    <Text className="font-sf-b text-lg text-[#318643] mt-1">
+                    <Text className="font-sf-b text-lg text-[#318643] mt-xs">
                       {index + 1}. {item.code}
                     </Text>
                   </View>
                 ))}
               </View>
 
-              <View className="bg-white rounded-2xl px-6 py-5 mb-5">
+              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
                 <Text className="font-sf-md text-lg">피드백 </Text>
-                <Text className="font-sf-md text-sm mb-3">
+                <Text className="font-sf-md text-sm mb-md">
                   ※ AI 기반 환경 피드백입니다.
                 </Text>
                 <Text className="font-sf-b text-base text-[#318643]">
@@ -81,7 +81,7 @@ export default function SurveyResult() {
                 </Text>
               </View>
 
-              <View className="bg-white rounded-2xl px-6 py-5 mb-3">
+              <View className="bg-white rounded-2xl px-2xl py-llg mb-md">
                 <Co2Chart />
               </View>
             </>
@@ -100,8 +100,8 @@ export default function SurveyResult() {
       {/* ✅ 모달 (팝업) */}
       <Modal visible={showInfo} transparent animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-2xl p-5 w-4/5 max-w-md">
-            <Text className="text-lg font-sf-b mb-2">계산 기준</Text>
+          <View className="bg-white rounded-2xl p-llg w-4/5 max-w-md">
+            <Text className="text-lg font-sf-b mb-sm">계산 기준</Text>
             <Text className="text-base text-gray-700 leading-1">
               • 재활용 분리배출:{"\n"}
               모두 잘함 50g / 일부 20g / 못함 0g{"\n"}• 일회용품 사용:{"\n"}

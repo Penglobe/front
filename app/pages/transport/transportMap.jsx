@@ -266,9 +266,9 @@ export default function TransportMap() {
         </View>
 
         {/* 이동 정보 */}
-        <View className="px-pageX mt-5">
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5">
-            <View className="flex-row items-center mb-3">
+        <View className="px-pageX mt-llg">
+          <View className="bg-white rounded-2xl shadow-md px-xl py-llg">
+            <View className="flex-row items-center mb-md">
               <Ionicons
                 name="location-outline"
                 size={22}
@@ -297,7 +297,7 @@ export default function TransportMap() {
         </View>
 
         {/* 종료 버튼 */}
-        <View className="px-pageX mt-auto mb-10">
+        <View className="px-pageX mt-auto mb-2xl">
           <MainButton
             label="이동 종료"
             onPress={() => handleStop(false)}
@@ -305,7 +305,7 @@ export default function TransportMap() {
           />
 
           {/* 🚀 테스트용 거리 증가 버튼 */}
-          <View className="mt-3">
+          <View className="mt-md">
             <MainButton
               label="거리 +100m (테스트)"
               onPress={() => {

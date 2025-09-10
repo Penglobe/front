@@ -86,7 +86,7 @@ export default function ProductNew() {
         keyboardShouldPersistTaps="handled"
       >
         {/* 헤더 */}
-        <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center justify-between mb-lg">
           <Text className="text-2xl font-sf-b">상품 생성</Text>
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <Text className="text-[#2563EB] font-sf-b">취소</Text>
@@ -98,7 +98,7 @@ export default function ProductNew() {
             value={name}
             onChangeText={setName}
             placeholder="에코 텀블러"
-            className="bg-white rounded-2xl px-4 py-3 border border-gray-200"
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
             autoCapitalize="none"
           />
         </L>
@@ -108,7 +108,7 @@ export default function ProductNew() {
             value={description}
             onChangeText={setDescription}
             placeholder="상세 설명"
-            className="bg-white rounded-2xl px-4 py-3 border border-gray-200"
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
             multiline
           />
         </L>
@@ -119,7 +119,7 @@ export default function ProductNew() {
             onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
             placeholder="3000"
             keyboardType="number-pad"
-            className="bg-white rounded-2xl px-4 py-3 border border-gray-200"
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
           />
         </L>
 
@@ -128,18 +128,18 @@ export default function ProductNew() {
             <View className="items-start">
               <Image
                 source={{ uri: asset.uri }}
-                className="w-40 h-40 rounded-xl mb-3"
+                className="w-40 h-40 rounded-xl mb-md"
               />
               <View className="flex-row">
                 <Pressable
                   onPress={pickImage}
-                  className="px-3 py-2 bg-emerald-600 rounded-xl mr-2"
+                  className="px-md py-sm bg-emerald-600 rounded-xl mr-sm"
                 >
                   <Text className="text-white font-sf-b">다른 이미지</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => setAsset(null)}
-                  className="px-3 py-2 bg-gray-200 rounded-xl"
+                  className="px-md py-sm bg-gray-200 rounded-xl"
                 >
                   <Text className="font-sf-md text-gray-700">삭제</Text>
                 </Pressable>
@@ -148,7 +148,7 @@ export default function ProductNew() {
           ) : (
             <Pressable
               onPress={pickImage}
-              className="px-4 py-3 bg-emerald-600 rounded-2xl items-center"
+              className="px-lg py-md bg-emerald-600 rounded-2xl items-center"
             >
               <Text className="text-white font-sf-b">이미지 선택</Text>
             </Pressable>
@@ -158,7 +158,7 @@ export default function ProductNew() {
         <Pressable
           onPress={onSubmit}
           disabled={!canSave || loading}
-          className={`mt-6 rounded-2xl py-3 items-center ${
+          className={`mt-xl rounded-2xl py-md items-center ${
             canSave && !loading ? "bg-emerald-600" : "bg-gray-300"
           }`}
         >
@@ -175,8 +175,8 @@ export default function ProductNew() {
 
 function L({ label, children }) {
   return (
-    <View className="mb-3">
-      <Text className="text-gray-700 mb-2 font-sf-md">{label}</Text>
+    <View className="mb-md">
+      <Text className="text-gray-700 mb-sm font-sf-md">{label}</Text>
       {children}
     </View>
   );

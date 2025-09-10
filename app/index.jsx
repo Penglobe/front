@@ -115,7 +115,7 @@ export default function Index() {
               placeholderTextColor="darkGray"
               keyboardType="email-address"
               autoCapitalize="none"
-              className="bg-white rounded-2xl px-4 text-black font-sf-md"
+              className="bg-white rounded-2xl px-lg text-black font-sf-md"
               style={[
                 styles.inputShadow,
                 {
@@ -133,7 +133,7 @@ export default function Index() {
               placeholder="비밀번호"
               placeholderTextColor="darkGray"
               secureTextEntry
-              className="bg-white rounded-2xl px-4 text-black font-sf-md"
+              className="bg-white rounded-2xl px-lg text-black font-sf-md"
               style={[
                 styles.inputShadow,
                 {
@@ -162,7 +162,7 @@ export default function Index() {
             ]}
           >
             <Text
-              className={`font-sf-b text-[18px] ${canLogin ? "text-white" : "text-[#9CA3AF]"}`}
+              className={`font-sf-b text-h3 ${canLogin ? "text-white" : "text-[#9CA3AF]"}`}
             >
               {loading ? "로그인 중..." : "로그인"}
             </Text>
@@ -171,7 +171,7 @@ export default function Index() {
           {/* 회원가입 페이지로 이동 */}
           <View className="mt-3 flex-row justify-center">
             <Pressable onPress={() => router.push("/pages/signup")}>
-              <Text className="font-sf-b text-black text-[15px] mr-2 underline">
+              <Text className="font-sf-b text-black text-h4 mr-sm underline">
                 회원가입
               </Text>
             </Pressable>

@@ -121,13 +121,13 @@ export default function TransportBookmark() {
       <HeaderBar title="목적지 선택" className="px-pageX font-sf-b" />
 
       {/* 🔎 검색창 */}
-      <View className="px-pageX mt-5">
-        <View className="flex-row items-center bg-white rounded-xl px-3 py-4 shadow-md shadow-black/5">
+      <View className="px-pageX mt-llg">
+        <View className="flex-row items-center bg-white rounded-xl px-md py-lg shadow-md shadow-black/5">
           <Ionicons
             name="search-outline"
             size={20}
             color={colors.Colors.green}
-            className="mr-2"
+            className="mr-sm"
           />
           <TextInput
             placeholder="목적지를 검색하세요"
@@ -141,11 +141,11 @@ export default function TransportBookmark() {
       </View>
 
       {/* 검색 결과 */}
-      <View className="px-pageX mt-6">
-        <Text className="font-sf-b text-xl text-gray-800 mb-3">검색 결과</Text>
+      <View className="px-pageX mt-2xl">
+        <Text className="font-sf-b text-xl text-gray-800 mb-md">검색 결과</Text>
         <View className="h-[200px] rounded-xl bg-[#E0F2F1]">
           {loading ? (
-            <ActivityIndicator className="mt-3" />
+            <ActivityIndicator className="mt-md" />
           ) : (
             <FlatList
               data={searchResults}
@@ -163,7 +163,7 @@ export default function TransportBookmark() {
                 />
               )}
               ListEmptyComponent={
-                <Text className="font-sf-md text-gray-400 text-center mt-4">
+                <Text className="font-sf-md text-gray-400 text-center mt-lg">
                   검색 결과가 없습니다.
                 </Text>
               }
@@ -173,12 +173,12 @@ export default function TransportBookmark() {
       </View>
 
       {/* 북마크 */}
-      <View className="px-pageX mt-8 flex-1">
-        <View className="flex-row justify-between items-center mt-2 mb-3">
+      <View className="px-pageX mt-2xl flex-1">
+        <View className="flex-row justify-between items-center mt-sm mb-md">
           <Text className="font-sf-b text-xl text-gray-800">내 북마크</Text>
           <TouchableOpacity
             onPress={() => router.push("/pages/transport/bookmarkManage")}
-            className="px-3 py-1 bg-[#318643] rounded-lg"
+            className="px-md py-xs bg-[#318643] rounded-lg"
           >
             <Text className="text-white font-sf-md text-base">관리</Text>
           </TouchableOpacity>
@@ -196,7 +196,7 @@ export default function TransportBookmark() {
             />
           )}
           ListEmptyComponent={
-            <Text className="font-sf-md text-gray-400 mt-4 text-center">
+            <Text className="font-sf-md text-gray-400 mt-lg text-center">
               등록된 북마크가 없습니다.
             </Text>
           }
@@ -204,7 +204,7 @@ export default function TransportBookmark() {
       </View>
 
       {/* 확인 버튼 */}
-      <View className="px-pageX mb-10">
+      <View className="px-pageX mb-3xl">
         <MainButton label="출발" onPress={handleConfirm} />
       </View>
     </View>

@@ -1,5 +1,4 @@
 // app/(tabs)/home/index.jsx
-
 import {
   View,
   StyleSheet,
@@ -26,7 +25,6 @@ import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import { apiFetch } from "@services/authService";
 import AttendanceReward from "@components/AttendanceReward";
-import Constants from "expo-constants";
 
 export default function Home() {
   const router = useRouter();
@@ -174,10 +172,10 @@ export default function Home() {
       />
 
       {/* 상단 카드들 */}
-      <View className="mt-[66px] px-pageX flex-row justify-between">
+      <View className="mt-6xl px-pageX flex-row justify-between">
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
-          className="flex-row items-center justify-between bg-blue rounded-[32px] px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-blue rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
@@ -194,7 +192,7 @@ export default function Home() {
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
-          className="flex-row items-center justify-between bg-green rounded-[32px] px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-green rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },
@@ -211,10 +209,10 @@ export default function Home() {
       </View>
 
       {/* 탄소 절감량 카드 */}
-      <View className="mt-[22px] px-pageX">
+      <View className="mt-llg px-pageX">
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
-          className="px-xl py-xl bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
+          className="px-xl py-xl bg-white/100 rounded-xl gap-[8px] items-start shadow-md active:bg-zinc-100"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -263,7 +261,7 @@ export default function Home() {
       <Animated.View className="mt-auto items-center mb-[180px]">
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
-          className="flex-row items-center justify-center rounded-[32px] px-xl py-md gap-2 bg-yellow active:bg-amber-300"
+          className="flex-row items-center justify-center rounded-3xl px-xl py-md gap-2 bg-yellow active:bg-amber-300"
           style={{
             shadowColor: "#F9C332",
             shadowOffset: { width: 0, height: 4 },
@@ -273,7 +271,9 @@ export default function Home() {
           }}
         >
           <Images.Quiz width={24} height={24} />
-          <Text className="text-white text-body font-sf-b text-[16px]">오늘의 퀴즈</Text>
+          <Text className="text-white text-body font-sf-b text-body">
+            오늘의 퀴즈
+          </Text>
         </Pressable>
       </Animated.View>
 
@@ -281,7 +281,7 @@ export default function Home() {
       <Modal visible={att.visible}>
         <View className="flex-row items-center mb-3 justify-center relative">
           {/* 제목 */}
-          <Text className="text-[25px] font-sf-b">출석 보상 🎉</Text>
+          <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
 
           {/* 닫기 버튼 (오른쪽 끝) */}
           {/* <Pressable
@@ -297,7 +297,7 @@ export default function Home() {
           </Pressable> */}
         </View>
 
-        <Text className="text-center text-[16px] text-black font-sf-md mb-5">
+        <Text className="text-center text-h4 text-black font-sf-md mb-xs">
           상자를 클릭하여 랜덤 보상을 확인해보세요.
         </Text>
 
@@ -307,12 +307,12 @@ export default function Home() {
           onReveal={onChestReveal}
         />
 
-        <View className="mt-6">
+        <View className="mt-sm">
           <MainButton
             onPress={claimAttendance}
             disabled={claiming || !chestClicked || preview == null}
           >
-            <Text className="text-white font-sf-b text-[16px]">
+            <Text className="text-white font-sf-b text-h4">
               {claiming ? "지급 중..." : "보상 받기"}
             </Text>
           </MainButton>

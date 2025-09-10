@@ -135,7 +135,7 @@ export default function Signup() {
           className="px-pageX"
         >
           {/* 상단 헤더 */}
-          <View className="flex-row items-center justify-between py-4">
+          <View className="flex-row items-center justify-between py-lg">
             <Text className="text-2xl font-sf-b">회원가입</Text>
             <Pressable onPress={() => router.back()} hitSlop={8}>
               <Text className="text-[#2563EB] font-sf-b">취소</Text>
@@ -167,7 +167,7 @@ export default function Signup() {
                     ios: "emailAddress",
                     android: "email",
                   })}
-                  className="flex-1 px-4 text-black font-sf-md"
+                  className="flex-1 px-lg text-black font-sf-md"
                   style={{ fontSize: FONT }}
                   returnKeyType="next"
                   onSubmitEditing={() => pwRef.current?.focus()}
@@ -208,7 +208,7 @@ export default function Signup() {
                     }
                   }}
                   disabled={emailCheck === "checking"}
-                  className="mr-3 px-3 py-2 rounded-xl"
+                  className="mr-md px-md py-sm rounded-xl"
                   style={{
                     backgroundColor: "green",
                     opacity: emailCheck === "checking" ? 0.7 : 1,
@@ -319,13 +319,13 @@ export default function Signup() {
                     editable={false}
                     placeholder="시/도를 선택하세요"
                     placeholderTextColor="gray"
-                    className="bg-white rounded-2xl px-4 text-black font-sf-md text-[16px]"
+                    className="bg-white rounded-2xl px-lg text-black font-sf-md text-h4"
                   />
                 </View>
               </Pressable>
 
               {regionOpen && (
-                <View className="mt-2 bg-white rounded-2xl border border-gray overflow-hidden">
+                <View className="mt-sm bg-white rounded-2xl border border-gray overflow-hidden">
                   <ScrollView
                     style={{ maxHeight: 240 }}
                     keyboardShouldPersistTaps="handled"
@@ -340,7 +340,7 @@ export default function Signup() {
                             setRegionLabel(r.name);
                             setRegionOpen(false);
                           }}
-                          className={`px-4 py-3 border-b border-gray ${
+                          className={`px-lg py-md border-b border-gray ${
                             selected ? "bg-emerald-50" : "bg-white"
                           }`}
                         >
@@ -379,7 +379,7 @@ export default function Signup() {
                     editable={false}
                     placeholder="프로필을 선택하세요"
                     placeholderTextColor="gray"
-                    className="bg-white rounded-2xl px-4 text-black font-sf-md text-[16px]"
+                    className="bg-white rounded-2xl px-lg text-black font-sf-md text-h4"
                     style={{ paddingRight: 48 }} // 오른쪽 썸네일 공간 확보
                   />
                 </View>
@@ -474,7 +474,7 @@ export default function Signup() {
               ]}
             >
               <Text
-                className={`font-sf-b text-[18px] ${
+                className={`font-sf-b text-h3 ${
                   canSubmit ? "text-white" : "text-[#9CA3AF]"
                 }`}
               >

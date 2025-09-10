@@ -172,7 +172,7 @@ export default function Survey() {
       <View className="px-pageX">
         <View>
           {/* 타이틀 */}
-          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start mt-8 mb-3 flex-row items-center gap-4">
+          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start mt-2xl mb-md flex-row items-center gap-lg">
             <Text className="text-black text-xl font-bold">
               <Text className="text-red-500 text-lg">
                 내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은 습관을
@@ -199,12 +199,12 @@ export default function Survey() {
                   onLayout={(e) => {
                     itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
                   }}
-                  className={`p-5 rounded-lg shadow-md mb-5 bg-white px-pageX ${
+                  className={`p-llg rounded-lg shadow-md mb-llg bg-white px-pageX ${
                     isUnanswered ? "border-2 border-red-500" : ""
                   }`}
                 >
                   {/*질문 출력*/}
-                  <Text className="text-black text-lg font-sf-b mb-3">
+                  <Text className="text-black text-lg font-sf-b mb-md">
                     Q. {q.code}
                   </Text>
 
@@ -213,7 +213,7 @@ export default function Survey() {
                     q.options.map((opt) => (
                       <TouchableOpacity
                         key={opt.value}
-                        className="flex-row items-center mb-3"
+                        className="flex-row items-center mb-md"
                         onPress={() => {
                           setAnswer((prev) => ({
                             ...prev,
@@ -225,7 +225,7 @@ export default function Survey() {
                         }}
                       >
                         {/*커스텀 라디오 버튼 + 항목*/}
-                        <View className="h-5 w-5 border-2 border-black rounded-full mr-3 items-center justify-center">
+                        <View className="h-5 w-5 border-2 border-black rounded-full mr-md items-center justify-center">
                           {answer[q.itemId] === opt.value && (
                             <View className="h-3 w-3 bg-black rounded-full" />
                           )}

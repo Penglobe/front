@@ -85,8 +85,8 @@ export default function QuizPage() {
     <View className="flex-1">
       {/*모달*/}
       <Modal visible={open} onClose={() => setOpen(false)}>
-        <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <Text className="text-black text-[20px] font-sf-b text-center mb-2">
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b text-center mb-sm">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
 
@@ -97,16 +97,14 @@ export default function QuizPage() {
               justifyContent: "center",
             }}
           >
-            <Text className="text-black text-[20px] font-sf-b">
+            <Text className="text-black text-h2 font-sf-b">
               {result ? "10" : "1"}
             </Text>
             <Images.Ice width={40} height={40} />
-            <Text className="text-black text-[20px] font-sf-b">
-              을 받았어요.
-            </Text>
+            <Text className="text-black text-h2 font-sf-b">을 받았어요.</Text>
           </View>
 
-          <View style={{ marginTop: 10 }}>
+          <View className="items-center mb-llg">
             {result ? <Images.Ipa2 /> : <Images.Ipa_sad />}
           </View>
         </View>
@@ -132,26 +130,24 @@ export default function QuizPage() {
 
       <HeaderBar title="오늘의 퀴즈" />
       {/*날짜, 오늘의 퀴즈*/}
-      <View className="px-pageX pt-[30px] gap-[30px]">
-        <View className="bg-white rounded-[10px] p-4">
-          <Text className="text-green font-sf-md text-[22px]">
-            {formattedDate}
-          </Text>
-          <Text className="font-sf-b text-[15px] mt-2">
+      <View className="px-pageX pt-2xl gap-2xl">
+        <View className="bg-white rounded-xl p-4">
+          <Text className="text-green font-sf-md text-lg">{formattedDate}</Text>
+          <Text className="font-sf-b text-h4 mt-sm">
             환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}하지만 얼음은 없어도 지식은
             쌓을 수 있어요!
           </Text>
         </View>
 
         {/*퀴즈*/}
-        <View className="bg-white rounded-[10px] p-7">
+        <View className="bg-white rounded-xl p-xl">
           {/*퀴즈내용*/}
-          <Text className="font-sf-b text-[21px]">
+          <Text className="font-sf-b text-h2">
             Q. {question ? question.question : "퀴즈를 불러오는 중입니다..."}
           </Text>
 
           {/*OX*/}
-          <View className="flex-row justify-around mt-10">
+          <View className="flex-row justify-around mt-3xl">
             <TouchableOpacity
               className="bg-blue py-8 px-12 rounded-lg opacity-90"
               onPress={() => handleAnswer("O")}

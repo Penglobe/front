@@ -97,7 +97,7 @@ export default function StepPill({ slot, onClaim }) {
         <Bg width={BG} height={BG} />
         {!claimed && (
           <Text
-            className="absolute font-sf-b text-[14px]"
+            className="absolute font-sf-b text-label"
             style={{ color: numberColor }}
           >
             {target}
@@ -107,7 +107,7 @@ export default function StepPill({ slot, onClaim }) {
 
       {/* 상태 텍스트 */}
       <Text
-        className={`mt-1 text-[11px] ${weightClass}`}
+        className={`mt-1 text-footnote ${weightClass}`}
         style={{ color: statusColor }}
       >
         {statusText}
@@ -115,7 +115,9 @@ export default function StepPill({ slot, onClaim }) {
 
       {/* 보상 표기(수령 완료만) */}
       {claimed && (
-        <Text className="mt-1 text-[11px] text-[#6B7280]">+{rewardPoints}</Text>
+        <Text className="mt-1 text-footnote text-[#6B7280]">
+          +{rewardPoints}
+        </Text>
       )}
     </View>
   );

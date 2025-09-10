@@ -11,15 +11,15 @@ export default function TransportFail() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 items-center justify-center px-6">
+    <View className="flex-1 items-center justify-center px-2xl">
       <BgGradient />
       <HeaderBar title="이동 실패" />
 
-      <Text className="text-red-600 text-2xl font-bold mb-4">
+      <Text className="text-red-600 text-2xl font-bold mb-lg">
         이동 기록 실패
       </Text>
-      <Text className="text-gray-800 text-lg mb-2">{reason}</Text>
-      <Text className="text-gray-500 mb-6">도착지: {placeName}</Text>
+      <Text className="text-gray-800 text-lg mb-sm">{reason}</Text>
+      <Text className="text-gray-500 mb-xl">도착지: {placeName}</Text>
 
       <MainButton
         label="다시 시도하기"

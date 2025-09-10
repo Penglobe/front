@@ -55,14 +55,14 @@ export default function BookmarkManage() {
       <BgGradient />
       <HeaderBar title="북마크 관리" />
 
-      <View className="px-pageX flex-1 mt-4">
+      <View className="px-pageX flex-1 mt-lg">
         <FlatList
           data={bookmarks}
           keyExtractor={(item) => "m-" + item.bookmarkId}
           renderItem={({ item }) => (
-            <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center justify-between mb-md">
               {/* 왼쪽: 장소 카드 */}
-              <View className="flex-1 mr-3">
+              <View className="flex-1 mr-md">
                 <PlaceCard item={item} isBookmark readOnly />
               </View>
 
@@ -82,25 +82,25 @@ export default function BookmarkManage() {
                       },
                     })
                   }
-                  className="py-2 mb-2 bg-[#318643] rounded-lg flex-row items-center justify-center"
+                  className="py-sm mb-sm bg-[#318643] rounded-lg flex-row items-center justify-center"
                 >
                   <Feather name="edit-3" size={16} color="white" />
-                  <Text className="text-white font-sf-md ml-1">수정</Text>
+                  <Text className="text-white font-sf-md ml-xs">수정</Text>
                 </TouchableOpacity>
 
                 {/* 삭제 버튼 */}
                 <TouchableOpacity
                   onPress={() => handleDelete(item.bookmarkId)}
-                  className="py-2 bg-red-500 rounded-lg flex-row items-center justify-center"
+                  className="py-sm bg-red-500 rounded-lg flex-row items-center justify-center"
                 >
                   <Feather name="trash" size={16} color="white" />
-                  <Text className="text-white font-sf-md ml-1">삭제</Text>
+                  <Text className="text-white font-sf-md ml-xs">삭제</Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
           ListEmptyComponent={
-            <Text className="font-sf-md text-gray-400 mt-10 text-center">
+            <Text className="font-sf-md text-gray-400 mt-3xl text-center">
               등록된 북마크가 없습니다.
             </Text>
           }
