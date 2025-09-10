@@ -21,7 +21,6 @@ export default function QuizPage() {
   const { user } = useAuth();
 
   /*user*/
-  const id = user?.userId;
   //console.log("user", user); // 먼저 전체 객체를 찍어보세요
   //console.log("userId", user.userId);
 
@@ -87,7 +86,7 @@ export default function QuizPage() {
       {/*모달*/}
       <Modal visible={open} onClose={() => setOpen(false)}>
         <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <Text className="text-black text-[20px] font-sf-md text-center mb-2">
+          <Text className="text-black text-[20px] font-sf-b text-center mb-2">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
 
@@ -98,12 +97,12 @@ export default function QuizPage() {
               justifyContent: "center",
             }}
           >
-            <Text className="text-black text-[20px] font-sf-md">
+            <Text className="text-black text-[20px] font-sf-b">
               {result ? "10" : "1"}
             </Text>
             <Images.Ice width={40} height={40} />
-            <Text className="text-black text-[20px] font-sf-md">
-              을 받아주세요.
+            <Text className="text-black text-[20px] font-sf-b">
+              을 받았어요.
             </Text>
           </View>
 
