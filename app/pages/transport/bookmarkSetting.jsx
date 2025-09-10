@@ -10,7 +10,6 @@ import KakaoMapView from "@components/KakaoMapView";
 import colors from "@constants/Colors.cjs";
 
 // ✅ SVG 캐릭터 import
-import Tori from "@assets/images/character/tori-1.svg";
 import Ipa from "@assets/images/character/ipa-face.svg";
 
 export default function BookmarkSetting() {
@@ -74,18 +73,18 @@ export default function BookmarkSetting() {
         contentContainerStyle={{ paddingBottom: 200 }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-pageX mt-xl">
+        <View className="px-pageX mt-6">
           {/* ✅ 캐릭터 + 안내 텍스트 */}
-          <View className="flex-row items-center px-pageX mb-llg">
+          <View className="flex-row items-center px-pageX mb-5">
             <Ipa width={40} height={40} style={{ marginRight: 8 }} />
             <Text className="text-gray-700 font-sf-b text-2xl">
-              북마크 이름을 설정해 주세요.
+              북마크 이름을 설정해 주세요
             </Text>
           </View>
 
-          <View className="bg-white rounded-2xl shadow-md px-llg py-2xl">
+          <View className="bg-white rounded-2xl shadow-md px-5 py-6">
             {/* Input + 수정 아이콘 */}
-            <View className="flex-row items-center bg-white rounded-xl px-md py-md border border-gray-200">
+            <View className="flex-row items-center bg-white rounded-xl px-3 py-3 border border-gray-200">
               <TextInput
                 value={label}
                 onChangeText={setLabel}
@@ -101,13 +100,18 @@ export default function BookmarkSetting() {
               />
             </View>
 
-            {/* 지도 */}
-            <View className="rounded-xl overflow-hidden mt-llg">
-              <KakaoMapView endLat={lat} endLng={lng} height={220} />
+            {/* 지도 → ✅ currentLat/currentLng 로 전달 */}
+            <View className="rounded-xl overflow-hidden mt-5">
+              <KakaoMapView
+                currentLat={lat}
+                currentLng={lng}
+                key={`${lat}-${lng}`}
+                height={220}
+              />
             </View>
 
             {/* 주소 */}
-            <View className="flex-row items-center bg-gray-50 mt-llg p-sm rounded-lg">
+            <View className="flex-row items-center bg-gray-50 mt-5 p-2 rounded-lg">
               <Ionicons
                 name="location-outline"
                 size={22}
@@ -118,13 +122,8 @@ export default function BookmarkSetting() {
             </View>
           </View>
 
-          {/* ✅ 캐릭터 영역 */}
-          <View className="items-end pr-pageX">
-            <Tori width={100} height={180} />
-          </View>
-
           {/* 버튼 */}
-          <View className="px-pageX mb-2xl">
+          <View className="mt-40">
             <MainButton label="등록하기" onPress={handleSave} />
           </View>
         </View>

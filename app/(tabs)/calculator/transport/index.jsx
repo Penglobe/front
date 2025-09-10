@@ -36,7 +36,9 @@ export default function TransportStart() {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
-        <Text className="mt-3 text-gray-600">현재 위치를 불러오는 중...</Text>
+        <Text className="mt-3 text-xl SFPro-Medium">
+          현재 위치를 불러오는 중...
+        </Text>
       </View>
     );
   }
@@ -44,12 +46,21 @@ export default function TransportStart() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <View className="absolute inset-0 pb-[150px]">
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingBottom: 150,
+        }}
+      >
         <HeaderBar title="환경 걸음" className="px-pageX" />
 
         {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 200 }}
+          contentContainerStyle={{ paddingBottom: 150 }}
           showsVerticalScrollIndicator={false}
         >
           {/* ✅ KakaoMapView */}
@@ -58,19 +69,14 @@ export default function TransportStart() {
               key={`${location.latitude}-${location.longitude}`}
               startLat={location.latitude}
               startLng={location.longitude}
-              currentLat={location.latitude}
-              currentLng={location.longitude}
               height={280}
             />
           </View>
 
           {/* 타이틀 */}
           <View className="px-pageX mb-4">
-            <Text
-              className="text-xl text-[#318643]"
-              style={{ fontFamily: "SFPro-Bold" }}
-            >
-              이동 수단을 선택해 주세요.
+            <Text className="text-xl" style={{ fontFamily: "SFPro-Bold" }}>
+              이동 수단을 선택해 주세요
             </Text>
           </View>
 
@@ -106,7 +112,7 @@ export default function TransportStart() {
           {/* 다음 버튼 */}
           <View className="px-pageX">
             <MainButton
-              className="mt-10"
+              className="mt-9"
               label="다음"
               onPress={() =>
                 router.push({

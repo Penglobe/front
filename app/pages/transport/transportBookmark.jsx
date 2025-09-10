@@ -33,7 +33,7 @@ export default function TransportBookmark() {
   // ✅ 북마크 불러오기
   const fetchBookmarks = useCallback(async () => {
     try {
-      const data = await listBookmarks(); // userId 필요 없음
+      const data = await listBookmarks();
       setBookmarks(data);
     } catch (err) {
       console.error("북마크 조회 실패:", err);
@@ -41,7 +41,6 @@ export default function TransportBookmark() {
     }
   }, []);
 
-  // ✅ 화면 focus될 때마다 북마크 새로 불러오기
   useFocusEffect(
     useCallback(() => {
       fetchBookmarks();
@@ -63,10 +62,7 @@ export default function TransportBookmark() {
     }
   };
 
-  // ✅ 고유 key 생성 함수 (검색 결과용)
-  const getSearchKey = (item, idx) => item.id || `s-${item.x}-${item.y}-${idx}`;
-
-  // ✅ 확인 버튼
+  // ✅ 출발 버튼
   const handleConfirm = () => {
     if (!selectedPlace) {
       Alert.alert("목적지를 선택해주세요.");
@@ -75,44 +71,49 @@ export default function TransportBookmark() {
 
     const isBookmark = !!selectedPlace.bookmarkId;
 
-    const goNext = () =>
-      router.push({
-        pathname: "/pages/transport/transportMap",
-        params: {
-          startLat,
-          startLng,
-          endLat: isBookmark ? selectedPlace.lat : selectedPlace.y,
-          endLng: isBookmark ? selectedPlace.lng : selectedPlace.x,
-          placeName: isBookmark
-            ? selectedPlace.bookmarkLabel
-            : selectedPlace.place_name,
-          mode,
-        },
-      });
+    router.push({
+      pathname: "/pages/transport/transportMap",
+      params: {
+        startLat,
+        startLng,
+        endLat: isBookmark ? selectedPlace.lat : selectedPlace.y,
+        endLng: isBookmark ? selectedPlace.lng : selectedPlace.x,
+        placeName: isBookmark
+          ? selectedPlace.bookmarkLabel
+          : selectedPlace.place_name,
+        mode,
+      },
+    });
+  };
 
-    if (isBookmark) {
-      goNext();
-    } else {
-      Alert.alert("북마크 등록", "이 장소를 북마크로 등록하시겠습니까?", [
-        {
-          text: "예",
-          onPress: () =>
-            router.push({
-              pathname: "/pages/transport/bookmarkSetting",
-              params: {
-                lat: selectedPlace.y,
-                lng: selectedPlace.x,
-                placeName: selectedPlace.place_name,
-                address: selectedPlace.address_name,
-                startLat,
-                startLng,
-                mode,
-              },
-            }),
-        },
-        { text: "아니오", style: "cancel", onPress: goNext },
-      ]);
-    }
+  // ✅ 북마크 추가 버튼
+  const handleAddBookmark = (place) => {
+    router.push({
+      pathname: "/pages/transport/bookmarkSetting",
+      params: {
+        lat: place.y,
+        lng: place.x,
+        placeName: place.place_name,
+        address: place.address_name,
+        startLat,
+        startLng,
+        mode,
+      },
+    });
+  };
+
+  // ✅ 북마크 상세보기 버튼
+  const handleDetail = (bookmark) => {
+    router.push({
+      pathname: "/pages/transport/bookmarkDetail",
+      params: {
+        bookmarkId: bookmark.bookmarkId,
+        bookmarkLabel: bookmark.bookmarkLabel,
+        address: bookmark.address,
+        currentLat: bookmark.lat,
+        currentLng: bookmark.lng,
+      },
+    });
   };
 
   return (
@@ -121,13 +122,13 @@ export default function TransportBookmark() {
       <HeaderBar title="목적지 선택" className="px-pageX font-sf-b" />
 
       {/* 🔎 검색창 */}
-      <View className="px-pageX mt-llg">
-        <View className="flex-row items-center bg-white rounded-xl px-md py-lg shadow-md shadow-black/5">
+      <View className="px-pageX mt-5">
+        <View className="flex-row items-center bg-white rounded-xl px-3 py-4 shadow-md shadow-black/5">
           <Ionicons
             name="search-outline"
             size={20}
             color={colors.Colors.green}
-            className="mr-sm"
+            className="mr-2"
           />
           <TextInput
             placeholder="목적지를 검색하세요"
@@ -140,48 +141,49 @@ export default function TransportBookmark() {
         </View>
       </View>
 
-      {/* 검색 결과 */}
-      <View className="px-pageX mt-2xl">
-        <Text className="font-sf-b text-xl text-gray-800 mb-md">검색 결과</Text>
-        <View className="h-[200px] rounded-xl bg-[#E0F2F1]">
-          {loading ? (
-            <ActivityIndicator className="mt-md" />
-          ) : (
-            <FlatList
-              data={searchResults}
-              keyExtractor={getSearchKey}
-              renderItem={({ item }) => (
-                <PlaceCard
-                  item={item}
-                  isBookmark={false}
-                  isSelected={
-                    !selectedPlace?.bookmarkId &&
-                    selectedPlace?.x === item.x &&
-                    selectedPlace?.y === item.y
-                  }
-                  onSelect={setSelectedPlace}
-                />
-              )}
-              ListEmptyComponent={
-                <Text className="font-sf-md text-gray-400 text-center mt-lg">
-                  검색 결과가 없습니다.
-                </Text>
-              }
-            />
-          )}
+      {/* 🔎 검색 결과 */}
+      {query.trim().length > 0 && (
+        <View className="px-pageX mt-6">
+          <Text className="font-sf-b text-xl text-gray-800 mb-3">
+            검색 결과
+          </Text>
+          <View className="h-[200px] rounded-xl bg-[#E0F2F1]">
+            {loading ? (
+              <ActivityIndicator className="mt-3" />
+            ) : (
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item, idx) =>
+                  item.id || `s-${item.x}-${item.y}-${idx}`
+                }
+                renderItem={({ item }) => (
+                  <PlaceCard
+                    item={item}
+                    isBookmark={false}
+                    isSelected={
+                      !selectedPlace?.bookmarkId &&
+                      selectedPlace?.x === item.x &&
+                      selectedPlace?.y === item.y
+                    }
+                    onSelect={setSelectedPlace}
+                    onAdd={handleAddBookmark}
+                  />
+                )}
+                ListEmptyComponent={
+                  <Text className="font-sf-md text-gray-400 text-center mt-4">
+                    검색 결과가 없습니다.
+                  </Text>
+                }
+              />
+            )}
+          </View>
         </View>
-      </View>
+      )}
 
       {/* 북마크 */}
-      <View className="px-pageX mt-2xl flex-1">
-        <View className="flex-row justify-between items-center mt-sm mb-md">
+      <View className="px-pageX mt-8 flex-1">
+        <View className="flex-row justify-between items-center mt-2 mb-3">
           <Text className="font-sf-b text-xl text-gray-800">내 북마크</Text>
-          <TouchableOpacity
-            onPress={() => router.push("/pages/transport/bookmarkManage")}
-            className="px-md py-xs bg-[#318643] rounded-lg"
-          >
-            <Text className="text-white font-sf-md text-base">관리</Text>
-          </TouchableOpacity>
         </View>
 
         <FlatList
@@ -193,18 +195,19 @@ export default function TransportBookmark() {
               isBookmark
               isSelected={selectedPlace?.bookmarkId === item.bookmarkId}
               onSelect={setSelectedPlace}
+              onDetail={handleDetail}
             />
           )}
           ListEmptyComponent={
-            <Text className="font-sf-md text-gray-400 mt-lg text-center">
+            <Text className="font-sf-md text-gray-400 mt-4 text-center">
               등록된 북마크가 없습니다.
             </Text>
           }
         />
       </View>
 
-      {/* 확인 버튼 */}
-      <View className="px-pageX mb-3xl">
+      {/* ✅ 공통 출발 버튼 */}
+      <View className="px-pageX mb-10">
         <MainButton label="출발" onPress={handleConfirm} />
       </View>
     </View>
