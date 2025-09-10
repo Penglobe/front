@@ -8,8 +8,7 @@ import { useRouter } from "expo-router";
 import SurveyResultButton from "@components/SurveyResultButton";
 import { useAuth } from "@hooks/useAuth";
 import Constants from "expo-constants";
-
-const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/surveys`;
+import { apiFetch } from "@services/authService";
 
 export default function Survey() {
   const router = useRouter();
@@ -21,8 +20,8 @@ export default function Survey() {
 
   //user
   const id = user?.userId;
-  //console.log("user", user); // 먼저 전체 객체를 찍어보세요
-  //console.log("userId", user.id);
+  console.log("user", user); // 먼저 전체 객체를 찍어보세요
+  console.log("userId", user.userId);
 
   // 스크롤뷰 관련
   const scrollRef = useRef(null);
@@ -32,8 +31,8 @@ export default function Survey() {
   useEffect(() => {
     async function fetchQuestion() {
       try {
-        const response = await fetch(`${BASE_URL}/today`);
-        const result = await response.json();
+        const res = await apiFetch("/surveys/today");
+        const result = await res.json();
 
         // 서버 응답 구조에 맞춰서 접근
         const data = result.data ?? result;
@@ -51,7 +50,7 @@ export default function Survey() {
 
   const resultHandler = async () => {
     try {
-      //console.log("보낼 answer 객체:", answer);
+      console.log("보낼 answer 객체:", answer);
 
       // answer 객체 → DTO 배열 변환
       const answerArray = Object.entries(answer).map(
@@ -62,13 +61,13 @@ export default function Survey() {
       );
 
       const payload = {
-        userId: user.id,
+        userId: user.userId,
         answer: answerArray,
       };
 
-      //console.log("payload: ", payload);
+      console.log("payload: ", payload);
 
-      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+      const response = await apiFetch(`/surveys/submit/${payload.userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +93,7 @@ export default function Survey() {
       router.push({
         pathname: "/pages/survey/result",
         params: {
-          userId: user.id,
+          userId: user.userId,
           resultData: resultDataStr, // 문자열로 전달
         },
       });
@@ -138,11 +137,11 @@ export default function Survey() {
       );
 
       const payload = {
-        userId: user.id,
+        userId: user.userId,
         answer: answerArray,
       };
 
-      const response = await fetch(`${BASE_URL}/submit/${payload.userId}`, {
+      const response = await apiFetch(`/surveys/submit/${payload.userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
