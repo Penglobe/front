@@ -18,8 +18,8 @@ const LOCATION_OPTIONS = {
   timeInterval: 3000,
   showsBackgroundLocationIndicator: true,
   foregroundService: {
-    notificationTitle: "이동 추적 중",
-    notificationBody: "환경 걸음이 이동을 기록하고 있습니다.",
+    notificationTitle: "환경 걸음",
+    notificationBody: "펭글로브가 이동을 기록하고 있습니다.",
   },
 };
 
@@ -35,7 +35,37 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// TaskManager 정의 (중복 방지)
+// 이동 평균 좌표 계산
+function getSmoothedCoord(buffer) {
+  if (buffer.length === 0) return null;
+  const avgLat = buffer.reduce((sum, p) => sum + p.latitude, 0) / buffer.length;
+  const avgLng =
+    buffer.reduce((sum, p) => sum + p.longitude, 0) / buffer.length;
+  return { latitude: avgLat, longitude: avgLng, timestamp: Date.now() };
+}
+
+// 두 벡터 방향 차이 계산
+function bearingDiff(coord1, coord2, coord3) {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const toDeg = (r) => (r * 180) / Math.PI;
+
+  function bearing(a, b) {
+    const dLon = toRad(b.longitude - a.longitude);
+    const y = Math.sin(dLon) * Math.cos(toRad(b.latitude));
+    const x =
+      Math.cos(toRad(a.latitude)) * Math.sin(toRad(b.latitude)) -
+      Math.sin(toRad(a.latitude)) *
+        Math.cos(toRad(b.latitude)) *
+        Math.cos(dLon);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+  }
+
+  const b1 = bearing(coord1, coord2);
+  const b2 = bearing(coord2, coord3);
+  return Math.abs(b1 - b2);
+}
+
+// TaskManager 정의
 if (!TaskManager.isTaskDefined(TASK_NAME)) {
   TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
     if (error) {
@@ -67,6 +97,7 @@ export default function TransportMap() {
 
   const distanceRef = useRef(0);
   const prevCoord = useRef(null);
+  const coordBuffer = useRef([]);
   const ended = useRef(false);
   const startTime = useRef(Date.now());
 
@@ -75,7 +106,7 @@ export default function TransportMap() {
   }, [distance]);
 
   // 속도 검증
-  const checkSpeed = (speed, avg = false) => {
+  const checkSpeed = (speed) => {
     if (mode === "WALK" && speed > SPEED_LIMITS.WALK)
       return "도보 이동 속도가 너무 빠릅니다.";
     if (mode === "BIKE" && speed > SPEED_LIMITS.BIKE)
@@ -83,18 +114,13 @@ export default function TransportMap() {
     return null;
   };
 
-  // 🚀 이동 시작
+  // 이동 시작
   useEffect(() => {
     (async () => {
       try {
         const activity = await startTransport(mode);
-        console.log("🚀 /transport/start 응답:", activity);
-
-        if (!activity || !activity.transportId) {
-          Alert.alert(
-            "이동 시작 실패",
-            "transportId를 가져올 수 없습니다.\n로그인을 다시 시도해주세요."
-          );
+        if (!activity?.transportId) {
+          Alert.alert("이동 시작 실패", "transportId를 가져올 수 없습니다.");
           return;
         }
 
@@ -120,10 +146,6 @@ export default function TransportMap() {
         }
       } catch (err) {
         console.error("이동 시작 실패:", err);
-        Alert.alert(
-          "이동 시작 실패",
-          err.message || "서버와 통신할 수 없습니다."
-        );
       }
     })();
 
@@ -138,7 +160,7 @@ export default function TransportMap() {
     };
   }, []);
 
-  // ✅ 위치 추적
+  // 위치 추적
   useEffect(() => {
     let subscription;
     (async () => {
@@ -147,42 +169,56 @@ export default function TransportMap() {
         async (loc) => {
           if (ended.current) return;
 
-          const { latitude, longitude } = loc.coords;
+          const { latitude, longitude, accuracy } = loc.coords;
           const now = Date.now();
 
-          setCurrentLat(latitude);
-          setCurrentLng(longitude);
+          if (accuracy > 20) return;
 
-          if (prevCoord.current) {
-            const d = calculateDistance(
-              prevCoord.current.latitude,
-              prevCoord.current.longitude,
-              latitude,
-              longitude
-            );
-            const dt = (now - prevCoord.current.timestamp) / 1000;
-            const speed = d / dt;
+          coordBuffer.current.push({ latitude, longitude, timestamp: now });
+          if (coordBuffer.current.length > 5) coordBuffer.current.shift();
 
-            const warning = checkSpeed(speed);
-            if (warning) {
-              ended.current = true;
-              await Location.stopLocationUpdatesAsync(TASK_NAME);
-              router.replace({
-                pathname: "/pages/transport/transportFail",
-                params: { placeName, reason: warning },
-              });
-              return;
-            }
-            setDistance((prev) => prev + d);
+          const smoothed = getSmoothedCoord(coordBuffer.current);
+          if (!smoothed) return;
+
+          if (!prevCoord.current) {
+            prevCoord.current = smoothed;
+            setCurrentLat(smoothed.latitude);
+            setCurrentLng(smoothed.longitude);
+            return;
           }
 
-          prevCoord.current = { latitude, longitude, timestamp: now };
+          const d = calculateDistance(
+            prevCoord.current.latitude,
+            prevCoord.current.longitude,
+            smoothed.latitude,
+            smoothed.longitude
+          );
+          const dt = (now - prevCoord.current.timestamp) / 1000;
+          const speed = d / dt;
 
-          // 도착 감지
+          if (d < 2 || d > 40) return;
+          if (mode === "WALK" && speed > 3) return;
+          if (mode === "BIKE" && speed > 8) return;
+
+          if (coordBuffer.current.length >= 3) {
+            const len = coordBuffer.current.length;
+            const diff = bearingDiff(
+              coordBuffer.current[len - 3],
+              coordBuffer.current[len - 2],
+              smoothed
+            );
+            if (diff > 90) return;
+          }
+
+          setDistance((prev) => prev + d);
+          prevCoord.current = smoothed;
+          setCurrentLat(smoothed.latitude);
+          setCurrentLng(smoothed.longitude);
+
           if (!ended.current && endLat && endLng) {
             const distToEnd = calculateDistance(
-              latitude,
-              longitude,
+              smoothed.latitude,
+              smoothed.longitude,
               parseFloat(endLat),
               parseFloat(endLng)
             );
@@ -194,18 +230,17 @@ export default function TransportMap() {
         }
       );
     })();
-
     return () => subscription && subscription.remove();
   }, []);
 
-  // ✅ 이동 종료
-  const handleStop = async (auto = false) => {
+  // 이동 종료
+  const handleStop = async () => {
     try {
       const usedDistance = distanceRef.current;
       const elapsedSec = (Date.now() - startTime.current) / 1000;
       const avgSpeed = usedDistance / elapsedSec;
 
-      const warning = checkSpeed(avgSpeed, true);
+      const warning = checkSpeed(avgSpeed);
       if (warning) {
         router.replace({
           pathname: "/pages/transport/transportFail",
@@ -215,14 +250,11 @@ export default function TransportMap() {
       }
 
       if (!transportId) {
-        console.error("⚠️ transportId 없음");
         Alert.alert("이동 종료 실패", "transportId가 없습니다.");
         return;
       }
 
       const result = await stopTransport(transportId, Math.round(usedDistance));
-      console.log("✅ /transport/{id}/stop 응답:", result);
-
       router.replace({
         pathname: "/pages/transport/transportFinish",
         params: {
@@ -237,86 +269,71 @@ export default function TransportMap() {
       });
     } catch (err) {
       console.error("stopTransport 실패:", err);
-      Alert.alert(
-        "이동 종료 실패",
-        err.message || "서버와 통신할 수 없습니다."
-      );
     }
   };
 
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="이동 중" className="px-pageX" />
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 200 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* 지도 */}
-        <View className="mb-5 overflow-hidden">
-          <KakaoMapView
-            startLat={startLat}
-            startLng={startLng}
-            endLat={endLat}
-            endLng={endLng}
-            currentLat={currentLat}
-            currentLng={currentLng}
-            height={400}
-          />
-        </View>
+      <HeaderBar
+        title="이동 중"
+        className="px-pageX absolute top-0 left-0 right-0 z-20"
+      />
 
-        {/* 이동 정보 */}
-        <View className="px-pageX mt-llg">
-          <View className="bg-white rounded-2xl shadow-md px-xl py-llg">
-            <View className="flex-row items-center mb-md">
-              <Ionicons
-                name="location-outline"
-                size={22}
-                color="#318643"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-b text-lg text-gray-800">
-                도착지: {placeName}
+      {/* 지도 전체화면 */}
+      {currentLat && currentLng ? (
+        <KakaoMapView
+          startLat={startLat}
+          startLng={startLng}
+          endLat={endLat}
+          endLng={endLng}
+          currentLat={currentLat}
+          currentLng={currentLng}
+          height="100%" // 전체 높이
+          width="100%" // 전체 너비
+        />
+      ) : (
+        <View className="flex-1 items-center justify-center bg-gray-100">
+          <Text>지도를 불러오는 중...</Text>
+        </View>
+      )}
+
+      {/* 밑에 카드 & 버튼 오버레이 */}
+      <View className="absolute bottom-0 left-0 right-0 px-pageX pb-10">
+        <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-4">
+          <View className="flex-row items-center mb-3">
+            <Ionicons name="location-outline" size={22} color="#318643" />
+            <Text className="font-sf-b text-lg text-gray-800">
+              도착지: {placeName}
+            </Text>
+          </View>
+          <View className="flex-row items-center">
+            <Ionicons name="walk-outline" size={20} color="#555" />
+            <Text className="font-sf-md text-base text-gray-600">
+              이동 거리:{" "}
+              <Text className="font-sf-b text-[#318643]">
+                {Math.round(distance)} m
               </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name="walk-outline"
-                size={20}
-                color="#555"
-                style={{ marginRight: 6 }}
-              />
-              <Text className="font-sf-md text-base text-gray-600">
-                이동 거리:{" "}
-                <Text className="font-sf-b text-[#318643]">
-                  {Math.round(distance)} m
-                </Text>
-              </Text>
-            </View>
+            </Text>
           </View>
         </View>
 
-        {/* 종료 버튼 */}
-        <View className="px-pageX mt-auto mb-2xl">
-          <MainButton
-            label="이동 종료"
-            onPress={() => handleStop(false)}
-            className="bg-red-500 active:bg-red-700"
-          />
+        <MainButton
+          label="이동 종료"
+          onPress={handleStop}
+          className="bg-red-500 mb-3"
+        />
 
-          {/* 🚀 테스트용 거리 증가 버튼 */}
-          <View className="mt-md">
-            <MainButton
-              label="거리 +100m (테스트)"
-              onPress={() => {
-                setDistance((prev) => prev + 100);
-                distanceRef.current += 100;
-              }}
-              className="bg-blue-500 active:bg-blue-700"
-            />
-          </View>
-        </View>
-      </ScrollView>
+        {/* 🚀 테스트용 버튼 */}
+        <MainButton
+          label="거리 +100m (테스트)"
+          onPress={() => {
+            setDistance((prev) => prev + 100);
+            distanceRef.current += 100;
+          }}
+          className="bg-blue-500 active:bg-blue-700"
+        />
+      </View>
     </View>
   );
 }

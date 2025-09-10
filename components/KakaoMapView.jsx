@@ -1,43 +1,66 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView } from "react-native-webview";
 
 export default function KakaoMapView({
-  startLat = null,
-  startLng = null,
-  endLat = null,
-  endLng = null,
-  currentLat = null,
-  currentLng = null,
+  startLat,
+  startLng,
+  endLat,
+  endLng,
+  currentLat,
+  currentLng,
   height = 300,
 }) {
   const webviewRef = useRef(null);
-
-  // ✅ 서버 URL
   const SERVER_URL = "https://penglobe.shinhanacademy.co.kr";
 
-  // ✅ 값이 있을 때만 파라미터 추가
+  // ✅ 최초 로딩 시 출발/도착만 서버에서 그림
   const params = new URLSearchParams();
-  if (startLat != null && startLng != null) {
+  if (startLat && startLng) {
     params.append("startLat", startLat);
     params.append("startLng", startLng);
   }
-  if (endLat != null && endLng != null) {
+  if (endLat && endLng) {
     params.append("endLat", endLat);
     params.append("endLng", endLng);
   }
-  if (currentLat != null && currentLng != null) {
+  if (currentLat && currentLng) {
     params.append("currentLat", currentLat);
     params.append("currentLng", currentLng);
   }
-
-  // ✅ 캐시 무효화를 위해 timestamp 추가
-  params.append("_ts", Date.now());
-
   const uri = `${SERVER_URL}/map?${params.toString()}`;
 
-  // ✅ WebView에 전달할 URL 로그
-  console.log("🌍 KakaoMapView URI:", uri);
+  // ✅ 마커만 갱신 (중심은 map.html에서 최초 1회만)
+  const updateMarker = (name, lat, lng) => {
+    if (!lat || !lng || !webviewRef.current) return;
+    const jsCode = `
+      if (window.map) {
+        var pos = new kakao.maps.LatLng(${Number(lat)}, ${Number(lng)});
+        if (!window.${name}Marker) {
+          window.${name}Marker = new kakao.maps.Marker({ position: pos, map: window.map });
+        } else {
+          window.${name}Marker.setPosition(pos);
+        }
+      }
+      true;
+    `;
+    webviewRef.current.injectJavaScript(jsCode);
+  };
+
+  // 출발 마커 갱신
+  useEffect(() => {
+    updateMarker("start", startLat, startLng);
+  }, [startLat, startLng]);
+
+  // 도착 마커 갱신
+  useEffect(() => {
+    updateMarker("end", endLat, endLng);
+  }, [endLat, endLng]);
+
+  // 현재 위치 마커 갱신
+  useEffect(() => {
+    updateMarker("current", currentLat, currentLng);
+  }, [currentLat, currentLng]);
 
   return (
     <View style={[styles.container, { height }]}>
@@ -45,37 +68,30 @@ export default function KakaoMapView({
         ref={webviewRef}
         originWhitelist={["*"]}
         source={{ uri }}
-        style={{ flex: 1, minHeight: height }}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
+        style={{ flex: 1 }}
+        javaScriptEnabled
+        domStorageEnabled
         mixedContentMode="always"
-        allowsBackForwardNavigationGestures={true}
-        setSupportMultipleWindows={false}
-        // ✅ WebView 내부에서 console.log → React Native로 전달
+        // ✅ WebView 로딩 끝나면 지도 relayout 보장
+        onLoadEnd={() => {
+          if (webviewRef.current) {
+            webviewRef.current.injectJavaScript(`
+      if (window.map) {
+        // 💡 중심은 HTML에서만, 여기서는 크기만 보정
+        window.map.relayout();
+      }
+      true;
+    `);
+          }
+        }}
         onMessage={(event) => {
           console.log("📩 WebView message:", event.nativeEvent.data);
         }}
-        // ✅ 에러 핸들링
         onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.error("❌ WebView error:", nativeEvent);
+          console.error("❌ WebView error:", syntheticEvent.nativeEvent);
         }}
         onHttpError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.error("❌ WebView HTTP error:", nativeEvent);
-        }}
-        onLoadEnd={() => {
-          console.log("✅ WebView finished loading:", uri);
-          // 👇 HTML 쪽 map 객체가 있으면 강제 relayout
-          webviewRef.current?.injectJavaScript(`
-            setTimeout(() => {
-              if (window.map) {
-                console.log("🔄 Forcing map.relayout()");
-                map.relayout();
-              }
-            }, 300);
-            true;
-          `);
+          console.error("❌ WebView HTTP error:", syntheticEvent.nativeEvent);
         }}
       />
     </View>
