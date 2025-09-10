@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { View, Dimensions, ScrollView, Text } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import Constants from "expo-constants";
 import { useLocalSearchParams } from "expo-router";
+import { apiFetch } from "@services/authService";
 
 const Co2Chart = () => {
   const { userId } = useLocalSearchParams();
-  const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/surveys`;
   const screenWidth = Dimensions.get("window").width;
 
   const [userCo2, setUserCo2] = useState([0, 0, 0, 0, 0, 0, 0]);
   const [totalCo2, setTotalCo2] = useState([0, 0, 0, 0, 0, 0, 0]);
+
   useEffect(() => {
     async function fetchCo2Data() {
       try {
-        const resUser = await fetch(`${BASE_URL}/weekly/user/${userId}`);
+        const resUser = await apiFetch(`/surveys/weekly/user/${userId}`);
         const userData = await resUser.json();
         setUserCo2(userData);
 
-        const resTotal = await fetch(`${BASE_URL}/weekly/total`);
+        const resTotal = await apiFetch("/surveys/weekly/total");
         const totalData = await resTotal.json();
         setTotalCo2(totalData);
 
