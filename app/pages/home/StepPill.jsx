@@ -21,6 +21,15 @@ export default function StepPill({ slot, onClaim }) {
   }, [claimed, claimable, blocked]);
 
   const canPress = claimable && !claimed;
+  const isRealClaimable = claimable && !claimed;
+
+  // 상태별 색상 결정
+  const statusColor = isRealClaimable
+    ? "green" // 수령 가능(활성)
+    : statusText === "미달성"
+      ? "gray" // 미달성(회색)
+      : "black"; // 수령 완료 등 기본
+  const weightClass = isRealClaimable ? "font-sf-b" : "font-sf-md";
 
   // 미션별 보상 배경 매핑
   const successBgByMetric = {
@@ -97,7 +106,10 @@ export default function StepPill({ slot, onClaim }) {
       </Pressable>
 
       {/* 상태 텍스트 */}
-      <Text className="mt-1 text-[11px] font-sf-md text-[#374151]">
+      <Text
+        className={`mt-1 text-[11px] ${weightClass}`}
+        style={{ color: statusColor }}
+      >
         {statusText}
       </Text>
 

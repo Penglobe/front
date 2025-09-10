@@ -153,7 +153,8 @@ export default function AttendanceReward({
                 </Text>
               </View>
             ) : (
-              <Text className="text-[200px]">🎁</Text>
+              // <Text className="text-[200px]">🎁</Text>
+              <Images.Box width={200} height={200} />
             )}
           </Animated.View>
         </Pressable>

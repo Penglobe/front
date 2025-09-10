@@ -110,10 +110,6 @@ export default function Home() {
       setPreview(null);
       setChestClicked(false);
       setTimeout(() => {
-        Alert.alert(
-          "출석 보상",
-          `${reward.toLocaleString("ko-KR")}얼음이 지급되었습니다.`
-        );
         refreshUser?.();
       }, 80);
     } catch (e) {
@@ -288,7 +284,7 @@ export default function Home() {
           <Text className="text-[25px] font-sf-b">출석 보상 🎉</Text>
 
           {/* 닫기 버튼 (오른쪽 끝) */}
-          <Pressable
+          {/* <Pressable
             onPress={() => {
               setAtt({ visible: false, loading: false });
               setPreview(null);
@@ -298,10 +294,10 @@ export default function Home() {
             style={{ padding: 4 }}
           >
             <Text className="text-2xl text-gray-400">✕</Text>
-          </Pressable>
+          </Pressable> */}
         </View>
 
-        <Text className="text-center text-[16px] text-black font-sf-md mb-3">
+        <Text className="text-center text-[16px] text-black font-sf-md mb-5">
           상자를 클릭하여 랜덤 보상을 확인해보세요.
         </Text>
 

@@ -1,25 +1,3 @@
-// import { useEffect } from "react";
-// import { View, Text, InteractionManager } from "react-native";
-// import { useRouter } from "expo-router";
-
-// export default function Index() {
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     const task = InteractionManager.runAfterInteractions(() => {
-//       router.replace("/(tabs)/home"); 
-//     });
-//     return () => task.cancel();
-//   }, []);
-
-//   return (
-//     <View style={{ flex:1, justifyContent:"center", alignItems:"center" }}>
-//       <Text>Loading...</Text>
-//     </View>
-//   );
-// }
-
-
 // app/index.jsx
 import { useEffect, useState } from "react";
 import {
@@ -55,7 +33,7 @@ export default function Index() {
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const canLogin = email.trim().length > 0 && pw.trim().length > 0;
+  const canLogin = email.trim().length > 0 && pw.trim().length > 7;
 
   useEffect(() => {
     (async () => {
@@ -193,7 +171,7 @@ export default function Index() {
           {/* 회원가입 페이지로 이동 */}
           <View className="mt-3 flex-row justify-center">
             <Pressable onPress={() => router.push("/pages/signup")}>
-              <Text className="font-sf-b text-black text-[15px] mr-2">
+              <Text className="font-sf-b text-black text-[15px] mr-2 underline">
                 회원가입
               </Text>
             </Pressable>

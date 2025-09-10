@@ -9,6 +9,7 @@ import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import Constants from "expo-constants";
+import { useAuth } from "../../../hooks/useAuth";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
@@ -28,6 +29,7 @@ export default function ProductDetailPage() {
   const [item, setItem] = useState(null);
   const [qty, setQty] = useState(1);
   const [confirmVisible, setConfirmVisible] = useState(false); //구매 확인 모달 상태
+  const { user, refreshUser } = useAuth();
 
   const load = useCallback(async () => {
     if (!pid) return;
@@ -47,8 +49,14 @@ export default function ProductDetailPage() {
     load();
   }, [load]);
 
+  // 모달 열릴 때 보유 포인트 최신화
+  useEffect(() => {
+    if (confirmVisible) refreshUser();
+  }, [confirmVisible, refreshUser]);
+
   const price = item?.price ?? 0;
   const total = price * qty;
+  const totalPoint = Number(user?.totalPoint ?? 0);
 
   const minus = () => setQty((n) => Math.max(1, n - 1));
   const plus = () => setQty((n) => n + 1);
@@ -111,7 +119,7 @@ export default function ProductDetailPage() {
           {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
           <View className="bg-white rounded-2xl px-pageX pt-3 pb-5">
             {/* 이미지 */}
-            <View className="w-full h-[280px] rounded-2xl mt-1 mb-3 bg-white items-center justify-center overflow-hidden">
+            <View className="w-full h-[220px] rounded-2xl mt-1 mb-2 bg-gray items-center justify-center overflow-hidden">
               {imgUri ? (
                 <Image
                   source={{ uri: imgUri }}
@@ -123,40 +131,48 @@ export default function ProductDetailPage() {
               )}
             </View>
 
-            <View className="px-pageX py-4">
-              <Text className="text-xl font-sf-b">{item.name}</Text>
-              <View className="flex-row items-center mt-2">
-                <Text className="text-emerald-600 font-sf-b mr-1">
-                  {price.toLocaleString()}
-                </Text>
-                <Images.Ice width={18} height={18} />
-              </View>
-
+            <View className="px-2 py-2">
+              <Text className="font-sf-b text-[18px] mb-4 text-green">
+                상품 정보
+              </Text>
+              <Text className="text-[20px] font-sf-b">{item.name}</Text>
               {!!item.description && (
-                <View className="mt-6">
-                  <Section title="상품 설명">
-                    <Text className="text-gray-700">{item.description}</Text>
-                  </Section>
+                <View className="mt-3 mb-10">
+                  <Text className="text-[16px] text-gray-700">
+                    {item.description}
+                  </Text>
                 </View>
               )}
+              <Text className="font-sf-b text-[18px] mb-2 text-green">
+                구매 정보
+              </Text>
+              <View className="flex-row items-center justify-between h-10">
+                <Text className="text-[16px] leading-[16px]">수량</Text>
 
-              <View className="mt-10">
-                <Text className="text-base font-sf-b mb-3">수량</Text>
-                <View className="flex-row items-center">
+                <View className="flex-row items-center h-full">
                   <Pressable
-                    className="w-10 h-10 rounded-xl items-center justify-center bg-gray-100"
+                    className="w-10 h-10 rounded-3xl items-center justify-center bg-green/50"
                     onPress={minus}
                   >
                     <Text className="text-xl">−</Text>
                   </Pressable>
-                  <Text className="mx-4 text-lg font-sf-b">{qty}</Text>
+                  <View className="h-10 justify-center">
+                    <Text className="mx-4 text-lg font-sf-b"> {qty} </Text>
+                  </View>
+
                   <Pressable
-                    className="w-10 h-10 rounded-xl items-center justify-center bg-gray-100"
+                    className="w-10 h-10 rounded-3xl items-center justify-center bg-green/50"
                     onPress={plus}
                   >
                     <Text className="text-xl">＋</Text>
                   </Pressable>
                 </View>
+              </View>
+              <View className="flex-row items-center mt-5 self-end">
+                <Text className="text-green font-sf-b text-[25px]">
+                  {total.toLocaleString()}
+                </Text>
+                <Images.Ice width={35} height={35} />
               </View>
             </View>
           </View>
@@ -185,8 +201,8 @@ export default function ProductDetailPage() {
       {/* 구매 확인 모달 */}
       <Modal visible={confirmVisible}>
         <View className="mb-4">
-          <Text className="text-black text-[25px] font-sf-b mb-6 text-center">
-            주문 확인{" "}
+          <Text className="text-black text-[25px] font-sf-b mb-4 text-center">
+            주문 확인
           </Text>
           <Pressable
             onPress={() => setConfirmVisible(false)}
@@ -196,19 +212,77 @@ export default function ProductDetailPage() {
           </Pressable>
         </View>
 
-        <Text className="text-black font-sf-md mb-5 text-[18px]">
-          구매 상품: {item.name}
-        </Text>
-        <Text className="text-black font-sf-md mb-5 text-[18px]">
-          구매 수량: {qty}개
-        </Text>
-        <View className="flex-row mb-8">
-          <Text className="mb-4 text-[18px] text-black font-sf-md">
-            구매 포인트: {total.toLocaleString()}
+        {/* 구매 상품 */}
+        <View className="flex-row items-center mb-3 min-h-[28px]">
+          {/* 고정 폭 레이블 */}
+          <Text className="w-[112px] text-black font-sf-sb text-[18px]">
+            구매 상품
           </Text>
-          <Images.Ice width={25} height={25} />
+          {/* 값: 우측 정렬 (긴 이름은 1줄 말줄임) */}
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text
+              className="text-[18px] font-sf-b text-green leading-[22px]"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.name}
+            </Text>
+          </View>
         </View>
-        <MainButton onPress={handleBuy}>
+
+        {/* 구매 수량 */}
+        <View className="flex-row items-center mb-3 min-h-[28px]">
+          <Text className="w-[112px] text-black font-sf-sb text-[18px]">
+            구매 수량
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text className="text-[18px] font-sf-b text-green leading-[22px]">
+              {qty}개
+            </Text>
+          </View>
+        </View>
+
+        {/* 총 결제 얼음 */}
+        <View className="flex-row items-center mb-3 min-h-[28px]">
+          <Text className="w-[112px] text-black font-sf-sb text-[18px]">
+            총 결제 얼음
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text className="text-[18px] font-sf-b text-green leading-[22px]">
+              {total.toLocaleString()}
+            </Text>
+            <Images.Ice width={22} height={22} />
+          </View>
+        </View>
+
+        {/* 현재 보유 얼음 */}
+        <View
+          className={`flex-row items-center min-h-[28px] ${
+            totalPoint < total ? "mb-1" : "mb-5"
+          }`}
+        >
+          <Text className="w-[112px] text-black font-sf-sb text-[18px]">
+            현재 보유 얼음
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text className="text-[18px] font-sf-b text-green leading-[22px]">
+              {totalPoint.toLocaleString()}
+            </Text>
+            <Images.Ice width={22} height={22} />
+          </View>
+        </View>
+
+        {totalPoint < total && (
+          <Text className="text-rose-600 w-full text-right mb-3">
+            잔액이 부족합니다.
+          </Text>
+        )}
+
+        <MainButton
+          onPress={handleBuy}
+          disabled={totalPoint < total}
+          className={totalPoint < total ? "opacity-60" : ""}
+        >
           <View className="flex-row items-center">
             <Text className="text-white font-sf-b ml-2 text-[16px]">
               결제하기
@@ -216,17 +290,6 @@ export default function ProductDetailPage() {
           </View>
         </MainButton>
       </Modal>
-    </View>
-  );
-}
-
-function Section({ title, children }) {
-  return (
-    <View className="mb-5">
-      <View className="flex-row items-center mb-2">
-        <Text className="text-base font-sf-b">📦 {title}</Text>
-      </View>
-      {children}
     </View>
   );
 }

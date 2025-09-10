@@ -116,7 +116,7 @@ export default function MissionScreen() {
                   출석 미션은 매달 새로 시작됩니다.
                 </Text>
                 <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
-                  (출석 보상 미수령 시 다음 달에 수령 불가능합니다.)
+                  (이전 보상을 수령해야 다음 보상이 수령가능합니다.)
                 </Text>
               </View>
             </View>
