@@ -67,8 +67,6 @@ export default function Survey() {
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
         alert("질문 불러오기 실패");
-      } finally {
-        setLoading(false);
       }
     }
 
