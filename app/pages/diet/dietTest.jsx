@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
-import { requestCarbon } from "@services/carbonApi";
+import { requestCarbon } from "@services/dietService";
 import {
   View,
   Text,

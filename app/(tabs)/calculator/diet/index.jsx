@@ -1,12 +1,28 @@
-// app/(tabs)/home/index.jsx
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
+import { fetchTodayCount } from "@services/dietService"; 
+import { useAuth } from "@hooks/useAuth"; 
 
 export default function Diet() {
   const router = useRouter();
+  const { user } = useAuth(); 
+
+  const handlePress = async () => {
+    try {
+      const count = await fetchTodayCount(user.userId);
+      if (count >= 3) {
+        Alert.alert("알림", "오늘은 이미 3번까지 기록했습니다. 내일 다시 시도해 주세요.");
+        return; 
+      }
+      router.push("/pages/diet/testFoodLens");
+    } catch (e) {
+      Alert.alert("오류", "식단 횟수 조회에 실패했습니다.");
+      console.error(e);
+    }
+  };
 
   return (
     <View className="flex-1">
@@ -19,7 +35,7 @@ export default function Diet() {
             알려드려요.
           </Text>
           <Pressable
-            onPress={() => router.push("/pages/diet/testFoodLens")}
+            onPress={handlePress}
             className="w-[100%] h-[180px] bg-green/40 rounded-[20px] items-center justify-center gap-2 active:bg-green/60"
           >
             <Images.Camera width={36} height={36} />
