@@ -36,6 +36,7 @@ import SuccessWalk from "@assets/icons/successWalk.svg";
 import Notice from "@assets/icons/notice.svg";
 import Camera from "@assets/icons/camera.svg";
 import Kakao from "@assets/icons/kakao.svg";
+import Box from "@assets/icons/giftbox.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -101,4 +102,5 @@ export const Images = {
   Tori2,
   Tori3,
   Tori4,
+  Box,
 };

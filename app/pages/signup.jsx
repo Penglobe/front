@@ -30,6 +30,7 @@ const AVATARS = [
 export default function Signup() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const bottomPad = insets.bottom + 100;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,35 +53,12 @@ export default function Signup() {
   const pwRef = useRef(null);
   const pw2Ref = useRef(null);
   const nickRef = useRef(null);
+  const profileTouchingRef = useRef(false);
 
   // 이메일 변경 시 중복확인 상태 초기화
   const onChangeEmail = (v) => {
     setEmail(v);
     if (emailCheck !== "idle") setEmailCheck("idle");
-  };
-
-  // 중복 확인 호출
-  const onCheckEmail = async () => {
-    const target = email.trim();
-    if (!target) return Alert.alert("확인", "이메일을 입력하세요.");
-    // 간단한 형식 체크 (옵션)
-    const okFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target);
-    if (!okFormat)
-      return Alert.alert("확인", "이메일 형식이 올바르지 않습니다.");
-
-    try {
-      setEmailCheck("checking");
-      const res = await apiFetch(
-        `/auth/check-email?email=${encodeURIComponent(target)}`
-      );
-      const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || "중복 확인 실패");
-      const exists = Boolean(json?.data?.exists ?? json?.exists);
-      setEmailCheck(exists ? "dup" : "ok");
-    } catch (e) {
-      setEmailCheck("idle");
-      Alert.alert("오류", e?.message ?? "중복 확인 중 오류가 발생했습니다.");
-    }
   };
 
   const canSubmit =
@@ -168,11 +146,7 @@ export default function Signup() {
           <ScrollView
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 24 }}
-            onScrollBeginDrag={() => {
-              setRegionOpen(false);
-              setProfileOpen(false);
-            }}
+            contentContainerStyle={{ paddingBottom: bottomPad }}
           >
             <Labeled label="이메일">
               {/* 입력 + 버튼 한 줄 */}
@@ -351,7 +325,7 @@ export default function Signup() {
               </Pressable>
 
               {regionOpen && (
-                <View className="mt-2 rounded-2xl bg-white border border-gray-200 overflow-hidden">
+                <View className="mt-2 bg-white rounded-2xl border border-gray overflow-hidden">
                   <ScrollView
                     style={{ maxHeight: 240 }}
                     keyboardShouldPersistTaps="handled"
@@ -366,13 +340,13 @@ export default function Signup() {
                             setRegionLabel(r.name);
                             setRegionOpen(false);
                           }}
-                          className={`px-4 py-3 border-b border-gray-100 ${
+                          className={`px-4 py-3 border-b border-gray ${
                             selected ? "bg-emerald-50" : "bg-white"
                           }`}
                         >
                           <Text
                             className={`font-sf-md ${
-                              selected ? "text-emerald-700" : "text-gray-800"
+                              selected ? "text-green" : "text-gray-800"
                             }`}
                           >
                             {r.name}
@@ -434,9 +408,17 @@ export default function Signup() {
 
               {/* 펼쳐지는 선택창 */}
               {profileOpen && (
-                <View className="mt-2 rounded-2xl bg-white border border-gray-200 overflow-hidden">
+                <View
+                  className="mt-2 rounded-2xl bg-white border border-gray overflow-hidden"
+                  // 프로필 영역에서 터치가 시작되면 부모가 바로 닫지 않도록 플래그 ON
+                  onTouchStart={() => (profileTouchingRef.current = true)}
+                  onTouchEnd={() =>
+                    setTimeout(() => (profileTouchingRef.current = false), 0)
+                  }
+                >
                   <ScrollView
                     horizontal
+                    nestedScrollEnabled
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{
                       paddingHorizontal: 8,
