@@ -80,3 +80,7 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+
+android/*/app-*.apk
+*.apk
+*.aab
