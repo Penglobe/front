@@ -153,6 +153,16 @@ export default function StoreListPage() {
   return (
     <View className="flex-1">
       <BgGradient />
+      <View
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      paddingBottom: 150,
+                    }}
+                  >
       <HeaderBar title="굿즈샵" />
 
       {/* 🔎 검색창 */}
@@ -212,6 +222,7 @@ export default function StoreListPage() {
           }
           showsVerticalScrollIndicator={false}
         />
+      </View>
       </View>
     </View>
   );

@@ -181,7 +181,7 @@ export default function Home() {
       <View className="mt-[66px] px-pageX flex-row justify-between">
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
-          className="flex-row items-center justify-between bg-blue rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-blue rounded-[32px] px-md py-xxs w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
@@ -191,14 +191,14 @@ export default function Home() {
           }}
         >
           <Images.Snow width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">
+          <Text className="text-white font-sf-md text-label">
             {streakDays.toLocaleString("ko-KR")}일
           </Text>
         </Pressable>
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
-          className="flex-row items-center justify-between bg-green rounded-[32px] px-4 py-2 w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-green rounded-[32px] px-md py-xxs w-[100px] h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },
@@ -208,7 +208,7 @@ export default function Home() {
           }}
         >
           <Images.Ice width={30} height={30} />
-          <Text className="text-white font-sf-md text-[16px]">
+          <Text className="text-white font-sf-md text-label">
             {totalPoint.toLocaleString("ko-KR")}
           </Text>
         </Pressable>
@@ -218,7 +218,7 @@ export default function Home() {
       <View className="mt-[22px] px-pageX">
         <Pressable
           onPress={() => router.push("/pages/home/mission")}
-          className="px-[24px] py-[24px] bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
+          className="px-xl py-xl bg-white/100 rounded-[10px] gap-[8px] items-start shadow-md active:bg-zinc-100"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
@@ -227,15 +227,15 @@ export default function Home() {
             elevation: 4,
           }}
         >
-          <Text className="text-black font-sf-md text-[18px]">
+          <Text className="text-black text-body font-sf-md">
             총 탄소 절감량
           </Text>
-          <Text className="font-grotesk-b text-[24px] text-green">
+          <Text className="font-grotesk-b text-h1 text-green">
             {(Number(totalScore) || 0).toFixed(2)}
             <Text className="text-black"> kg</Text>
-            <Text className="text-[14px] font-sf-md text-black">
+            <Text className="text-label font-sf-md text-black">
               {" "}
-              (CO<Text className="text-[10px]">2</Text> 기준)
+              (CO<Text className="text-overline">2</Text> 기준)
             </Text>
           </Text>
         </Pressable>
@@ -267,7 +267,7 @@ export default function Home() {
       <Animated.View className="mt-auto items-center mb-[180px]">
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
-          className="flex-row items-center justify-center rounded-[32px] px-6 py-3.5 gap-2 bg-yellow active:bg-amber-300"
+          className="flex-row items-center justify-center rounded-[32px] px-xl py-md gap-2 bg-yellow active:bg-amber-300"
           style={{
             shadowColor: "#F9C332",
             shadowOffset: { width: 0, height: 4 },
@@ -277,7 +277,7 @@ export default function Home() {
           }}
         >
           <Images.Quiz width={24} height={24} />
-          <Text className="text-white font-sf-b text-[16px]">오늘의 퀴즈</Text>
+          <Text className="text-white text-body font-sf-b text-[16px]">오늘의 퀴즈</Text>
         </Pressable>
       </Animated.View>
 

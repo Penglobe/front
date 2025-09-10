@@ -44,6 +44,16 @@ export default function TransportStart() {
   return (
     <View className="flex-1">
       <BgGradient />
+           <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                paddingBottom: 150,
+              }}
+            >
       <HeaderBar title="환경 걸음" className="px-pageX" />
 
       {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
@@ -120,6 +130,7 @@ export default function TransportStart() {
           />
         </View>
       </ScrollView>
+      </View>
     </View>
   );
 }
