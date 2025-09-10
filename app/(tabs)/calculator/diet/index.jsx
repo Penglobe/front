@@ -19,8 +19,8 @@ export default function Diet() {
             알려드려요.
           </Text>
           <Pressable
-            onPress={() => router.push("/pages/diet/dietTest")}
-            className="w-[100%] h-[180px] bg-green/40 rounded-3xl items-center justify-center gap-2 active:bg-green/60"
+            onPress={() => router.push("/pages/diet/testFoodLens")}
+            className="w-[100%] h-[180px] bg-green/40 rounded-[20px] items-center justify-center gap-2 active:bg-green/60"
           >
             <Images.Camera width={36} height={36} />
             <Text className="font-sf-b text-green text-h4">사진 추가</Text>
