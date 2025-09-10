@@ -23,7 +23,7 @@ export default function QuizPage() {
   /*user*/
   const id = user?.userId;
   //console.log("user", user); // 먼저 전체 객체를 찍어보세요
-  //console.log("userId", user.id);
+  //console.log("userId", user.userId);
 
   //console.log("userId", user.id);
 
@@ -65,7 +65,7 @@ export default function QuizPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user.id,
+          userId: user.userId,
           quizId: question.quizId,
           answer: answer === "O",
         }),
