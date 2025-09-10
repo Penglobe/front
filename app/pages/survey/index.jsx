@@ -64,6 +64,7 @@ export default function Survey() {
         // 제출 안 했으면 질문 데이터 설정
         const data = Array.isArray(result.questions) ? result.questions : [];
         setQuestions(data);
+        setLoading(false);
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
         alert("질문 불러오기 실패");
