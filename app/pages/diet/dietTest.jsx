@@ -1,14 +1,22 @@
 import React, { useRef, useState } from "react";
 import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/carbonApi";
-import { View, Text, Button, Alert, ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { NativeModules } from "react-native";
 import { ShutterButton } from "@pages/diet/ShutterButton";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native"; 
+import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "@hooks/useAuth";
 import { ResultStore } from "@utils/storage";
 
@@ -16,12 +24,22 @@ const { FoodLensModule } = NativeModules;
 
 const jlog = (event, data = {}) => {
   try {
-    const safe = JSON.stringify(
-      { ts: new Date().toISOString(), tag: "diet-test", event, ...data }
-    );
+    const safe = JSON.stringify({
+      ts: new Date().toISOString(),
+      tag: "diet-test",
+      event,
+      ...data,
+    });
     console.log(safe);
   } catch (e) {
-    console.log(JSON.stringify({ ts: new Date().toISOString(), tag: "diet-test", event, note: "stringify-failed" }));
+    console.log(
+      JSON.stringify({
+        ts: new Date().toISOString(),
+        tag: "diet-test",
+        event,
+        note: "stringify-failed",
+      })
+    );
   }
 };
 
@@ -53,8 +71,10 @@ export default function DietTest() {
 
   if (!perm.granted) {
     return (
-      <View style={[styles.center, { padding: 16 }]}>
-        <Text style={{ marginBottom: 12 }}>음식을 촬영하기 위해 카메라 접근 권한이 필요합니다.</Text>
+      <View className="flex-1 justify-center items-center p-lg">
+        <Text className="mb-md">
+          음식을 촬영하기 위해 카메라 접근 권한이 필요합니다.
+        </Text>
         <Button title="카메라 권한 허용" onPress={requestPerm} />
       </View>
     );
@@ -84,7 +104,10 @@ export default function DietTest() {
     } catch (e) {
       const info = formatNativeError(e);
       setLastError(info);
-      Alert.alert(info.title, info.hint ? `${info.message}\n\n${info.hint}` : info.message);
+      Alert.alert(
+        info.title,
+        info.hint ? `${info.message}\n\n${info.hint}` : info.message
+      );
     }
   };
 
@@ -94,54 +117,66 @@ export default function DietTest() {
   };
 
   const confirmAndPredict = async () => {
-  try {
-    if (!FoodLensModule) {
-      Alert.alert("네이티브 모듈 없음", "iOS를 다시 빌드하세요");
-      return;
-    }
-    if (!photo?.base64) {
-      Alert.alert("알림", "이미지 데이터가 없습니다. 다시 촬영해 주세요.");
-      return;
-    }
+    try {
+      if (!FoodLensModule) {
+        Alert.alert("네이티브 모듈 없음", "iOS를 다시 빌드하세요");
+        return;
+      }
+      if (!photo?.base64) {
+        Alert.alert("알림", "이미지 데이터가 없습니다. 다시 촬영해 주세요.");
+        return;
+      }
 
-    setLoading(true);
-    setLastError(null);
+      setLoading(true);
+      setLastError(null);
 
-    const result = await FoodLensModule.predictBase64(photo.base64);
-    jlog("predict.ok", {
-        foodsCount:
-          (result?.foods ?? result?.items ?? result?.candidates ?? result?.results ?? []).length,
+      const result = await FoodLensModule.predictBase64(photo.base64);
+      jlog("predict.ok", {
+        foodsCount: (
+          result?.foods ??
+          result?.items ??
+          result?.candidates ??
+          result?.results ??
+          []
+        ).length,
       });
 
-    const userId = user?.userId;
-    if (!userId) {
-      Alert.alert("로그인 필요", "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
-      return;
+      const userId = user?.userId;
+      if (!userId) {
+        Alert.alert(
+          "로그인 필요",
+          "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
+        );
+        return;
+      }
+
+      const payload = {
+        ...toCarbonRequestPayload(result, { merge: true }),
+        userId,
+      };
+
+      const carbon = await requestCarbon(payload);
+
+      // 화면 전환 직전 상태 저장
+      ResultStore.data = result;
+      ResultStore.photoUri = photo?.uri ?? null;
+      ResultStore.carbon = carbon;
+      ResultStore.carbonPayload = payload;
+
+      setPreview(false);
+
+      router.push("/pages/diet/dietResult");
+    } catch (e) {
+      const info = formatNativeError(e);
+      setLastError(info);
+      Alert.alert(
+        info.title,
+        info.hint ? `${info.message}\n\n${info.hint}` : info.message
+      );
+    } finally {
+      setLoading(false);
     }
-
-    const payload = { ...toCarbonRequestPayload(result, { merge: true }), userId };
-
-    const carbon = await requestCarbon(payload);
-
-    // 화면 전환 직전 상태 저장
-    ResultStore.data = result;
-    ResultStore.photoUri = photo?.uri ?? null;
-    ResultStore.carbon = carbon;
-    ResultStore.carbonPayload = payload;
-
-    setPreview(false);
-
-
-    router.push("/pages/diet/dietResult");
-  } catch (e) {
-    const info = formatNativeError(e);
-    setLastError(info);
-    Alert.alert(info.title, info.hint ? `${info.message}\n\n${info.hint}` : info.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <View style={styles.container}>
@@ -154,9 +189,17 @@ export default function DietTest() {
       />
 
       {!cameraReady && (
-        <View style={[StyleSheet.absoluteFillObject, styles.center, { backgroundColor: "rgba(0,0,0,0.2)" }]}>
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            styles.center,
+            { backgroundColor: "rgba(0,0,0,0.2)" },
+          ]}
+        >
           <ActivityIndicator />
-          <Text style={{ marginTop: 6, color: "white" }}>카메라 초기화 중…</Text>
+          <Text style={{ marginTop: 6, color: "white" }}>
+            카메라 초기화 중…
+          </Text>
         </View>
       )}
 
@@ -172,28 +215,29 @@ export default function DietTest() {
             backgroundColor: "transparent",
           }}
         >
-          <ShutterButton onPress={takePhoto} disabled={loading || !cameraReady} loading={loading} />
+          <ShutterButton
+            onPress={takePhoto}
+            disabled={loading || !cameraReady}
+            loading={loading}
+          />
         </View>
       )}
 
       {preview && photo?.uri && (
         <View style={[StyleSheet.absoluteFillObject]}>
-          <ExpoImage source={{ uri: photo.uri }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
+          <ExpoImage
+            source={{ uri: photo.uri }}
+            style={StyleSheet.absoluteFillObject}
+            contentFit="cover"
+          />
           <View
+            className="absolute left-0 right-0 bottom-0 pt-md px-lg flex-row gap-3"
             style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: 0,
               paddingBottom: insets.bottom + 16,
-              paddingTop: 12,
-              paddingHorizontal: 16,
               backgroundColor: "rgba(0,0,0,0.35)",
-              flexDirection: "row",
-              gap: 12,
             }}
           >
-            <View style={{ flex: 1 }}>
+            <View className="flex-1">
               <Pressable
                 onPress={retake}
                 style={{
@@ -203,18 +247,18 @@ export default function DietTest() {
                   backgroundColor: "rgba(255,255,255,0.2)",
                 }}
               >
-                <Text style={{ color: "white", fontWeight: "600" }}>다시 찍기</Text>
+                <Text className="text-white font-semibold">다시 찍기</Text>
               </Pressable>
             </View>
 
-            <View style={{ flex: 1 }}>
+            <View className="flex-1">
               <Pressable
-                className="items-center rounded-[10px] bg-green"
+                className="items-center rounded-xl bg-green"
                 onPress={confirmAndPredict}
                 disabled={loading}
                 style={{ paddingVertical: 14, opacity: loading ? 0.6 : 1 }}
               >
-                <Text style={{ color: "white", fontWeight: "700" }}>
+                <Text className="text-white font-bold">
                   {loading ? "분석 중…" : "계산하기"}
                 </Text>
               </Pressable>

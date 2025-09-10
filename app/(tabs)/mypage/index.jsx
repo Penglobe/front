@@ -286,7 +286,7 @@ export default function MyPage() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
@@ -294,34 +294,25 @@ export default function MyPage() {
 
   if (!myPageInfo) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View className="flex-1 justify-center items-center">
         <Text>마이페이지 정보를 불러오지 못했습니다.</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       <BgGradient />
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          paddingBottom: 150,
-        }}
-      >
+      <View className="absolute inset-0 pb-[150px]">
         <HeaderBar title="마이페이지" />
 
         <ScrollView className="flex-1 px-pageX">
-          <View className="bg-white rounded-xl p-4 shadow mb-4">
-            <Text className="text-lg font-bold mb-2">사용자 정보</Text>
+          <View className="bg-white rounded-xl p-lg shadow mb-md">
+            <Text className="text-lg font-bold mb-xxs">사용자 정보</Text>
             <Text>사용자 ID: {myPageInfo.userId}</Text>
             <Text>닉네임: {myPageInfo.nickname}</Text>
             {myPageInfo.profile && (
-              <View style={{ width: 60, height: 60, marginBottom: 10 }}>
+              <View className="w-[60px] h-[60px] mb-md">
                 {getAvatarRenderComponent(myPageInfo.profile)
                   ? React.createElement(
                       getAvatarRenderComponent(myPageInfo.profile),
@@ -332,7 +323,7 @@ export default function MyPage() {
             )}
             <View className="flex-row items-center">
               <Text>얼음 이미지: {myPageInfo.totalPoint}</Text>
-              <Images.Ice width={20} height={20} style={{ marginLeft: 5 }} />
+              <Images.Ice width={20} height={20} className="ml-xs" />
             </View>
             <Text>누적 출석일: {myPageInfo.attendanceTotalDays}</Text>
             <Text>최장 연속 출석일: {myPageInfo.longestAttendanceStreak}</Text>
@@ -348,8 +339,8 @@ export default function MyPage() {
           />
 
           {/* Daily Carbon Reduction Section */}
-          <View className="bg-white rounded-xl p-4 shadow mt-4">
-            <Text className="text-lg font-bold mb-2">일일 탄소 절감량</Text>
+          <View className="bg-white rounded-xl p-lg shadow mt-lg">
+            <Text className="text-lg font-bold mb-xxs">일일 탄소 절감량</Text>
             {selectedDate ? (
               dailyLoading ? (
                 <ActivityIndicator size="small" color="#0000ff" />
@@ -360,7 +351,7 @@ export default function MyPage() {
                     환경 걸음 절감량: {dailyReductionData.transportCo2Kg} kg
                   </Text>
                   <Text>식단 절감량: {dailyReductionData.dietCo2Kg} kg</Text>
-                  <Text className="font-bold mt-2">
+                  <Text className="font-bold mt-sm">
                     총 절감량: {dailyReductionData.totalCo2Kg} kg
                   </Text>
                 </View>
@@ -374,14 +365,14 @@ export default function MyPage() {
 
           {/* 추가 정보 섹션 (필요시 확장) */}
           {/* 추가 정보 섹션 (필요시 확장) */}
-          <View className="bg-white rounded-xl p-4 shadow mt-4">
-            <Text className="text-lg font-bold mb-2">기타 정보</Text>
+          <View className="bg-white rounded-xl p-lg shadow mt-lg">
+            <Text className="text-lg font-bold mb-xxs">기타 정보</Text>
             <Text>현재 연속 출석일: {myPageInfo.attendanceStreakDays}</Text>
             {/* 여기에 다른 마이페이지 관련 정보를 추가할 수 있습니다. */}
             <MainButton
               label="출석 데이터 초기화 (테스트용)"
               onPress={handleResetAttendance}
-              className="mt-4 bg-red-500"
+              className="mt-lg bg-red-500"
             />
           </View>
         </ScrollView>

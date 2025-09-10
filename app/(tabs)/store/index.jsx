@@ -113,17 +113,17 @@ export default function StoreListPage() {
         {!!imgUri && (
           <Image
             source={{ uri: imgUri }}
-            className="w-full h-[120px] rounded-2xl mb-2"
+            className="w-full h-[120px] rounded-2xl mb-sm"
           />
         )}
 
-        <Text className="text-[15px] text-gray-900 font-sf-b" numberOfLines={1}>
+        <Text className="text-h4 text-gray-900 font-sf-b" numberOfLines={1}>
           {item.name}
         </Text>
 
         {!!item.description && (
           <Text
-            className="text-[12px] text-gray-500 font-sf-md mt-0.5"
+            className="text-caption text-gray-500 font-sf-md mt-xxs"
             numberOfLines={2}
           >
             {item.description}
@@ -131,8 +131,8 @@ export default function StoreListPage() {
         )}
 
         {/* 가격 배지: 우측 하단 고정 */}
-        <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-2.5 py-1">
-          <Text className="text-green font-sf-b mr-1">
+        <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
+          <Text className="text-green font-sf-b mr-xs">
             {(item.price ?? 0).toLocaleString()}
           </Text>
           <Images.Ice width={16} height={16} />
@@ -153,76 +153,67 @@ export default function StoreListPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      paddingBottom: 150,
-                    }}
-                  >
-      <HeaderBar title="굿즈샵" />
+      <View className="absolute inset-0 pb-[150px]">
+        <HeaderBar title="굿즈샵" />
 
-      {/* 🔎 검색창 */}
-      <View className="px-pageX mt-4">
-        <View className="flex-row items-center bg-white rounded-xl px-3 py-3 shadow-md shadow-black/5">
-          <Ionicons name="search-outline" size={20} color={"#10B981"} />
-          <View className="flex-1 ml-2 mr-2">
-            <View className="-mt-1" />
-            <View>
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="상품명을 검색하세요"
-                className="font-sf-md text-gray-800"
-                returnKeyType="search"
-                onSubmitEditing={handleSearchSubmit}
-              />
+        {/* 🔎 검색창 */}
+        <View className="px-pageX mt-4">
+          <View className="flex-row items-center bg-white rounded-xl px-md py-md shadow-md shadow-black/5">
+            <Ionicons name="search-outline" size={20} color={"#10B981"} />
+            <View className="flex-1 ml-sm mr-sm">
+              <View className="-mt-xs" />
+              <View>
+                <TextInput
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder="상품명을 검색하세요"
+                  className="font-sf-md text-gray-800"
+                  returnKeyType="search"
+                  onSubmitEditing={handleSearchSubmit}
+                />
+              </View>
             </View>
+            {!!query && (
+              <Pressable onPress={clearQuery} hitSlop={8}>
+                <Ionicons name="close-circle" size={20} color={"#94A3B8"} />
+              </Pressable>
+            )}
           </View>
-          {!!query && (
-            <Pressable onPress={clearQuery} hitSlop={8}>
-              <Ionicons name="close-circle" size={20} color={"#94A3B8"} />
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      {/* 목록 */}
-      <View className="flex-1 px-pageX pt-3">
-        <View className="flex-row justify-between items-center mb-2 px-1">
-          <Text className="text-gray-500 font-sf-md">
-            {query
-              ? `검색 결과 ${filtered.length}개`
-              : `전체 ${items.length}개`}
-          </Text>
         </View>
 
-        <FlatList
-          data={filtered}
-          keyExtractor={(it) => String(it.productId)}
-          renderItem={renderItem}
-          numColumns={NUM_COLUMNS}
-          key={`cols-${NUM_COLUMNS}`}
-          columnWrapperStyle={{ justifyContent: "flex-start" }}
-          contentContainerStyle={{
-            paddingBottom: TABBAR_H + insets.bottom + 12,
-          }}
-          ListEmptyComponent={
-            !loading ? (
-              <Text className="text-center text-gray-500 mt-10">
-                {query ? "검색 결과가 없습니다." : "상품이 없습니다."}
-              </Text>
-            ) : null
-          }
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+        {/* 목록 */}
+        <View className="flex-1 px-pageX pt-md">
+          <View className="flex-row justify-between items-center mb-sm px-xs">
+            <Text className="text-gray-500 font-sf-md">
+              {query
+                ? `검색 결과 ${filtered.length}개`
+                : `전체 ${items.length}개`}
+            </Text>
+          </View>
+
+          <FlatList
+            data={filtered}
+            keyExtractor={(it) => String(it.productId)}
+            renderItem={renderItem}
+            numColumns={NUM_COLUMNS}
+            key={`cols-${NUM_COLUMNS}`}
+            columnWrapperStyle={{ justifyContent: "flex-start" }}
+            contentContainerStyle={{
+              paddingBottom: TABBAR_H + insets.bottom + 12,
+            }}
+            ListEmptyComponent={
+              !loading ? (
+                <Text className="text-center text-gray-500 mt-2xl">
+                  {query ? "검색 결과가 없습니다." : "상품이 없습니다."}
+                </Text>
+              ) : null
+            }
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       </View>
     </View>
   );

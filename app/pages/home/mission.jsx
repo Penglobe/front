@@ -99,23 +99,23 @@ export default function MissionScreen() {
         }
         contentContainerStyle={{ paddingBottom: 28 }}
       >
-        <View className="px-pageX pt-4">
+        <View className="px-pageX pt-lg">
           {/* 안내 카드 */}
           <View
-            className="bg-[#D9D9D9] rounded-2xl px-4 py-4 shadow-md"
+            className="bg-[#D9D9D9] rounded-2xl px-lg py-lg shadow-md"
             style={{ elevation: 4 }}
           >
             <View className="flex-row items-start">
               <Images.Notice width={18} height={18} />
 
-              <View className="flex-1 pl-2">
-                <Text className="text-black font-sf-b text-[15px] leading-[20px]">
+              <View className="flex-1 pl-sm">
+                <Text className="text-black font-sf-b text-h4 leading-[20px]">
                   사용자의 누적 탄소 절감량을 확인하세요.
                 </Text>
-                <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
+                <Text className="text-black font-sf-b text-h4 leading-[20px] mt-xs">
                   출석 미션은 매달 새로 시작됩니다.
                 </Text>
-                <Text className="text-black font-sf-b text-[15px] leading-[20px] mt-1">
+                <Text className="text-black font-sf-b text-h4 leading-[20px] mt-xs">
                   (이전 보상을 수령해야 다음 보상이 수령가능합니다.)
                 </Text>
               </View>
@@ -165,17 +165,17 @@ export default function MissionScreen() {
           setClaimInfo(null);
         }}
       >
-        <Text className="text-black text-[20px] font-sf-b mb-1 text-center">
+        <Text className="text-black text-h2 font-sf-b mb-xs text-center">
           보상 지급 완료!
         </Text>
         <View className="w-full flex-row items-center justify-center">
-          <Text className="text-green font-sf-b text-[20px]">
+          <Text className="text-green font-sf-b text-h2">
             {claimInfo?.rewardPoints ?? 0}
           </Text>
 
           <Images.Ice width={28} height={28} />
 
-          <Text className="text-black font-sf-b text-[20px]">을 받았어요.</Text>
+          <Text className="text-black font-sf-b text-h2">을 받았어요.</Text>
         </View>
         <View className="items-center my-3">
           <Images.Ipa2 width={150} height={150} />
@@ -205,7 +205,7 @@ export default function MissionScreen() {
             marginBottom: 8, // 로그아웃 버튼과 간격
           }}
         >
-          <Text className="text-white font-sf-b text-[16px]">상품 추가</Text>
+          <Text className="text-white font-sf-b text-h4">상품 추가</Text>
         </Pressable>
 
         {/* 기존 로그아웃 버튼 */}
@@ -220,7 +220,7 @@ export default function MissionScreen() {
             backgroundColor: "#ef4444", // red-500
           }}
         >
-          <Text className="text-white font-sf-b text-[16px]">로그아웃</Text>
+          <Text className="text-white font-sf-b text-h4">로그아웃</Text>
         </Pressable>
       </View>
     </View>

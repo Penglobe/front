@@ -59,7 +59,7 @@ export default function TransportFinish() {
         {/* ✅ 본문 */}
         <View className="flex-1 px-pageX">
           {/* 안내 텍스트 */}
-          <View className="flex-row items-center mb-5 mt-5">
+          <View className="flex-row items-center mb-llg mt-llg">
             {points > 0 ? (
               <View className="px-pageX flex-row items-center">
                 <Text className="text-2xl font-sf-b text-green-700">
@@ -83,27 +83,27 @@ export default function TransportFinish() {
 
           {/* 결과 카드들 */}
           {/* 총 거리 */}
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
+          <View className="bg-white rounded-2xl shadow-md px-2xl py-llg mb-llg">
             <Text className="font-sf-md text-lg">총 이동 거리</Text>
             <View className="items-end">
-              <Text className="text-3xl font-sf-b text-[#318643] mt-1">
+              <Text className="text-3xl font-sf-b text-[#318643] mt-xs">
                 {distanceM} m
               </Text>
             </View>
           </View>
 
           {/* 총 시간 */}
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
+          <View className="bg-white rounded-2xl shadow-md px-2xl py-llg mb-llg">
             <Text className="font-sf-md text-lg">총 이동 시간</Text>
             <View className="items-end">
-              <Text className="text-3xl font-sf-b text-[#318643] mt-1">
+              <Text className="text-3xl font-sf-b text-[#318643] mt-xs">
                 {durationM || 0} 분
               </Text>
             </View>
           </View>
 
           {/* CO₂ 절감량 */}
-          <View className="bg-white rounded-2xl shadow-md px-6 py-5">
+          <View className="bg-white rounded-2xl shadow-md px-2xl py-llg">
             <View className="flex-row items-center justify-between">
               <Text className="font-sf-md text-lg">탄소 절감량</Text>
               {/* 안내 아이콘 */}
@@ -112,15 +112,15 @@ export default function TransportFinish() {
               </TouchableOpacity>
             </View>
             <View className="items-end">
-              <Text className="text-3xl font-sf-b text-[#318643] mt-1">
+              <Text className="text-3xl font-sf-b text-[#318643] mt-xs">
                 {co2Kg} kg CO₂
               </Text>
             </View>
-            <Text className="text-sm mt-3 text-gray-600">
+            <Text className="text-sm mt-md text-gray-600">
               🚗 자동차로 이동했다면 약 {carCo2} kg CO₂가 배출돼요.
             </Text>
             {mode === "TRANSIT" && (
-              <Text className="text-xs mt-1 text-gray-500">
+              <Text className="text-xs mt-xs text-gray-500">
                 ※ 대중교통은 절감량의 50%만 인정됩니다.
               </Text>
             )}
@@ -133,7 +133,7 @@ export default function TransportFinish() {
         </View>
 
         {/* ✅ 하단 버튼 */}
-        <View className="px-pageX mb-10">
+        <View className="px-pageX mb-2xl">
           <MainButton label="홈으로" onPress={() => router.push("/")} />
         </View>
 
@@ -148,7 +148,7 @@ export default function TransportFinish() {
                 지급
               </Text>
               <TouchableOpacity
-                className="mt-4 self-end"
+                className="mt-md self-end"
                 onPress={() => setShowInfo(false)}
               >
                 <Text className="text-[#318643] font-sf-md">닫기</Text>

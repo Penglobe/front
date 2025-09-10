@@ -13,14 +13,17 @@ export default function Loading() {
   return (
     <View className="flex-1 justify-center items-center gap-8">
       <Modal visible={open} onClose={() => setOpen(false)}>
-        <Text className="text-black text-[18px] font-sf-md mb-4">모달 제목</Text>
+        <Text className="text-black text-h3 font-sf-md mb-lg">모달 제목</Text>
         <Images.Ipa2 />
-        <MainButton label="포인트 받기" onPress={() => router.push("pages/diet/dietResult")} />
+        <MainButton
+          label="포인트 받기"
+          onPress={() => router.push("pages/diet/dietResult")}
+        />
       </Modal>
 
       <Images.Ipa2 />
       <ActivityIndicator size="large" color="#318643" />
-      <Text className="font-sb-md text-black text-[18px] text-center leading-[32px]">
+      <Text className="font-sb-md text-black text-h4 text-center leading-[32px]">
         아낀 탄소 배출량 계산 중입니다. {"\n"}잠시만 기다려주세요.
       </Text>
       <MainButton label="다음" onPress={() => setOpen(true)} />

@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "@hooks/useAuth";
-import { apiFetch } from "@services/authService"; 
+import { apiFetch } from "@services/authService";
 
 // 날짜
 function formatDate(dateObj) {
@@ -45,7 +45,8 @@ export default function DietResult() {
   // 탄소 계산 결과
   const rawCarbon = ResultStore.carbon;
   const carbon = rawCarbon?.data ?? rawCarbon;
-  const totalKg = typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
+  const totalKg =
+    typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
 
   // 한 끼 식사 평균 배출량 (임시)
   const typicalMealKg = 12;
@@ -62,7 +63,10 @@ export default function DietResult() {
   const saveDietRecord = async () => {
     try {
       if (!userId) {
-        Alert.alert("로그인 필요", "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
+        Alert.alert(
+          "로그인 필요",
+          "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
+        );
         return;
       }
       if (savedKg == null) {
@@ -88,7 +92,7 @@ export default function DietResult() {
         throw new Error(msg);
       }
 
-      // 유저 정보 갱신 
+      // 유저 정보 갱신
       await refreshUser?.();
 
       Alert.alert("저장 완료", "절약한 탄소량이 기록되었습니다.", [
@@ -106,19 +110,23 @@ export default function DietResult() {
       <HeaderBar title="식단 측정 결과" />
       <View className="flex-1">
         <BgGradient />
-        <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        >
           <View className="flex-1 px-pageX gap-4">
             {/* 날짜 */}
-            <View className="pt-[18px]">
-              <Text className="font-sb-md text-black text-[12px]">식사 날짜</Text>
-              <Text className="font-grotesk-md text-black text-[18px]">
+            <View className="pt-llg">
+              <Text className="font-sb-md text-black text-caption">
+                식사 날짜
+              </Text>
+              <Text className="font-grotesk-md text-black text-h3">
                 {dateStr || "—"}
               </Text>
             </View>
 
             {/* 촬영 사진 */}
             {photoUri && (
-              <View style={{ height: 320, borderRadius: 12, overflow: "hidden" }}>
+              <View className="h-[320px] rounded-[12px] overflow-hidden">
                 <ExpoImage
                   source={{ uri: photoUri }}
                   style={{ width: "100%", height: "100%" }}
@@ -128,17 +136,18 @@ export default function DietResult() {
             )}
 
             {/* 탄소 배출 결과 카드 */}
-            <View className="w-[100%] bg-white rounded-[12px] px-[18px] py-[20px] gap-[8px] border-green border-2">
-              <Text className="font-grotesk-b text-[28px] text-green">
+            <View className="w-[100%] bg-white rounded-xl px-lg py-llg gap-sm border-green border-2">
+              <Text className="font-grotesk-b text-h1 text-green">
                 {totalKg != null ? fmt(totalKg, 1) : "—"}
-                <Text className="text-[18px] font-sf-md text-green">
-                  {" "}kg (CO
-                  <Text className="text-[10px]">2</Text>eq)
+                <Text className="text-h3 font-sf-md text-green">
+                  {" "}
+                  kg (CO
+                  <Text className="text-overline">2</Text>eq)
                 </Text>
               </Text>
 
               {/* 비교 문구 */}
-              <Text className="font-sf-md text-black text-[16px]">
+              <Text className="font-sf-md text-black text-h4">
                 {savedKg != null
                   ? `한 끼 식사로 ${fmt(savedKg, 1)} kg CO₂eq 를 절약했어요!`
                   : "탄소 배출량을 계산 중이에요."}
@@ -146,25 +155,29 @@ export default function DietResult() {
             </View>
 
             {/* 일반 정보 */}
-            <View className="w-[100%] ml-1 items-center flex-row gap-2">
+            <View className="w-[100%] ml-xs items-center flex-row gap-2">
               <Images.IpaFace width={28} height={29} />
-              <Text className="font-sf-md text-[16px]">
+              <Text className="font-sf-md text-h4">
                 보통 한 끼 식사에서 약 {typicalMealKg} kg CO₂eq가 배출돼요!
               </Text>
             </View>
 
             {/* 항목별 배출량 리스트 */}
             {Array.isArray(carbon?.items) && carbon.items.length > 0 && (
-              <View className="w-full bg-white rounded-[12px] px-[16px] py-[14px] mt-2">
-                <Text className="font-sf-b text-[16px] mb-2">항목별 배출량</Text>
+              <View className="w-full bg-white rounded-xl px-lg py-md mt-2">
+                <Text className="font-sf-b text-[16px] mb-2">
+                  항목별 배출량
+                </Text>
                 {carbon.items.map((it, idx) => {
                   const kg = typeof it?.co2Kg === "number" ? it.co2Kg : null;
                   return (
                     <View
                       key={`${it.name}-${idx}`}
-                      className="bg-white rounded-[10px] px-[12px] py-[10px] mb-[8px] border border-[#eee]"
+                      className="bg-white rounded-xl px-md py-md mb-sm border border-[#eee]"
                     >
-                      <Text className="font-sf-b">{it.name ?? "이름 없음"}</Text>
+                      <Text className="font-sf-b">
+                        {it.name ?? "이름 없음"}
+                      </Text>
                       <Text>{kg != null ? `${fmt(kg, 1)} kg CO₂eq` : "—"}</Text>
                     </View>
                   );
@@ -177,7 +190,9 @@ export default function DietResult() {
               className="mt-16"
               label={saving ? "저장 중..." : "포인트 받기"}
               onPress={saveDietRecord}
-              disabled={saving || totalKg == null || savedKg == null || savedKg <= 0}
+              disabled={
+                saving || totalKg == null || savedKg == null || savedKg <= 0
+              }
             />
 
             <MainButton

@@ -64,7 +64,7 @@ const Co2Chart = () => {
   return (
     <ScrollView horizontal>
       <View className="pt-2">
-        <Text className="text-lg font-sf-md mb-4">주간 CO₂ 평균</Text>
+        <Text className="text-lg font-sf-md mb-lg">주간 CO₂ 평균</Text>
         <LineChart
           data={chartData}
           width={screenWidth - 30}

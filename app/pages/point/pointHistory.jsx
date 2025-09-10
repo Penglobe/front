@@ -78,7 +78,7 @@ export default function PointHistory() {
     const isPlus = item.changeAmount > 0;
     return (
       <View
-        className="flex-row justify-between items-center rounded-lg p-4 mb-3"
+        className="flex-row justify-between items-center rounded-lg p-lg mb-md"
         style={{
           backgroundColor: Colors.white,
           shadowColor: Colors.black,
@@ -92,7 +92,7 @@ export default function PointHistory() {
           <Text className="text-base font-sf-md">
             {reasonLabels[item.reason] ?? item.reason}
           </Text>
-          <Text className="text-xs text-zinc-400 mt-1">
+          <Text className="text-xs text-zinc-400 mt-xs">
             {new Date(item.eventDate).toLocaleDateString("ko-KR")}
           </Text>
         </View>
@@ -103,7 +103,7 @@ export default function PointHistory() {
           >
             {isPlus ? `+${item.changeAmount}` : item.changeAmount}
           </Text>
-          <Text className="text-xs text-zinc-500 mt-1">
+          <Text className="text-xs text-zinc-500 mt-xs">
             {item.balanceAfter} 얼음
           </Text>
         </View>
@@ -130,9 +130,9 @@ export default function PointHistory() {
       <HeaderBar title="얼음 적립 내역" className="px-pageX" />
 
       {/* 잔액 카드 */}
-      <View className="px-pageX mt-4">
+      <View className="px-pageX mt-lg">
         <View
-          className="rounded-xl p-4 flex-row justify-between items-center"
+          className="rounded-xl p-lg flex-row justify-between items-center"
           style={{
             backgroundColor: Colors.white,
             shadowColor: Colors.black,
@@ -147,7 +147,7 @@ export default function PointHistory() {
           </Text>
           <View className="flex-row items-center">
             <Text
-              className="text-2xl font-grotesk-b mr-2"
+              className="text-2xl font-grotesk-b mr-sm"
               style={{ color: Colors.green }}
             >
               {balance.toLocaleString("ko-KR")}
@@ -170,11 +170,11 @@ export default function PointHistory() {
       ) : (
         <View className="flex-1">
           {/* 월 이동 헤더 */}
-          <View className="flex-row justify-between items-center mt-6 px-pageX">
+          <View className="flex-row justify-between items-center mt-xl px-pageX">
             <Pressable
               onPress={goOlderMonth}
               disabled={currentIndex >= sections.length - 1}
-              className="px-4 py-2 rounded-lg"
+              className="px-lg py-sm rounded-lg"
               style={{
                 backgroundColor:
                   currentIndex >= sections.length - 1
@@ -203,7 +203,7 @@ export default function PointHistory() {
             <Pressable
               onPress={goNewerMonth}
               disabled={currentIndex <= 0}
-              className="px-4 py-2 rounded-lg"
+              className="px-lg py-sm rounded-lg"
               style={{
                 backgroundColor: currentIndex <= 0 ? Colors.gray : Colors.green,
                 opacity: currentIndex <= 0 ? 0.6 : 1,

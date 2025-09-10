@@ -55,14 +55,14 @@ export default function MissionSection({
 
   return (
     <View
-      className="bg-white rounded-2xl px-4 py-4 mt-4 shadow-md"
+      className="bg-white rounded-2xl px-lg py-lg mt-lg shadow-md"
       style={{ elevation: 4 }}
     >
       {/* 타이틀 */}
-      <View className="flex-row items-center mb-3">
-        <View className="mr-1">{icon}</View>
+      <View className="flex-row items-center mb-md">
+        <View className="mr-xs">{icon}</View>
         <Text className="text-xl font-sf-b text-black">{title}</Text>
-        {unit === "kg" && <Text className="text-black ml-1">(kg)</Text>}
+        {unit === "kg" && <Text className="text-black ml-xs">(kg)</Text>}
       </View>
 
       {/* 바 모드(출석) */}
@@ -83,9 +83,9 @@ export default function MissionSection({
           );
 
           return (
-            <View className="w-full mt-1">
+            <View className="w-full mt-xs">
               {/* 진행 바 */}
-              <View className="h-4 mb-1 bg-[#D1D5DB] rounded-full overflow-hidden">
+              <View className="h-4 mb-xs bg-[#D1D5DB] rounded-full overflow-hidden">
                 <View
                   className="h-4 bg-[#065A93] rounded-full"
                   style={{ width: `${pct}%` }}
@@ -93,7 +93,7 @@ export default function MissionSection({
               </View>
 
               {/* 진행/버튼 라인 */}
-              <View className="mt-2 flex-row items-center justify-between">
+              <View className="mt-sm flex-row items-center justify-between">
                 <Text
                   className={`font-sf-b ${isDone ? "text-black" : "text-[#0C092A]"}`}
                 >
@@ -109,7 +109,7 @@ export default function MissionSection({
                     disabled={!canClaim}
                     onPress={() => onClaim(slot.metric, slot.target)}
                     className={[
-                      "px-4 py-2 rounded-lg",
+                      "px-lg py-sm rounded-lg",
                       canClaim ? "bg-[#065A93]" : "bg-[#D1D5DB]",
                     ].join(" ")}
                     style={canClaim ? { elevation: 4 } : undefined}

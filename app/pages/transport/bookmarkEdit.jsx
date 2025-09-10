@@ -57,16 +57,16 @@ export default function BookmarkEdit() {
       >
         <View className="px-pageX mt-6">
           {/* 안내 텍스트 */}
-          <View className="flex-row items-center px-pageX mb-5">
+          <View className="flex-row items-center px-pageX mb-llg">
             <Ipa width={40} height={40} style={{ marginRight: 8 }} />
             <Text className="text-gray-700 font-sf-b text-2xl">
               북마크 이름을 수정해 주세요
             </Text>
           </View>
 
-          <View className="bg-white rounded-2xl shadow-md px-5 py-6">
+          <View className="bg-white rounded-2xl shadow-md px-llg py-2xl">
             {/* Input */}
-            <View className="flex-row items-center bg-white rounded-xl px-3 py-3 border border-gray-200">
+            <View className="flex-row items-center bg-white rounded-xl px-md py-md border border-gray-200">
               <TextInput
                 value={label}
                 onChangeText={setLabel}
@@ -83,12 +83,12 @@ export default function BookmarkEdit() {
             </View>
 
             {/* 지도 */}
-            <View className="rounded-xl overflow-hidden mt-5">
+            <View className="rounded-xl overflow-hidden mt-llg">
               <KakaoMapView endLat={lat} endLng={lng} height={220} />
             </View>
 
             {/* 주소 */}
-            <View className="flex-row items-center bg-gray-50 mt-5 p-2 rounded-lg">
+            <View className="flex-row items-center bg-gray-50 mt-llg p-sm rounded-lg">
               <Ionicons
                 name="location-outline"
                 size={22}
@@ -105,7 +105,7 @@ export default function BookmarkEdit() {
           </View>
 
           {/* 버튼 */}
-          <View className="px-pageX mb-10">
+          <View className="px-pageX mb-3xl">
             <MainButton label="수정하기" onPress={handleSave} />
           </View>
         </View>
