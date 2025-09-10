@@ -2,11 +2,11 @@ import { View, Text, TouchableOpacity, Modal, ScrollView } from "react-native";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
-import { router, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { useLocalSearchParams, useSearchParams } from "expo-router/build/hooks";
+import { router } from "expo-router";
+import { useState } from "react";
+import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Images } from "@constants/Images";
-import Co2Chart from "./Co2Chart";
+import Co2Chart from "@pages/survey/Co2Chart";
 
 export default function SurveyResult() {
   const { userId, resultData } = useLocalSearchParams();
@@ -27,35 +27,29 @@ export default function SurveyResult() {
       <BgGradient />
 
       {/* 헤더 */}
-      <HeaderBar title="설문조사" />
+      <HeaderBar title="빙하 리포트" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <View className="px-pageX flex-row items-center mb-2 mt-5">
+        <View className="px-pageX flex-row items-center mb-5 mt-5">
           <Images.ToriFace width={40} height={40} />
-          <Text className="text-2xl font-sf-b text-green-700 ml-2">
+          <Text className="text-2xl font-sf-md text-green-700 ml-2">
             오늘의 설문 결과를 확인해볼까요?
           </Text>
         </View>
-
-        {/* 안내 문구 */}
-        <Text className="px-pageX text-sm mb-3">
-          {"  "}※ 여러 번 설문에 참여해도 표시되는 결과는 최초 제출 기준입니다.
-        </Text>
 
         <View className="px-pageX">
           {data ? (
             <>
               <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
-                <Text className="font-sf-md text-lg">오늘의 탄소 절감량</Text>
+                <Text className="text-lg">
+                  오늘의 탄소{" "}
+                  <Text className="text-red-500 text-lg font-bold">절감량</Text>
+                </Text>
                 <View className="items-end">
                   <Text className="text-3xl font-sf-b text-[#318643] mt-1">
                     {data.totalCo2} kg CO₂
                   </Text>
                 </View>
-                <Text className="text-sm mt-3 text-gray-600">
-                  ※ 사용자가 실제로 줄인 이산화탄소 양을 의미하며, {"\n"}
-                  배출량이 아닌 절감된 양입니다.
-                </Text>
               </View>
 
               <View className="bg-white rounded-2xl px-6 py-5 mb-5">
@@ -87,7 +81,7 @@ export default function SurveyResult() {
                 </Text>
               </View>
 
-              <View className="bg-white rounded-2xl px-6 py-5 mb-10">
+              <View className="bg-white rounded-2xl px-6 py-5 mb-3">
                 <Co2Chart />
               </View>
             </>
