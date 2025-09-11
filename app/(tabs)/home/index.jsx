@@ -235,28 +235,6 @@ export default function Home() {
         </Pressable>
       </View>
 
-      <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-        {/* 토리: 왼쪽 하단 */}
-        <View style={{ position: "absolute", right: 20, top: 200 }}>
-          <ToriComp
-            width={TORI_W}
-            height={TORI_W}
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </View>
-
-        {/* 이파: 오른쪽 하단 (살짝 위) */}
-        <Animated.View
-          style={[{ position: "absolute", left: 20, bottom: 300 }]}
-        >
-          <IpaComp
-            width={IPA_W}
-            height={IPA_H}
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </Animated.View>
-      </View>
-
       {/* 퀴즈 버튼 */}
       <Animated.View className="mt-auto items-center mb-[180px]">
         <Pressable

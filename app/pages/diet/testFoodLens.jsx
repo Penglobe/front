@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Button, View, Text, ScrollView } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, View, Text, ScrollView, Alert } from "react-native";
 import { NativeModules, NativeEventEmitter } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
 const { FoodLensModule } = NativeModules;
 const emitter = new NativeEventEmitter(FoodLensModule);
 
 export default function FoodLensScreen() {
   const [result, setResult] = useState(null);
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef(null);
 
   useEffect(() => {
     // === 로그 이벤트 수신 ===
@@ -14,10 +17,10 @@ export default function FoodLensScreen() {
       console.log(`[FoodLensLog/${ev.level}] ${ev.message}`);
     });
 
-    // === 카메라 결과 이벤트 수신 ===
+    // === 결과 이벤트 수신 ===
     const resultSub = emitter.addListener("FoodLensResult", (ev) => {
       console.log("📸 FoodLens Result:", ev.rawJson);
-      setResult(ev.rawJson); // 👉 state에 저장해서 UI 표시
+      setResult(ev.rawJson);
     });
 
     return () => {
@@ -26,7 +29,7 @@ export default function FoodLensScreen() {
     };
   }, []);
 
-  // === SDK 초기화 + 옵션 설정 ===
+  // === SDK 초기화 ===
   async function initSDK() {
     try {
       await FoodLensModule.initialize("YOUR_API_KEY", null);
@@ -37,12 +40,21 @@ export default function FoodLensScreen() {
     }
   }
 
-  // === 카메라 실행 ===
-  async function openCamera() {
+  // === Expo Camera로 촬영 + 예측 ===
+  async function takeAndPredict() {
+    if (!permission?.granted) {
+      const { granted } = await requestPermission();
+      if (!granted) {
+        Alert.alert("카메라 권한이 필요합니다.");
+        return;
+      }
+    }
     try {
-      await FoodLensModule.startCameraUI();
+      const photo = await cameraRef.current.takePictureAsync({ base64: true });
+      console.log("📷 Base64 captured, sending to SDK...");
+      await FoodLensModule.predict(photo.base64); // 👉 Core SDK predict 호출
     } catch (e) {
-      console.error("❌ startCameraUI failed:", e);
+      console.error("❌ Predict failed:", e);
     }
   }
 
@@ -50,10 +62,15 @@ export default function FoodLensScreen() {
     <View style={{ flex: 1, padding: 16 }}>
       <Button title="Initialize SDK" onPress={initSDK} />
       <View style={{ height: 20 }} />
-      <Button title="Open FoodLens Camera" onPress={openCamera} />
+
+      <CameraView ref={cameraRef} style={{ flex: 1, marginVertical: 10 }} />
+
+      <Button title="Take Photo & Predict" onPress={takeAndPredict} />
 
       {result && (
-        <ScrollView style={{ marginTop: 20, backgroundColor: "#f5f5f5", padding: 10 }}>
+        <ScrollView
+          style={{ marginTop: 20, backgroundColor: "#f5f5f5", padding: 10 }}
+        >
           <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
             📊 인식 결과 JSON
           </Text>

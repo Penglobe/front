@@ -5,12 +5,10 @@ import BgGradient from "@components/BgGradient";
 import RegionRanking from "@pages/ranking/RegionRanking";
 import WeeklyRanking from "@pages/ranking/WeeklyRanking";
 import GlobalRanking from "@pages/ranking/GlobalRanking";
-import { getAccessToken, me } from "@services/authService";
+import { apiFetch, me } from "@services/authService";
 import Constants from "expo-constants";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-
-const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
 const tabs = [
   { key: "regions", label: "지역 랭킹" },
@@ -23,62 +21,32 @@ export default function Ranking() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [rankingData, setRankingData] = useState([]);
 
-  // 1. Fetch user's region on mount
+  // 1. 마운트 시 사용자 지역 가져오기
   useEffect(() => {
     const fetchUserRegion = async () => {
       try {
-        const token = await getAccessToken();
-        if (!token) {
-          console.warn("Not logged in, defaulting to Seoul.");
-          setSelectedRegion("서울특별시");
-          return;
-        }
-        const response = await fetch(`${BASE_URL}/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch user info: ${response.status}`);
-        }
-
-        const apiResponse = await response.json();
-        const userInfo = apiResponse.data;
-
+        const userInfo = await me();
         console.log("Ranking index.jsx - User Info for Region:", userInfo);
         if (userInfo && userInfo.regionName) {
           setSelectedRegion(userInfo.regionName);
         } else {
           console.warn("User region not found, defaulting to Seoul.");
-          setSelectedRegion("서울특별시"); // Default if not found
+          setSelectedRegion("서울특별시"); // 찾을 수 없을 경우 기본값
         }
       } catch (error) {
         console.error("Error fetching user info, defaulting to Seoul:", error);
-        setSelectedRegion("서울특별시"); // Default on error
+        setSelectedRegion("서울특별시"); // 오류 발생 시 기본값
       }
     };
     fetchUserRegion();
   }, []);
 
-  // 2. Fetch ranking data when tab or region changes
+  // 2. 탭 또는 지역 변경 시 랭킹 데이터 가져오기
   const fetchRegionRankingData = useCallback(async () => {
-    if (!selectedRegion) return; // Do not fetch if region is not set
+    if (!selectedRegion) return; // 지역이 설정되지 않은 경우 가져오지 않음
 
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        console.warn("Not logged in, cannot fetch ranking data.");
-        return;
-      }
-
-      const response = await fetch(`${BASE_URL}/rankings/regions`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await apiFetch("/rankings/regions");
 
       if (!response.ok) {
         throw new Error(`Server response error: ${response.status}`);
@@ -89,7 +57,7 @@ export default function Ranking() {
     } catch (error) {
       console.error("Error fetching region ranking:", error);
     }
-  }, [selectedRegion]); // Dependency on selectedRegion
+  }, [selectedRegion]); // selectedRegion에 대한 의존성
 
   useEffect(() => {
     if (activeTab === "regions") {
@@ -107,51 +75,47 @@ export default function Ranking() {
           left: 0,
           right: 0,
           bottom: 0,
-          paddingBottom: 100,
+          paddingBottom: 150,
         }}
       >
         <HeaderBar title="랭킹" />
-
-        {/* 1. 전체 반투명 박스 */}
-        <View className="flex-1 bg-deactivateButton/50 rounded-3xl shadow px-lg">
-          {/* 탭 메뉴 */}
-          <View>
-            <View className="flex-row justify-center mb-lg gap-5">
-              {tabs.map((tab) => (
-                <Pressable
-                  key={tab.key}
-                  onPress={() => setActiveTab(tab.key)}
-                  className={`px-lg py-xs rounded-full ${
-                    activeTab === tab.key ? "bg-green" : "bg-deactivateButton"
-                  }`}
+        {/* 탭 메뉴 */}
+        <View className="px-pageX mt-4">
+          <View className="flex-row justify-center mb-4 gap-5">
+            {tabs.map((tab) => (
+              <Pressable
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                className={`px-lg py-xs rounded-full ${
+                  activeTab === tab.key ? "bg-green" : "bg-deactivateButton"
+                }`}
+              >
+                <Text
+                  className={
+                    activeTab === tab.key
+                      ? "text-white font-bold text-[18px]"
+                      : "text-green font-bold text-[18px]"
+                  }
                 >
-                  <Text
-                    className={
-                      activeTab === tab.key
-                        ? "text-white font-bold text-h3"
-                        : "text-green font-bold text-h3"
-                    }
-                  >
-                    {tab.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
+                  {tab.label}
+                </Text>
+              </Pressable>
+            ))}
           </View>
-
-          {/* 탭 내용 */}
-          {activeTab === "regions" && (
-            <RegionRanking
-              selectedRegion={selectedRegion}
-              setSelectedRegion={setSelectedRegion}
-              rankingData={rankingData}
-            />
-          )}
-          {activeTab === "weekly" && (
-            <WeeklyRanking fetchRegionRankingData={fetchRegionRankingData} />
-          )}
-          {activeTab === "global" && <GlobalRanking />}
         </View>
+
+        {/* 탭 내용 */}
+        {activeTab === "regions" && (
+          <RegionRanking
+            selectedRegion={selectedRegion}
+            setSelectedRegion={setSelectedRegion}
+            rankingData={rankingData}
+          />
+        )}
+        {activeTab === "weekly" && (
+          <WeeklyRanking fetchRegionRankingData={fetchRegionRankingData} />
+        )}
+        {activeTab === "global" && <GlobalRanking />}
       </View>
     </View>
   );

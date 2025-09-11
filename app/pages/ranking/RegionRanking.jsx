@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import Svg, { Path, G, Text as SvgText, Rect } from "react-native-svg";
 import geojson from "@assets/map/krmap.json";
+import { useEffect } from "react/cjs/react.development";
 
 export default function RegionRanking({
   selectedRegion,
@@ -163,16 +164,46 @@ export default function RegionRanking({
     }
   };
 
+  // 초기 로드 또는 데이터 변경 시 선택된 지역으로 자동 스크롤
+  useEffect(() => {
+    if (selectedRegion && rankingData.length > 0) {
+      const selectedItem = rankingData.find(
+        (item) => item.regionName === selectedRegion
+      );
+
+      if (selectedItem) {
+        // Use a timeout to ensure layout is calculated
+        setTimeout(() => {
+          const cardLayout = layoutMap.current[selectedItem.regionName];
+          if (
+            cardLayout &&
+            scrollViewRef.current &&
+            scrollViewHeight.current > 0
+          ) {
+            const yPosition = cardLayout.y;
+            const cardHeight = cardLayout.height;
+            const svHeight = scrollViewHeight.current;
+
+            const scrollToY = yPosition - svHeight / 2 + cardHeight / 2;
+            const finalY = Math.max(0, scrollToY);
+
+            scrollViewRef.current.scrollTo({ y: finalY, animated: true });
+          }
+        }, 100); // Small delay to ensure layout is ready
+      }
+    }
+  }, [selectedRegion, rankingData]); // Dependencies
+
   return (
     <View style={{ flex: 1, flexDirection: "column" }}>
       <View
-        className="bg-white rounded-2xl p-2 shadow"
+        className="bg-white rounded-2xl p-sm shadow"
         style={{ flex: 1 }}
         onLayout={(event) => setMapLayout(event.nativeEvent.layout)}
       >
         {mapData && (
           <Svg width="100%" height="100%">
-            {/* Mainland */}
+            {/* 본토 */}
             <G>
               {mapData.mainlandFeatures.map((feature) => {
                 const title = feature.properties.title;
@@ -212,7 +243,7 @@ export default function RegionRanking({
               })}
             </G>
 
-            {/* Jeju Inset */}
+            {/* 제주도 인셋 */}
             <G>
               <Rect
                 x={mapData.insetRect.x}
@@ -257,7 +288,7 @@ export default function RegionRanking({
               })()}
             </G>
 
-            {/* Labels */}
+            {/* 라벨 */}
             {selectedRegion && mapData.centerCoords[selectedRegion] && (
               <SvgText
                 x={mapData.centerCoords[selectedRegion].x}
@@ -278,10 +309,10 @@ export default function RegionRanking({
       </View>
 
       <View
-        className="bg-deactivateButton/75 rounded-2xl p-4"
+        className="bg-deactivateButton/75 rounded-2xl p-lg"
         style={{ flex: 1 }}
       >
-        <Text className="text-white font-sf-b text-lg mb-2">
+        <Text className="text-green text-center font-sf-b text-bodyLg mb-2">
           지역별 탄소 절감량 랭킹
         </Text>
         <ScrollView

@@ -39,3 +39,12 @@ export async function requestCarbon(payload, { timeoutMs = 15000 } = {}) {
     clearTimeout(timer);
   }
 }
+
+export async function fetchTodayCount(userId) {
+  const res = await apiFetch(`/diet/${userId}/today/count`, {
+    method: "GET",
+  });
+
+  const parsed = await res.json();
+  return parsed?.data?.todayCount ?? 0;
+}
