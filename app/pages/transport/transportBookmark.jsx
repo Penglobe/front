@@ -123,7 +123,7 @@ export default function TransportBookmark() {
 
       {/* 🔎 검색창 */}
       <View className="px-pageX mt-5">
-        <View className="flex-row items-center bg-white rounded-xl px-3 py-4 shadow-md shadow-black/5">
+        <View className="flex-row items-center bg-white rounded-xl px-md py-md shadow-md shadow-black/5">
           <Ionicons
             name="search-outline"
             size={20}
@@ -135,6 +135,10 @@ export default function TransportBookmark() {
             value={query}
             onChangeText={setQuery}
             className="flex-1 font-sf-md text-gray-800"
+            style={{
+              paddingVertical: 0, // iOS 잘림 방지
+              textAlignVertical: "center", // Android 중앙 정렬
+            }}
             returnKeyType="search"
             onSubmitEditing={handleSearch}
           />
@@ -143,8 +147,8 @@ export default function TransportBookmark() {
 
       {/* 🔎 검색 결과 */}
       {query.trim().length > 0 && (
-        <View className="px-pageX mt-6">
-          <Text className="font-sf-b text-xl text-gray-800 mb-3">
+        <View className="px-pageX py-md">
+          <Text className="font-sf-b text-button text-gray-800 px-sm my-md">
             검색 결과
           </Text>
           <View className="h-[200px] rounded-xl bg-[#E0F2F1]">
@@ -170,7 +174,7 @@ export default function TransportBookmark() {
                   />
                 )}
                 ListEmptyComponent={
-                  <Text className="font-sf-md text-gray-400 text-center mt-4">
+                  <Text className="font-sf-md text-gray-400 text-center text-button py-llg">
                     검색 결과가 없습니다.
                   </Text>
                 }
@@ -181,9 +185,11 @@ export default function TransportBookmark() {
       )}
 
       {/* 북마크 */}
-      <View className="px-pageX mt-8 flex-1">
-        <View className="flex-row justify-between items-center mt-2 mb-3">
-          <Text className="font-sf-b text-xl text-gray-800">내 북마크</Text>
+      <View className="px-pageX py-lg flex-1">
+        <View className="flex-row justify-between items-center py-md">
+          <Text className="font-sf-b text-button text-gray-800 px-sm">
+            내 북마크
+          </Text>
         </View>
 
         <FlatList
