@@ -86,7 +86,10 @@ export default function ProductDetailPage() {
           data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
         }점`,
         [
-          { text: "주문내역 보기", onPress: () => router.push("/shop/orders") },
+          {
+            text: "주문내역 보기",
+            onPress: () => router.push("/pages/shop/orderlist"),
+          },
           { text: "확인", onPress: () => router.back() },
         ]
       );

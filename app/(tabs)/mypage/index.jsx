@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ActivityIndicator, Alert, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Button,
+} from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { getAccessToken, me } from "@services/authService";
@@ -8,6 +15,7 @@ import { Calendar } from "react-native-calendars";
 import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { router } from "expo-router";
 
 const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
