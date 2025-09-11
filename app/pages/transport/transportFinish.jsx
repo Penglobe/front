@@ -175,7 +175,7 @@ export default function TransportFinish() {
               <Text className="text-base font-sf-b mb-2">계산 기준</Text>
               <Text className="text-sm text-gray-600 leading-5">
                 • 자동차는 1km당 약 0.2kg CO₂ 배출 {"\n"}• 도보·자전거는 100%
-                절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100포인트
+                절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100얼음
                 지급
               </Text>
               <TouchableOpacity
