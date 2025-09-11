@@ -37,6 +37,8 @@ import Notice from "@assets/icons/notice.svg";
 import Camera from "@assets/icons/camera.svg";
 import Kakao from "@assets/icons/kakao.svg";
 import Box from "@assets/icons/giftbox.svg";
+import LogOut from "@assets/icons/logout.svg";
+import Order from "@assets/icons/order.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -103,4 +105,6 @@ export const Images = {
   Tori3,
   Tori4,
   Box,
+  LogOut,
+  Order,
 };

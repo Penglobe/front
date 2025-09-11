@@ -12,11 +12,10 @@ const getAvatarRenderComponent = (profileKey) => {
 };
 
 export default function RankingCard({ item, isProminent, onPress }) {
-  // console.log(`RankingCard item.profile for ${item.nickname}: "${item.profile}"`);
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
-        className={`bg-white rounded-xl p-lg mb-2 ${
+        className={`bg-white rounded-xl p-lg mb-2 shadow-sm ${
           isProminent ? "border-2 border-green" : ""
         }`}
         style={{

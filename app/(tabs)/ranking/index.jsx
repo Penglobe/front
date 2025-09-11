@@ -26,7 +26,7 @@ export default function Ranking() {
     const fetchUserRegion = async () => {
       try {
         const userInfo = await me();
-        console.log("Ranking index.jsx - User Info for Region:", userInfo);
+
         if (userInfo && userInfo.regionName) {
           setSelectedRegion(userInfo.regionName);
         } else {
@@ -74,8 +74,7 @@ export default function Ranking() {
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
-          paddingBottom: 150,
+          bottom: 35,
         }}
       >
         <HeaderBar title="랭킹" />
