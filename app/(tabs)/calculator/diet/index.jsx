@@ -4,20 +4,35 @@ import BgGradient from "@components/BgGradient";
 import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import { fetchTodayCount } from "@services/dietService"; 
-import { useAuth } from "@hooks/useAuth"; 
+import { useAuth } from "@hooks/useAuth";
 
 export default function Diet() {
   const router = useRouter();
-  const { user } = useAuth(); 
+ const { user, refreshUser } = useAuth(); 
+
+ const pickUserId = (u) => u?.userId ?? u?.id ?? u?.uid ?? null;
 
   const handlePress = async () => {
     try {
-      const count = await fetchTodayCount(user.userId);
+  
+     let uid = pickUserId(user);
+     if (!uid && typeof refreshUser === "function") {
+       await refreshUser();
+       uid = pickUserId(user); 
+     }
+     // 2) 그래도 없으면 안내 후 종료
+     if (!uid) {
+       Alert.alert("로그인 필요", "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.");
+       return;
+     }
+
+     const count = await fetchTodayCount(uid);
       if (count >= 3) {
         Alert.alert("알림", "오늘은 이미 3번까지 기록했습니다. 내일 다시 시도해 주세요.");
         return; 
       }
-      router.push("/pages/diet/testFoodLens");
+
+     router.push("/pages/diet/dietTest");
     } catch (e) {
       Alert.alert("오류", "식단 횟수 조회에 실패했습니다.");
       console.error(e);
