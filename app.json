@@ -35,7 +35,7 @@
         "UIBackgroundModes": ["location"]
       }
     },
-    "android": {
+        "android": {
       "compileSdkVersion": 35,
       "targetSdkVersion": 35,
       "adaptiveIcon": {
@@ -44,10 +44,15 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",             
+        "READ_MEDIA_IMAGES",        
+        "READ_EXTERNAL_STORAGE",      
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
-        "FOREGROUND_SERVICE"
+        "FOREGROUND_SERVICE",
+        "INTERNET"                  
       ],
       "package": "com.penglobe9.app"
     },

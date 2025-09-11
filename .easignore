@@ -1,0 +1,8 @@
+android/.gradle
+android/app/build
+android/build
+ios/build
+*.apk
+*.aab
+*.tar.gz
+*.keystore

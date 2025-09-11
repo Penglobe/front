@@ -156,7 +156,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation "com.facebook.react:react-android:+"
 
-    implementation "com.doinglab.foodlens:FoodLensSDK-core:3.0.9"
+    implementation "com.doinglab.foodlens:FoodLensSDK-core:3.1.2"
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
