@@ -9,8 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
-import { getAccessToken, me } from "@services/authService";
-import Constants from "expo-constants";
+import { apiFetch } from "@services/authService";
 import { useAuth } from "@hooks/useAuth"; // Import useAuth hook
 
 export default function WeeklyRanking({ fetchRegionRankingData }) {
@@ -22,32 +21,16 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   const [showParticipationMessage, setShowParticipationMessage] =
     useState(false); // New state for message visibility
 
-  const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
-
-  const { user, isLoading: isAuthLoading } = useAuth(); // Add useAuth() hook call and user declaration
+  const { user, isLoading: isAuthLoading } = useAuth();
+  console.log("DEBUG: WeeklyRanking - user from useAuth:", user);
+  console.log("DEBUG: WeeklyRanking - user.id type:", typeof user?.id);
+  console.log("DEBUG: WeeklyRanking - user.id value:", user?.id); // Add useAuth() hook call and user declaration
 
   // --- Refactored Data Fetching Logic ---
   const fetchRankingData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        console.warn("로그인 필요");
-        setLoading(false);
-        return;
-      }
-
-      const userInfo = await me();
-      if (userInfo && userInfo.nickname) {
-        setCurrentUserNickname(userInfo.nickname);
-      }
-
-      const response = await fetch(`${BASE_URL}/rankings/weekly`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await apiFetch("/rankings/weekly");
 
       if (!response.ok) {
         throw new Error(`Weekly ranking 에러: ${response.status}`);
@@ -56,6 +39,8 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       const data = await response.json();
       setRankingList(data.top10 || []);
       setMyRank(data.myRank || null);
+      console.log("DEBUG: WeeklyRanking - rankingList:", data.top10);
+      console.log("DEBUG: WeeklyRanking - myRank:", data.myRank);
 
       if (!data.myRank) {
         setShowParticipationMessage(true); // Show message instead of alert
@@ -74,10 +59,10 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   }, [userId]); // Add userId to dependency array
 
   useEffect(() => {
-    if (user && user.id && user.nickname) {
-      // Changed user.userId to user.id
-      setUserId(user.id); // Changed user.userId to user.id
+    if (user && user.userId && user.nickname) {
+      setUserId(user.userId);
       setCurrentUserNickname(user.nickname);
+      console.log("DEBUG: WeeklyRanking - Logged in userId:", user.userId);
     }
   }, [user]);
 
@@ -88,12 +73,8 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
   // --- New API call for the test button ---
   const handleAddDummyData = async () => {
     try {
-      const token = await getAccessToken();
-      const response = await fetch(`${BASE_URL}/users/me/add-dummy-data`, {
+      const response = await apiFetch("/users/me/add-dummy-data", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) {
@@ -116,7 +97,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
     return (
       <ActivityIndicator
         size="large"
-        color="#0000ff"
+        color="#blue"
         style={{ flex: 1, justifyContent: "center" }}
       />
     );
@@ -134,16 +115,16 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
           colors={["#58BE84", "#0C7B7E"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          className="p-4 mb-4 shadow"
+          className="p-lg mb-4 shadow"
           style={{ borderRadius: 8 }}
         >
           <View className="flex-col items-center">
-            <Text className="text-white font-sf-b text-lg">
+            <Text className="text-white font-sf-b text-bodyLg">
               실시간 현재 순위 : {myRank.rank}위
             </Text>
             {myRank.lastWeekRank !== null &&
               myRank.lastWeekRank !== undefined && (
-                <Text className="text-white font-sf-r text-sm mt-1">
+                <Text className="text-white font-sf-r text-bodySm mt-1">
                   지난 주에는 {myRank.lastWeekRank}위로 완료했어요!
                 </Text>
               )}
@@ -153,7 +134,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
 
       {/* 랭킹 참여 조건 미달 메시지 */}
       {showParticipationMessage && (
-        <View className="bg-deactivateButton border-l-4 border-500 text-yellow-700 p-4 mb-4 rounded-lg">
+        <View className="bg-deactivateButton border-l-4 border-500 text-yellow-700 p-lg mb-4 rounded-lg">
           <Text className="font-bold">랭킹 참여 조건 미달</Text>
           <Text>
             주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! 이번 주에
@@ -163,8 +144,17 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       )}
 
       {/* 랭킹 리스트 (카드 형식) */}
-      <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
+      <ScrollView
+        className="flex-1 bg-white rounded-xl p-lg shadow"
+        contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
+      >
         {rankingList.map((item) => {
+          console.log(
+            "DEBUG: WeeklyRanking - item.userId:",
+            item.userId,
+            "type:",
+            typeof item.userId
+          );
           const isCurrentUser = item.userId === userId; // Change to userId comparison
           return (
             <RankingCard
@@ -189,6 +179,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
                 rank: myRank.rank,
                 nickname: currentUserNickname,
                 score: myRank.score,
+                profile: myRank.profile, // Add profile to myRank card
               }}
               isProminent={true}
             />
@@ -197,18 +188,16 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       </ScrollView>
 
       {/* 테스트 버튼 */}
-      {userId === 115 && ( // Conditionally render for userId 115
-        <View className="flex-row justify-around mt-4 pb-10">
-          <TouchableOpacity
-            onPress={handleAddDummyData}
-            className="bg-blue-500 p-3 rounded-lg"
-          >
-            <Text className="text-white font-bold">
-              랭킹 참여/점수 추가 (테스트)
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View className="flex-row justify-around mt-4 pb-3xl">
+        <TouchableOpacity
+          onPress={handleAddDummyData}
+          className="bg-blue-500 p-md rounded-lg"
+        >
+          <Text className="text-white font-bold">
+            랭킹 참여/점수 추가 (테스트)
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
