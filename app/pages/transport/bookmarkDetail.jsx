@@ -1,11 +1,10 @@
 // pages/transport/BookmarkDetail.jsx
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert } from "react-native";
+import { View, Text, TextInput, Alert, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { deleteBookmark, updateBookmark } from "@services/transportService";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
-import MainButton from "@components/MainButton";
 import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -14,7 +13,6 @@ export default function BookmarkDetail() {
     useLocalSearchParams();
   const router = useRouter();
 
-  // ✅ 수정 관련 상태
   const [isEditing, setIsEditing] = useState(false);
   const [labelInput, setLabelInput] = useState(bookmarkLabel);
 
@@ -63,61 +61,73 @@ export default function BookmarkDetail() {
       <HeaderBar title="북마크 상세" />
 
       <View className="px-pageX mt-6">
-        {/* ✅ 지도 */}
-        <View className="rounded-xl overflow-hidden mb-6">
-          <KakaoMapView
-            currentLat={currentLat}
-            currentLng={currentLng}
-            height={250}
-          />
-        </View>
+        <View className="bg-white rounded-2xl shadow-sm px-lg py-lg">
+          {/* ✅ 이름 (인라인 수정 가능) */}
+          <View className="flex-row items-center py-sm">
+            {isEditing ? (
+              <TextInput
+                value={labelInput}
+                onChangeText={setLabelInput}
+                className="ml-2 font-sf-b text-h2 flex-1 border-b border-gray-400"
+                autoFocus
+                multiline={false}
+                numberOfLines={1}
+              />
+            ) : (
+              <Text
+                className="ml-2 font-sf-b text-h2 flex-1"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {labelInput}
+              </Text>
+            )}
 
-        {/* ✅ 이름 (인라인 수정 가능) */}
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="bookmark-outline" size={22} color="#318643" />
+            <Pressable
+              onPress={() => {
+                if (isEditing) {
+                  handleSave();
+                } else {
+                  setIsEditing(true);
+                }
+              }}
+              className="ml-2 p-1 shrink-0" // 👈 아이콘은 절대 줄어들지 않게
+            >
+              <Ionicons
+                name={isEditing ? "checkmark" : "create-outline"}
+                size={25}
+                color="#318643"
+              />
+            </Pressable>
+          </View>
 
-          {isEditing ? (
-            <TextInput
-              value={labelInput}
-              onChangeText={setLabelInput}
-              className="ml-2 font-sf-b text-lg border-b border-gray-400 flex-1"
-              autoFocus
+          {/* ✅ 지도 */}
+          <View className="rounded-xl overflow-hidden py-sm">
+            <KakaoMapView
+              currentLat={currentLat}
+              currentLng={currentLng}
+              height={300}
             />
-          ) : (
-            <Text className="ml-2 font-sf-b text-lg">{labelInput}</Text>
-          )}
+          </View>
 
-          <Ionicons
-            name={isEditing ? "checkmark" : "create-outline"}
-            size={22}
-            color="#318643"
-            onPress={() => {
-              if (isEditing) {
-                handleSave();
-              } else {
-                setIsEditing(true);
-              }
-            }}
-            style={{ marginLeft: 8 }}
-          />
+          {/* ✅ 주소 */}
+          <View className="py-md px-xs flex-row items-center">
+            <Ionicons name="location-outline" size={25} color="#318643" />
+            <Text className="font-sf-md px-xs text-body flex-1 flex-wrap">
+              {address}
+            </Text>
+          </View>
+          {/* ✅ 삭제 버튼 (Pressable + 아이콘) */}
+          <Pressable
+            onPress={handleDelete}
+            className="py-sm px-md flex-row items-end justify-end"
+          >
+            <Ionicons name="trash-outline" size={22} color="#FF3B30" />
+            <Text className="ml-2 font-sf-b text-red-500 text-button">
+              삭제
+            </Text>
+          </Pressable>
         </View>
-
-        {/* ✅ 주소 */}
-        <View className="flex-row items-center">
-          <Ionicons name="location-outline" size={22} color="#318643" />
-          <Text className="ml-2 font-sf-md text-base text-gray-700">
-            {address}
-          </Text>
-        </View>
-      </View>
-
-      {/* ✅ 버튼 */}
-      <View className="px-pageX mt-10">
-        <MainButton
-          label="삭제"
-          onPress={handleDelete}
-          className="bg-red-500"
-        />
       </View>
     </View>
   );

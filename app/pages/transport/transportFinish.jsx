@@ -1,88 +1,120 @@
 // app/pages/transport/transportFinish.jsx
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Modal,
   ScrollView,
-  Pressable,
+  BackHandler,
 } from "react-native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
-import { Images } from "@constants/Images";
 
 // ✅ 캐릭터 import
 import Ipa from "@assets/images/character/ipa-face.svg";
 import IpaTori from "@assets/images/character/ipa-tori-1.svg";
 
-// ✅ 얼음 아이콘 import
+// ✅ 아이콘 import
 import Ice from "@assets/icons/ice.svg";
 
 export default function TransportFinish() {
-  const { placeName, distanceM, co2Kg, durationM, mode, points } =
-    useLocalSearchParams();
+  const { distanceM, co2Kg, durationM, mode, points } = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
 
-  // ✅ 모달 상태
   const [showInfo, setShowInfo] = useState(false);
 
-  // 🚗 자동차로 갔을 경우 배출되는 CO₂ (kg) → 안내문용
+  // ✅ 중복 네비게이션 방지 가드
+  const navigatingRef = useRef(false);
+
+  // 🚗 자동차로 갔을 경우 배출되는 CO₂ (kg)
   const carCo2 = distanceM ? (parseFloat(distanceM) * 0.0002).toFixed(2) : 0;
+
+  useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false, // ✅ 슬라이드 제스처 끄기
+      headerBackButtonMenuEnabled: false, // ✅ 헤더 back 메뉴도 비활성
+    });
+  }, [navigation]);
+
+  // ✅ iOS 제스처 & 헤더 기본 back(pop) 가로채서 홈으로 replace
+  useFocusEffect(
+    useCallback(() => {
+      const sub = navigation.addListener("beforeRemove", (e) => {
+        // 이미 다른 경로로 이동 중이면 무시
+        if (navigatingRef.current) return;
+
+        // 사용자가 '뒤로가기' 시도 → 기본 pop 막고 홈으로 교체
+        e.preventDefault();
+        navigatingRef.current = true;
+        router.replace("/home");
+      });
+
+      return sub; // cleanup
+    }, [navigation, router])
+  );
+
+  // ✅ 안드로이드 하드웨어 뒤로가기 → 홈으로 replace
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        if (navigatingRef.current) return true; // 이미 처리 중
+        navigatingRef.current = true;
+        router.replace("/home");
+        return true; // 이벤트 소비
+      });
+
+      return () => sub.remove();
+    }, [router])
+  );
+
+  // ✅ UI(헤더/버튼)에서 홈 이동 공통 핸들러 (기록 안 남김)
+  const goHome = useCallback(() => {
+    if (navigatingRef.current) return; // 중복 방지
+    navigatingRef.current = true;
+    router.replace("/home");
+  }, [router]);
 
   return (
     <View className="flex-1">
       <BgGradient />
 
-      {/* ✅ 커스텀 헤더 (뒤로가기 → transportBookmark으로 replace) */}
-      <HeaderBar title="이동 결과" showBack={false} />
-
-      {/* 왼쪽 커스텀 Back 버튼 오버레이 */}
-      <Pressable
-        onPress={() => router.replace("/pages/transport/transportBookmark")}
-        style={{
-          position: "absolute",
-          top: 55, // 기기 SafeArea 감안해서 조절
-          left: 16,
-          padding: 8,
-        }}
-      >
-        <Images.Back width={24} height={24} />
-      </Pressable>
+      {/* ✅ 헤더 */}
+      <HeaderBar title="이동 결과" showBack onBack={goHome} />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 200 }}
+        contentContainerStyle={{ paddingBottom: 50 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ✅ 본문 */}
         <View className="flex-1 px-pageX">
           {/* 안내 텍스트 */}
           <View className="flex-row items-center mb-5 mt-5">
-            {points > 0 ? (
+            {Number(points) > 0 ? (
               <View className="px-pageX flex-row items-center">
-                <Text className="text-2xl font-sf-b text-green-700">
+                <Text className="text-h2 font-sf-b text-green-700">
                   {points}
                 </Text>
                 <Ice width={40} height={40} />
-                <Text className="text-2xl font-sf-b text-green-700">
+                <Text className="text-h2 font-sf-b text-green-700">
                   {" "}
                   을 얻었습니다!
                 </Text>
               </View>
             ) : (
               <View className="flex-row items-center">
-                <Ipa width={40} height={40} style={{ marginRight: 6 }} />
-                <Text className="text-2xl font-sf-b text-green-700">
+                <Ipa width={40} height={40} style={{ marginRight: 8 }} />
+                <Text className="text-h2 font-sf-b text-green-700">
                   도착했습니다!
                 </Text>
               </View>
             )}
           </View>
 
-          {/* 결과 카드들 */}
-          {/* 총 거리 */}
+          {/* 총 이동 거리 */}
           <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
             <Text className="font-sf-md text-lg">총 이동 거리</Text>
             <View className="items-end">
@@ -92,7 +124,7 @@ export default function TransportFinish() {
             </View>
           </View>
 
-          {/* 총 시간 */}
+          {/* 총 이동 시간 */}
           <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-5">
             <Text className="font-sf-md text-lg">총 이동 시간</Text>
             <View className="items-end">
@@ -102,11 +134,10 @@ export default function TransportFinish() {
             </View>
           </View>
 
-          {/* CO₂ 절감량 */}
+          {/* 탄소 절감량 */}
           <View className="bg-white rounded-2xl shadow-md px-6 py-5">
             <View className="flex-row items-center justify-between">
               <Text className="font-sf-md text-lg">탄소 절감량</Text>
-              {/* 안내 아이콘 */}
               <TouchableOpacity onPress={() => setShowInfo(true)}>
                 <Text className="text-gray-400 text-2xl">ⓘ</Text>
               </TouchableOpacity>
@@ -134,17 +165,17 @@ export default function TransportFinish() {
 
         {/* ✅ 하단 버튼 */}
         <View className="px-pageX mb-10">
-          <MainButton label="홈으로" onPress={() => router.push("/home")} />
+          <MainButton label="홈으로" onPress={goHome} />
         </View>
 
-        {/* ✅ 모달 (팝업) */}
+        {/* ✅ 모달 */}
         <Modal visible={showInfo} transparent animationType="fade">
           <View className="flex-1 justify-center items-center bg-black/50">
             <View className="bg-white rounded-xl p-5 w-4/5">
               <Text className="text-base font-sf-b mb-2">계산 기준</Text>
               <Text className="text-sm text-gray-600 leading-5">
                 • 자동차는 1km당 약 0.2kg CO₂ 배출 {"\n"}• 도보·자전거는 100%
-                절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100포인트
+                절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100얼음
                 지급
               </Text>
               <TouchableOpacity

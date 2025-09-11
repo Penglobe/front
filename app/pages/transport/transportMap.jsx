@@ -289,8 +289,8 @@ export default function TransportMap() {
           endLng={endLng}
           currentLat={currentLat}
           currentLng={currentLng}
-          height="100%" // 전체 높이
-          width="100%" // 전체 너비
+          height="100%"
+          width="100%"
         />
       ) : (
         <View className="flex-1 items-center justify-center bg-gray-100">
@@ -298,9 +298,9 @@ export default function TransportMap() {
         </View>
       )}
 
-      {/* 밑에 카드 & 버튼 오버레이 */}
-      <View className="absolute bottom-0 left-0 right-0 px-pageX pb-10">
-        <View className="bg-white rounded-2xl shadow-md px-6 py-5 mb-4">
+      {/* ✅ 도착지 & 이동거리 카드 (헤더 밑) */}
+      <View className="absolute left-0 right-0 px-xl py-md top-[120px]">
+        <View className="bg-white rounded-2xl shadow-sm px-xl py-lg">
           <View className="flex-row items-center mb-3">
             <Ionicons name="location-outline" size={22} color="#318643" />
             <Text className="font-sf-b text-lg text-gray-800">
@@ -317,14 +317,15 @@ export default function TransportMap() {
             </Text>
           </View>
         </View>
+      </View>
 
+      {/* ✅ 하단 버튼 */}
+      <View className="absolute bottom-0 left-0 right-0 px-xl py-3xl">
         <MainButton
           label="이동 종료"
           onPress={handleStop}
-          className="bg-red-500 mb-3"
+          className="bg-red-500 mb-md"
         />
-
-        {/* 🚀 테스트용 버튼 */}
         <MainButton
           label="거리 +100m (테스트)"
           onPress={() => {

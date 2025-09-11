@@ -21,7 +21,7 @@ export default function TransportButton({
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      className={`w-full flex-row items-center px-4 py-6 rounded-2xl mb-3 border
+      className={`w-full flex-row items-center px-lg py-llg rounded-2xl mb-3 border
         ${!selected ? "bg-white" : ""}
         ${disabled ? "opacity-70" : ""}
       `}
@@ -37,7 +37,7 @@ export default function TransportButton({
         color={"#111827"} // ✅ 아이콘은 항상 진회색
         style={{ marginRight: 12 }}
       />
-      <Text className="text-[18px] text-black font-sf-md">{label}</Text>
+      <Text className="text-h3 text-black font-sf-md">{label}</Text>
     </Pressable>
   );
 }

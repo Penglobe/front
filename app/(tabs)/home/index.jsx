@@ -6,25 +6,24 @@ import {
   Dimensions,
   Alert,
   Text,
+  BackHandler,
 } from "react-native";
-import { Images } from "@constants/Images";
-import { useFocusEffect, useRouter } from "expo-router";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-  Easing,
-  interpolate,
-} from "react-native-reanimated";
-import { Image as ExpoImage } from "expo-image";
+import { useFocusEffect, useRouter, usePathname } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@hooks/useAuth";
 import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import { apiFetch } from "@services/authService";
 import AttendanceReward from "@components/AttendanceReward";
+import { Images } from "@constants/Images";
+import Animated, {
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import { Image as ExpoImage } from "expo-image";
 
 export default function Home() {
   const router = useRouter();
@@ -35,6 +34,16 @@ export default function Home() {
   const [loadingPrev, setLoadingPrev] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [chestClicked, setChestClicked] = useState(false); // 상자 클릭 여부
+
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true // 아무 동작 안 함
+      );
+      return () => subscription.remove();
+    }, [])
+  );
 
   // 모달 표시 여부
   const checkAttendancePopup = useCallback(async () => {

@@ -64,7 +64,7 @@ export default function TransportStart() {
           showsVerticalScrollIndicator={false}
         >
           {/* ✅ KakaoMapView */}
-          <View className="mb-5 overflow-hidden">
+          <View className="overflow-hidden">
             <KakaoMapView
               key={`${location.latitude}-${location.longitude}`}
               startLat={location.latitude}
@@ -74,7 +74,7 @@ export default function TransportStart() {
           </View>
 
           {/* 타이틀 */}
-          <View className="px-pageX mb-4">
+          <View className="px-pageX py-llg">
             <Text className="text-xl" style={{ fontFamily: "SFPro-Bold" }}>
               이동 수단을 선택해 주세요
             </Text>
@@ -110,9 +110,8 @@ export default function TransportStart() {
           </View>
 
           {/* 다음 버튼 */}
-          <View className="px-pageX">
+          <View className="px-pageX py-xl">
             <MainButton
-              className="mt-9"
               label="다음"
               onPress={() =>
                 router.push({
