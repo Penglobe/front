@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
-import { getAccessToken, me } from "@services/authService";
+import { apiFetch, me } from "@services/authService";
 import Constants from "expo-constants";
-
-const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 
 export default function GlobalRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -13,18 +11,12 @@ export default function GlobalRanking() {
   const [loading, setLoading] = useState(true);
   const [currentUserNickname, setCurrentUserNickname] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [showParticipationMessage, setShowParticipationMessage] = useState(false); // New state for message visibility
+  const [showParticipationMessage, setShowParticipationMessage] =
+    useState(false); // New state for message visibility
 
   useEffect(() => {
     const fetchGlobalRanking = async () => {
       try {
-        const token = await getAccessToken();
-        if (!token) {
-          console.warn("로그인 필요");
-          setLoading(false);
-          return;
-        }
-
         // Fetch current user's info using the 'me' function
         const userInfo = await me();
         if (userInfo && userInfo.nickname) {
@@ -34,15 +26,7 @@ export default function GlobalRanking() {
           setCurrentUserId(userInfo.userId);
         }
 
-        const response = await fetch(
-          `${BASE_URL}/rankings/global`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await apiFetch("/rankings/global");
 
         if (!response.ok)
           throw new Error(`Global ranking 에러: ${response.status}`);
@@ -93,11 +77,11 @@ export default function GlobalRanking() {
           colors={["#58BE84", "#0C7B7E"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
-          className="p-4 mb-4 shadow"
+          className="p-lg mb-4 shadow"
           style={{ borderRadius: 8 }}
         >
           <View className="flex-col items-center">
-            <Text className="text-white font-sf-b text-lg">
+            <Text className="text-white font-sf-b text-bodyLg">
               나의 전체 순위 : {myRank.rank}위
             </Text>
             {/* 지난 주 랭킹은 전체 랭킹에는 없으므로 제거 */}
@@ -107,14 +91,20 @@ export default function GlobalRanking() {
 
       {/* 랭킹 확인 불가 메시지 */}
       {showParticipationMessage && (
-          <View className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-lg">
-              <Text className="font-bold">랭킹 확인 불가</Text>
-              <Text>기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을 통해 탄소 절감량을 늘려보세요!</Text>
-          </View>
+        <View className="bg-deactivateButton border-l-4 border-500 text-yellow-700 p-lg mb-4 rounded-lg">
+          <Text className="font-bold">랭킹 확인 불가</Text>
+          <Text>
+            기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을
+            통해 탄소 절감량을 늘려보세요!
+          </Text>
+        </View>
       )}
 
       {/* 랭킹 리스트 (카드 형식) */}
-      <ScrollView className="flex-1 bg-white rounded-xl p-4 shadow">
+      <ScrollView
+        className="flex-1 bg-white rounded-xl p-lg shadow"
+        contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
+      >
         {rankingList.map((item) => {
           const isCurrentUser = item.userId === currentUserId; // Change to userId comparison
           return (

@@ -2,14 +2,56 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, ActivityIndicator, Alert, ScrollView } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
-import { getAccessToken, me } from "@services/authService";
-import Constants from "expo-constants";
-import { Calendar } from "react-native-calendars";
+import { apiFetch, me, logout as authLogout } from "@services/authService";
+import { Calendar, LocaleConfig } from "react-native-calendars";
 import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
-import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
-const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
+// 한글 설정
+LocaleConfig.locales["ko"] = {
+  monthNames: [
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
+  ],
+  monthNamesShort: [
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
+  ],
+  dayNames: [
+    "일요일",
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+  ],
+  dayNamesShort: ["일", "월", "화", "수", "목", "금", "토"],
+  today: "오늘",
+};
+LocaleConfig.defaultLocale = "ko";
 
 const AVATARS = [
   { key: "ToriFace", label: "토리", Render: Images.ToriFace },
@@ -22,50 +64,23 @@ const getAvatarRenderComponent = (profileKey) => {
 };
 
 export default function MyPage() {
+  const router = useRouter();
   const [myPageInfo, setMyPageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Get today's date in YYYY-MM-DD format
   const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-  const day = String(today.getDate()).padStart(2, "0");
-  const todayDateString = `${year}-${month}-${day}`;
+  const todayDateString = today.toISOString().split("T")[0];
 
-  const [selectedDate, setSelectedDate] = useState(todayDateString); // State for selected date, default to today
-  const [dailyReductionData, setDailyReductionData] = useState(null); // State for daily data
-  const [dailyLoading, setDailyLoading] = useState(false); // Loading state for daily data
-  const [attendanceDates, setAttendanceDates] = useState([]); // State for attendance dates
+  const [selectedDate, setSelectedDate] = useState(todayDateString);
+  const [currentMonth, setCurrentMonth] = useState(todayDateString);
+  const [dailyReductionData, setDailyReductionData] = useState(null);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [attendanceDates, setAttendanceDates] = useState([]);
 
   const fetchMyPageInfo = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        console.warn("로그인 필요");
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${BASE_URL}/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`마이페이지 정보 가져오기 에러: ${response.status}`);
-      }
-
-      const apiResponse = await response.json();
-      if (apiResponse.status === 200) {
-        setMyPageInfo(apiResponse.data);
-      } else {
-        Alert.alert(
-          "오류",
-          apiResponse.message || "마이페이지 정보를 가져오지 못했습니다."
-        );
-      }
+      const userInfo = await me();
+      setMyPageInfo(userInfo);
     } catch (error) {
       console.error("Error fetching my page info:", error);
       Alert.alert("오류", "마이페이지 정보를 불러오는 중 오류가 발생했습니다.");
@@ -77,39 +92,19 @@ export default function MyPage() {
   const fetchDailyReductionData = useCallback(async (dateString) => {
     setDailyLoading(true);
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        console.warn("로그인 필요");
-        setDailyLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${BASE_URL}/users/me/daily/${dateString}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await apiFetch(`/users/me/daily/${dateString}`);
       if (!response.ok) {
         throw new Error(`일일 절감량 정보 가져오기 에러: ${response.status}`);
       }
-
       const apiResponse = await response.json();
       if (apiResponse.status === 200) {
         setDailyReductionData(apiResponse.data);
       } else {
-        Alert.alert(
-          "오류",
-          apiResponse.message || "일일 절감량 정보를 가져오지 못했습니다."
-        );
+        setDailyReductionData(null); // Clear data on error or non-200 status
       }
     } catch (error) {
       console.error("Error fetching daily reduction info:", error);
-      Alert.alert(
-        "오류",
-        "일일 절감량 정보를 불러오는 중 오류가 발생했습니다."
-      );
+      setDailyReductionData(null);
     } finally {
       setDailyLoading(false);
     }
@@ -117,23 +112,10 @@ export default function MyPage() {
 
   const fetchAttendanceDates = useCallback(async () => {
     try {
-      const token = await getAccessToken();
-      if (!token) {
-        console.warn("로그인 필요");
-        return;
-      }
-
-      const response = await fetch(`${BASE_URL}/users/me/attendance-dates`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
+      const response = await apiFetch("/users/me/attendance-dates");
       if (!response.ok) {
         throw new Error(`출석 날짜 정보 가져오기 에러: ${response.status}`);
       }
-
       const apiResponse = await response.json();
       if (apiResponse.status === 200) {
         setAttendanceDates(apiResponse.data);
@@ -166,22 +148,9 @@ export default function MyPage() {
           text: "초기화",
           onPress: async () => {
             try {
-              const token = await getAccessToken();
-              if (!token) {
-                console.warn("로그인 필요");
-                return;
-              }
-
-              const response = await fetch(
-                `${BASE_URL}/users/me/reset-attendance`,
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                  },
-                }
-              );
+              const response = await apiFetch("/users/me/reset-attendance", {
+                method: "POST",
+              });
 
               if (!response.ok) {
                 throw new Error(`출석 데이터 초기화 에러: ${response.status}`);
@@ -214,21 +183,38 @@ export default function MyPage() {
   }, [fetchMyPageInfo, fetchAttendanceDates]);
 
   useEffect(() => {
-    fetchDailyReductionData(todayDateString); // Fetch daily data for today
-  }, [fetchDailyReductionData, todayDateString]); // Only fetch daily data on initial mount or date change
+    if (selectedDate) {
+      fetchDailyReductionData(selectedDate);
+    }
+  }, [selectedDate, fetchDailyReductionData]);
 
-  // Handler for calendar day press
   const handleDayPress = (day) => {
-    const formattedDate = day.dateString; // day object from react-native-calendars has dateString property
-    setSelectedDate(formattedDate);
-    fetchDailyReductionData(formattedDate);
+    setSelectedDate(day.dateString);
   };
 
-  // Function to prepare markedDates for Calendar component
-  const getMarkedDates = () => {
+  const getMarkedDates = useCallback(() => {
     const marked = {};
 
-    // 1. Mark all attendance days first
+    // 1. 보이는 월 전체에 주말 텍스트 색상 적용
+    const month = new Date(currentMonth).getMonth();
+    const year = new Date(currentMonth).getFullYear();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      const day = new Date(year, month, i);
+      const dayOfWeek = day.getDay();
+      const dateString = day.toISOString().split("T")[0];
+
+      if (dayOfWeek === 6) {
+        // Saturday
+        marked[dateString] = { textStyle: { color: "blue" } };
+      } else if (dayOfWeek === 0) {
+        // Sunday
+        marked[dateString] = { textStyle: { color: "red" } };
+      }
+    }
+
+    // 2. 모든 출석일 표시 (필요시 주말 텍스트 색상 덮어씀)
     const sortedAttendanceDates = [...attendanceDates].sort(
       (a, b) => new Date(a) - new Date(b)
     );
@@ -254,10 +240,11 @@ export default function MyPage() {
           while (tempDate.getTime() <= new Date(streakEndDate).getTime()) {
             const formattedTempDate = tempDate.toISOString().split("T")[0];
             marked[formattedTempDate] = {
-              color: "#2E8B57", // SeaGreen for attendance
+              ...(marked[formattedTempDate] || {}),
+              color: "#b1e666",
               textColor: "white",
               startingDay: formattedTempDate === currentStreakStart,
-              endingDay: formattedTempDate === streakEndDate, // Fixed typo here
+              endingDay: formattedTempDate === streakEndDate,
             };
             tempDate.setDate(tempDate.getDate() + 1);
           }
@@ -266,23 +253,43 @@ export default function MyPage() {
       }
     }
 
-    // 2. Override the style for the selected date
+    // 3. 선택된 날짜의 스타일 재정의
     if (selectedDate) {
-      const isAttendanceDay = !!marked[selectedDate];
-      const selectionColor = isAttendanceDay ? "#1E90FF" : "#D3D3D3"; // Blue for attendance, Gray for non-attendance
-
+      const selectionColor =
+        marked[selectedDate]?.color === "#b1e666" ? "#2E8B57" : "#2E8B57";
       marked[selectedDate] = {
-        ...marked[selectedDate], // Keep starting/ending day properties if they exist
+        ...(marked[selectedDate] || {}),
         color: selectionColor,
-        // If it's not an attendance day, we need to make it a standalone period (a circle)
-        startingDay: !isAttendanceDay
-          ? true
-          : marked[selectedDate]?.startingDay,
-        endingDay: !isAttendanceDay ? true : marked[selectedDate]?.endingDay,
+        startingDay: marked[selectedDate]?.startingDay ?? true,
+        endingDay: marked[selectedDate]?.endingDay ?? true,
       };
     }
+
     return marked;
-  };
+  }, [attendanceDates, selectedDate, currentMonth]);
+
+  const handleLogout = useCallback(async () => {
+    Alert.alert(
+      "로그아웃",
+      "정말 로그아웃 하시겠습니까?",
+      [
+        { text: "취소", style: "cancel" },
+        {
+          text: "로그아웃",
+          onPress: async () => {
+            try {
+              await authLogout();
+              router.replace("/"); // 로그인 화면으로 이동
+            } catch (error) {
+              console.error("Error logging out:", error);
+              Alert.alert("오류", "로그아웃 중 오류가 발생했습니다.");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  }, [router]);
 
   if (loading) {
     return (
@@ -300,6 +307,16 @@ export default function MyPage() {
     );
   }
 
+  const totalPoint = Number(myPageInfo.totalPoint ?? 0);
+  const attendanceTotalDays = Number(myPageInfo.attendanceTotalDays ?? 0);
+  const longestAttendanceStreak = Number(
+    myPageInfo.longestAttendanceStreak ?? 0
+  );
+
+  const UserAvatar = myPageInfo.profile
+    ? getAvatarRenderComponent(myPageInfo.profile)
+    : null;
+
   return (
     <View className="flex-1">
       <BgGradient />
@@ -307,74 +324,161 @@ export default function MyPage() {
         <HeaderBar title="마이페이지" />
 
         <ScrollView className="flex-1 px-pageX">
-          <View className="bg-white rounded-xl p-lg shadow mb-md">
-            <Text className="text-lg font-bold mb-xxs">사용자 정보</Text>
-            <Text>사용자 ID: {myPageInfo.userId}</Text>
-            <Text>닉네임: {myPageInfo.nickname}</Text>
-            {myPageInfo.profile && (
-              <View className="w-[60px] h-[60px] mb-md">
-                {getAvatarRenderComponent(myPageInfo.profile)
-                  ? React.createElement(
-                      getAvatarRenderComponent(myPageInfo.profile),
-                      { width: 60, height: 60 }
-                    )
-                  : null}
-              </View>
-            )}
-            <View className="flex-row items-center">
-              <Text>얼음 이미지: {myPageInfo.totalPoint}</Text>
-              <Images.Ice width={20} height={20} className="ml-xs" />
-            </View>
-            <Text>누적 출석일: {myPageInfo.attendanceTotalDays}</Text>
-            <Text>최장 연속 출석일: {myPageInfo.longestAttendanceStreak}</Text>
-            {myPageInfo.regionName && (
-              <Text>지역: {myPageInfo.regionName}</Text>
-            )}
-          </View>
-
-          <Calendar
-            onDayPress={handleDayPress}
-            markedDates={getMarkedDates()}
-            markingType="period"
-          />
-
-          {/* Daily Carbon Reduction Section */}
-          <View className="bg-white rounded-xl p-lg shadow mt-lg">
-            <Text className="text-lg font-bold mb-xxs">일일 탄소 절감량</Text>
-            {selectedDate ? (
-              dailyLoading ? (
-                <ActivityIndicator size="small" color="#0000ff" />
-              ) : dailyReductionData ? (
-                <View>
-                  <Text>선택 날짜: {selectedDate}</Text>
-                  <Text>
-                    환경 걸음 절감량: {dailyReductionData.transportCo2Kg} kg
-                  </Text>
-                  <Text>식단 절감량: {dailyReductionData.dietCo2Kg} kg</Text>
-                  <Text className="font-bold mt-sm">
-                    총 절감량: {dailyReductionData.totalCo2Kg} kg
-                  </Text>
+          {/* 상단 프로필 영역 */}
+          <View className="bg-white rounded-xl p-lg shadow mt-4 mb-4">
+            <View className="items-center mb-0">
+              {UserAvatar && (
+                <View className="w-24 h-24 rounded-full overflow-hidden mb-2 bg-gray items-center justify-center">
+                  {React.createElement(UserAvatar, { width: 96, height: 96 })}
                 </View>
-              ) : (
-                <Text>선택한 날짜의 절감량 정보를 불러올 수 없습니다.</Text>
-              )
-            ) : (
-              <Text>날짜를 선택하여 일일 절감량을 확인하세요.</Text>
-            )}
+              )}
+              <Text className="text-black font-sf-b text-h3 mb-4">
+                {myPageInfo.nickname}
+              </Text>
+              <View className="flex-row justify-around w-full max-w-md">
+                <View
+                  className="items-center flex-1 p-sm rounded-md shadow-sm mx-1 "
+                  backgroundColor="#9fcbe8ff"
+                >
+                  <Text className="text-black font-sf-r text-right text-caption">
+                    누적 출석
+                  </Text>
+                  <View className="flex-row items-center mt-1">
+                    <Images.Snow width={30} height={30} />
+                    <Text className="text-black font-sf-b text-body ml-1">
+                      {attendanceTotalDays}일
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  className="items-center flex-1 p-sm rounded-md shadow-sm mx-1"
+                  backgroundColor="#9fcbe8ff"
+                >
+                  <Text className="text-black font-sf-r text-caption">
+                    최장 연속 출석
+                  </Text>
+                  <View className="flex-row items-center mt-1">
+                    <Images.Snow width={30} height={30} />
+                    <Text className="text-black font-sf-b text-body ml-1">
+                      {longestAttendanceStreak}일
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  className="items-center flex-1 p-sm rounded-md shadow-sm mx-1"
+                  backgroundColor="#9fcbe8ff"
+                >
+                  <Text className="text-black font-sf-r text-caption">
+                    보유 얼음
+                  </Text>
+                  <View className="flex-row items-center mt-1">
+                    <Images.Ice width={30} height={30} />
+                    <Text className="text-black font-sf-b text-body ml-1">
+                      {totalPoint.toLocaleString("ko-KR")}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
           </View>
-
-          {/* 추가 정보 섹션 (필요시 확장) */}
-          {/* 추가 정보 섹션 (필요시 확장) */}
-          <View className="bg-white rounded-xl p-lg shadow mt-lg">
-            <Text className="text-lg font-bold mb-xxs">기타 정보</Text>
-            <Text>현재 연속 출석일: {myPageInfo.attendanceStreakDays}</Text>
-            {/* 여기에 다른 마이페이지 관련 정보를 추가할 수 있습니다. */}
-            <MainButton
-              label="출석 데이터 초기화 (테스트용)"
-              onPress={handleResetAttendance}
-              className="mt-lg bg-red-500"
+          {/* 달력 섹션 */}
+          <View className="bg-white rounded-xl p-lg shadow mb-4">
+            <Calendar
+              onDayPress={handleDayPress}
+              markedDates={getMarkedDates()}
+              markingType={"period"}
+              monthFormat="yyyy년 MM월"
+              onMonthChange={(month) => {
+                setCurrentMonth(month.dateString);
+              }}
+              maxDate={todayDateString} // Added this line
+              theme={{
+                arrowColor: "black",
+                "stylesheet.calendar.header": {
+                  dayTextAtIndex0: {
+                    color: "red", // Sunday
+                  },
+                  dayTextAtIndex6: {
+                    color: "blue", // Saturday
+                  },
+                },
+              }}
+              style={{
+                borderRadius: 10,
+                overflow: "hidden", // Ensures the background respects the border radius
+              }}
             />
           </View>
+          {/* 일일 탄소 절감량 섹션 */}
+          <View className="bg-white rounded-xl p-lg shadow mt-4">
+            <Text className="text-bodyLg text-center font-bold mb-2">
+              {selectedDate}
+            </Text>
+            {selectedDate ? (
+              dailyLoading ? (
+                <ActivityIndicator size="small" color="green" />
+              ) : dailyReductionData ? (
+                <View className="space-y-2">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center">
+                      <Images.Walk width={24} height={24} />
+                      <Text className="text-black font-sf-md text-body ml-2">
+                        환경 걸음
+                      </Text>
+                    </View>
+                    <Text className="text-black font-sf-b text-body">
+                      {dailyReductionData.transportCo2Kg} kg
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center">
+                      <Images.Diet width={24} height={24} />
+                      <Text className="text-black font-sf-md text-body ml-2">
+                        식단
+                      </Text>
+                    </View>
+                    <Text className="text-black font-sf-b text-body">
+                      {dailyReductionData.dietCo2Kg} kg
+                    </Text>
+                  </View>
+                  <View className="mt-2 pt-sm flex-row justify-between items-center">
+                    <Text className="font-bold text-body text-green">
+                      총 절감량
+                    </Text>
+                    <Text className="font-bold text-body text-green">
+                      {dailyReductionData.totalCo2Kg} kg
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <Text className="text-gray">
+                  선택한 날짜의 절감량 정보를 불러올 수 없습니다.
+                </Text>
+              )
+            ) : (
+              <Text className="text-gray">
+                날짜를 선택하여 일일 절감량을 확인하세요.
+              </Text>
+            )}
+          </View>
+          {/* 테스트 버튼 */}
+          <MainButton
+            label="출석 데이터 초기화 (테스트용)"
+            onPress={handleResetAttendance}
+            className="mt-4 bg-red-500"
+          />
+          {/* 로그아웃 버튼 */}
+          <MainButton
+            label="로그아웃"
+            onPress={handleLogout}
+            className="mt-4 bg-gray" // Using a different color for logout
+          />
+          {/* 주문 내역 확인 버튼 */}
+          <MainButton
+            label="주문 내역 확인"
+            onPress={() => router.push("/pages/orders/history")} // Navigate to order history page
+            className="mt-4 bg-blue-500" // A distinct color for this button
+          />
         </ScrollView>
       </View>
     </View>
