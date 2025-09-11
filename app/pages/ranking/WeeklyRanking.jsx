@@ -22,9 +22,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
     useState(false); // New state for message visibility
 
   const { user, isLoading: isAuthLoading } = useAuth();
-  console.log("DEBUG: WeeklyRanking - user from useAuth:", user);
-  console.log("DEBUG: WeeklyRanking - user.id type:", typeof user?.id);
-  console.log("DEBUG: WeeklyRanking - user.id value:", user?.id); // Add useAuth() hook call and user declaration
 
   // --- Refactored Data Fetching Logic ---
   const fetchRankingData = useCallback(async () => {
@@ -39,8 +36,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       const data = await response.json();
       setRankingList(data.top10 || []);
       setMyRank(data.myRank || null);
-      console.log("DEBUG: WeeklyRanking - rankingList:", data.top10);
-      console.log("DEBUG: WeeklyRanking - myRank:", data.myRank);
 
       if (!data.myRank) {
         setShowParticipationMessage(true); // Show message instead of alert
@@ -62,7 +57,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
     if (user && user.userId && user.nickname) {
       setUserId(user.userId);
       setCurrentUserNickname(user.nickname);
-      console.log("DEBUG: WeeklyRanking - Logged in userId:", user.userId);
     }
   }, [user]);
 
@@ -81,7 +75,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
         throw new Error("Failed to add dummy data");
       }
 
-      console.log("Dummy data added successfully. Refetching rankings...");
       await fetchRankingData(); // Re-fetch data to show changes
       if (fetchRegionRankingData) {
         await fetchRegionRankingData(); // Re-fetch region data as well
@@ -149,12 +142,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
         contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
       >
         {rankingList.map((item) => {
-          console.log(
-            "DEBUG: WeeklyRanking - item.userId:",
-            item.userId,
-            "type:",
-            typeof item.userId
-          );
           const isCurrentUser = item.userId === userId; // Change to userId comparison
           return (
             <RankingCard
@@ -186,18 +173,6 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
           </>
         )}
       </ScrollView>
-
-      {/* 테스트 버튼 */}
-      <View className="flex-row justify-around mt-4 pb-3xl">
-        <TouchableOpacity
-          onPress={handleAddDummyData}
-          className="bg-blue-500 p-md rounded-lg"
-        >
-          <Text className="text-white font-bold">
-            랭킹 참여/점수 추가 (테스트)
-          </Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

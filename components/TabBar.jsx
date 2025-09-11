@@ -28,6 +28,10 @@ export default function TabBar({ state, descriptors, navigation }) {
   const currentRoute = state.routes[state.index]?.name; //현재 탭
   const isCalculatorFocused = currentRoute?.startsWith("calculator"); // calculator 및 하위 경로 전부 true
 
+  if (currentRoute?.startsWith("ranking")) {
+    return null;
+  }
+
   const Icon = (name, focused) => {
     if (open) {
       if (isRoute(name, "home"))

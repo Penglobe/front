@@ -309,8 +309,8 @@ export default function RegionRanking({
       </View>
 
       <View
-        className="bg-deactivateButton/75 rounded-2xl p-lg"
-        style={{ flex: 1 }}
+        className="bg-deactivateButton/75 rounded-2xl p-sm"
+        style={{ flex: 1, paddingLeft: 10, paddingRight: 10, marginTop: 10 }}
       >
         <Text className="text-green text-center font-sf-b text-bodyLg mb-2">
           지역별 탄소 절감량 랭킹
