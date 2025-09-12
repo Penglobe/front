@@ -21,7 +21,8 @@ const reasonLabels = {
   QUIZ: "퀴즈",
   SURVEY: "설문",
   MISSION_REWARD: "미션 보상",
-  SHOP_PURCHASE: "얼음 사용",
+  SHOP_PURCHASE: "굿즈 구매",
+  DONATION: "기부",
 };
 
 // 월별 그룹화

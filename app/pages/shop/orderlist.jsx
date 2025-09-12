@@ -10,6 +10,7 @@ import BgGradient from "@components/BgGradient";
 import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import colors from "@constants/Colors.cjs";
+import { Images } from "../../../constants/Images";
 
 const { Colors } = colors;
 
@@ -73,7 +74,7 @@ export default function OrderList({ userId }) {
     return (
       <View style={{ flex: 1 }}>
         <BgGradient />
-        <HeaderBar title="주문 내역" />
+        <HeaderBar title="얼음 사용 내역" />
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -88,7 +89,7 @@ export default function OrderList({ userId }) {
   return (
     <View style={{ flex: 1 }}>
       <BgGradient />
-      <HeaderBar title="주문 내역" />
+      <HeaderBar title="얼음 사용 내역" />
 
       {/* 월 이동 버튼 */}
       <View className="flex-row justify-between items-center mt-xl px-pageX">
@@ -162,8 +163,13 @@ export default function OrderList({ userId }) {
               </View>
 
               {/* 오른쪽: 수량, 아래쪽 정렬 */}
-              <View className="justify-end">
-                <Text className="text-gray-600">수량: {order.qty}</Text>
+              <View className="flex-row items-center justify-end">
+                <Text className="text-gray-600 mr-1">
+                  {order.productName.startsWith("[기부]")
+                    ? `기부금: ${order.qty}`
+                    : `사용한 얼음: ${order.price * order.qty}`}
+                </Text>
+                <Images.Ice width={20} height={20} />
               </View>
             </View>
           ))
