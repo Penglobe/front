@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, Image, ScrollView, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Pressable,
+  Alert,
+  TextInput,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
@@ -27,7 +35,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
 
   const [item, setItem] = useState(null);
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(0);
   const [confirmVisible, setConfirmVisible] = useState(false); //구매 확인 모달 상태
   const { user, refreshUser } = useAuth();
 
@@ -54,8 +62,6 @@ export default function ProductDetailPage() {
     if (confirmVisible) refreshUser();
   }, [confirmVisible, refreshUser]);
 
-  const price = item?.price ?? 0;
-  const total = price * qty;
   const totalPoint = Number(user?.totalPoint ?? 0);
 
   const minus = () => setQty((n) => Math.max(1, n - 1));
@@ -63,7 +69,15 @@ export default function ProductDetailPage() {
 
   // 모달 열기
   const openConfirm = () => {
-    setConfirmVisible(true);
+    if (qty < 1) {
+      //100으로 수정***************************************************************
+      Alert.alert(
+        "최소 기부금 안내",
+        "기부금은 최소 100얼음 이상이어야 합니다."
+      );
+      return; // 100 미만이면 모달 열지 않음
+    }
+    setConfirmVisible(true); // 조건 만족 시 모달 열기
   };
 
   // 구매 처리 API
@@ -71,7 +85,7 @@ export default function ProductDetailPage() {
     try {
       const res = await apiFetch(`/shop/orders`, {
         method: "POST",
-        body: JSON.stringify({ productId: item.productId, qty }),
+        body: JSON.stringify({ productId: item.productId, qty: qty }),
       });
       const json = await res.json().catch(() => null);
       //console.log("BUY status:", res.status, "resp:", json);
@@ -81,17 +95,11 @@ export default function ProductDetailPage() {
       setConfirmVisible(false); //모달 닫기
 
       Alert.alert(
-        "구매 완료",
+        "기부 완료",
         `${item.name}\n사용한 얼음: ${
           data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-        }개`,
-        [
-          {
-            text: "사용 내역 보기",
-            onPress: () => router.push("/pages/shop/orderlist"),
-          },
-          { text: "확인", onPress: () => router.back() },
-        ]
+        }얼음` + "\n\n당신의 기부가 지구를 지키는 큰 힘이 됩니다!",
+        [{ text: "확인", onPress: () => router.back() }]
       );
     } catch (e) {
       Alert.alert("구매 실패", "잔액이 부족합니다.");
@@ -114,7 +122,7 @@ export default function ProductDetailPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="상품 정보" />
+      <HeaderBar title="기부 정보" />
 
       {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
       <View className="flex-1 px-pageX pt-md">
@@ -135,9 +143,7 @@ export default function ProductDetailPage() {
             </View>
 
             <View className="px-sm py-sm">
-              <Text className="font-sf-b text-h3 mb-lg text-green">
-                상품 정보
-              </Text>
+              <Text className="font-sf-b text-h3 mb-sm text-green">기부명</Text>
               <Text className="text-h2 font-sf-b">{item.name}</Text>
               {!!item.description && (
                 <View className="mt-md mb-3xl">
@@ -147,39 +153,30 @@ export default function ProductDetailPage() {
                 </View>
               )}
               <Text className="font-sf-b text-h3 mb-sm text-green">
-                구매 정보
+                기부금(포인트)
               </Text>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-h4 leading-[16px]">수량</Text>
-
-                <View className="flex-row items-center h-full">
-                  <Pressable
-                    className="w-10 h-10 rounded-3xl items-center justify-center bg-green/50"
-                    onPress={minus}
-                  >
-                    <Text className="text-xl">−</Text>
-                  </Pressable>
-                  <View className="h-10 justify-center">
-                    <Text className="mx-lg text-lg font-sf-b"> {qty} </Text>
-                  </View>
-
-                  <Pressable
-                    className="w-10 h-10 rounded-3xl items-center justify-center bg-green/50"
-                    onPress={plus}
-                  >
-                    <Text className="text-xl">＋</Text>
-                  </Pressable>
+              <View className="flex-row items-center justify-between h-10">
+                <View className="flex-1 h-full justify-center">
+                  <TextInput
+                    value={qty > 0 ? qty.toString() : ""} // 0이면 빈 문자열
+                    onChangeText={(text) => {
+                      const numText = text.replace(/[^0-9]/g, ""); // 숫자만 허용
+                      if (!numText) {
+                        setQty(0); // 빈 상태 유지
+                        return;
+                      }
+                      let num = parseInt(numText, 10);
+                      setQty(num);
+                    }}
+                    placeholder="기부금 입력 (최소 100얼음)"
+                    keyboardType="numeric"
+                    className="flex-1 h-10 px-4 text-lg font-sf-b rounded-3xl border border-gray-300 bg-white"
+                  />
                 </View>
               </View>
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-h4 leading-[16px] mt-llg">가격</Text>
-                <View className="flex-row items-center mt-llg self-end">
-                  <Text className="text-green font-sf-b text-h1">
-                    {total.toLocaleString()}
-                  </Text>
-                  <Images.Ice width={35} height={35} />
-                </View>
+              <View className="flex-row items-center mt-llg self-end">
+                <Text className="text-green font-sf-b text-h1">{qty}</Text>
+                <Images.Ice width={35} height={35} />
               </View>
             </View>
           </View>
@@ -198,7 +195,7 @@ export default function ProductDetailPage() {
           <MainButton onPress={openConfirm} className="w-full">
             <View className="flex-row items-center">
               <Text className="text-white font-sf-b ml-sm text-h4">
-                구매하기
+                기부하기
               </Text>
             </View>
           </MainButton>
@@ -209,21 +206,21 @@ export default function ProductDetailPage() {
       <Modal visible={confirmVisible}>
         <View className="mb-4">
           <Text className="text-black text-h1 font-sf-b mb-4 text-center">
-            주문 확인
+            기부 결제 확인
           </Text>
           <Pressable
             onPress={() => setConfirmVisible(false)}
-            className="absolute right-2.5 top-0 p-xxs"
+            style={{ position: "absolute", right: 10, top: 0, padding: 2 }}
           >
             <Text className="text-h1 text-gray-400">✕</Text>
           </Pressable>
         </View>
 
         {/* 구매 상품 */}
-        <View className="flex-row items-center mb-sm min-h-[28px]">
+        <View className="flex-row items-center mb-lg min-h-[28px]">
           {/* 고정 폭 레이블 */}
           <Text className="w-[112px] text-black font-sf-sb text-h3">
-            구매 상품
+            기부명
           </Text>
           {/* 값: 우측 정렬 (긴 이름은 1줄 말줄임) */}
           <View className="flex-1 flex-row items-center justify-end">
@@ -238,21 +235,22 @@ export default function ProductDetailPage() {
         </View>
 
         {/* 구매 수량 */}
-        <View className="flex-row items-center mb-sm min-h-[28px]">
+        <View className="flex-row items-center mb-5 min-h-[28px]">
           <Text className="w-[112px] text-black font-sf-sb text-h3">
-            구매 수량
+            기부금(포인트)
           </Text>
           <View className="flex-1 flex-row items-center justify-end">
             <Text className="text-h3 font-sf-b text-green leading-[22px]">
-              {qty} 개
+              {qty}
             </Text>
+            <Images.Ice width={22} height={22} />
           </View>
         </View>
 
         {/* 현재 보유 얼음 */}
         <View
-          className={`flex-row items-center min-h-[28px] mb-sm ${
-            totalPoint < total ? "mb-1" : "mb-5"
+          className={`flex-row items-center ${
+            totalPoint < qty ? "mb-1" : "mb-5"
           }`}
         >
           <Text className="w-[112px] text-black font-sf-sb text-h3">
@@ -266,20 +264,7 @@ export default function ProductDetailPage() {
           </View>
         </View>
 
-        {/* 총 결제 얼음 */}
-        <View className="flex-row items-center mb-sm min-h-[28px]">
-          <Text className="w-[112px] text-black font-sf-sb text-h3">
-            총 결제 얼음
-          </Text>
-          <View className="flex-1 flex-row items-center justify-end">
-            <Text className="text-h3 font-sf-b text-green leading-[22px]">
-              {total.toLocaleString()}
-            </Text>
-            <Images.Ice width={22} height={22} />
-          </View>
-        </View>
-
-        {totalPoint < total && (
+        {totalPoint < qty && (
           <Text className="text-rose-600 w-full text-right mb-md">
             잔액이 부족합니다.
           </Text>
@@ -287,8 +272,8 @@ export default function ProductDetailPage() {
 
         <MainButton
           onPress={handleBuy}
-          disabled={totalPoint < total}
-          className={totalPoint < total ? "opacity-60" : ""}
+          disabled={totalPoint < qty}
+          className={totalPoint < qty ? "opacity-60" : ""}
         >
           <View className="flex-row items-center">
             <Text className="text-white font-sf-b ml-2 text-h4">결제하기</Text>

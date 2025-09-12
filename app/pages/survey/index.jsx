@@ -172,11 +172,11 @@ export default function Survey() {
       <View className="px-pageX">
         <View>
           {/* 타이틀 */}
-          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start mt-2xl mb-md flex-row items-center gap-lg">
+          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
             <Text className="text-black text-xl font-bold">
               <Text className="text-red-500 text-lg">
-                내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은 습관을
-                만들어봐요.
+                {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
+                습관을 만들어봐요.
                 {"\n"}
               </Text>
               <View>
@@ -185,7 +185,7 @@ export default function Survey() {
                 </Text>
               </View>
             </Text>
-            <Images.IpaFace width={70} height={70} />
+            <Images.survey_ipa width={100} height={130} />
           </View>
 
           {/* 질문 카드 */}
@@ -199,7 +199,7 @@ export default function Survey() {
                   onLayout={(e) => {
                     itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
                   }}
-                  className={`p-llg rounded-lg shadow-md mb-llg bg-white px-pageX ${
+                  className={`p-llg rounded-lg shadow-md mb-lg bg-white px-pageX ${
                     isUnanswered ? "border-2 border-red-500" : ""
                   }`}
                 >

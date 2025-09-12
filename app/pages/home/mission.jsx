@@ -208,6 +208,22 @@ export default function MissionScreen() {
           <Text className="text-white font-sf-b text-h4">상품 추가</Text>
         </Pressable>
 
+        {/* 기부 추가 페이지*/}
+        <Pressable
+          onPress={() => router.push("/pages/shop/newDonation")}
+          android_ripple={{ color: "#ffffff30" }}
+          style={{
+            height: 48,
+            borderRadius: 12,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#10B981", // emerald-600
+            marginBottom: 8, // 로그아웃 버튼과 간격
+          }}
+        >
+          <Text className="text-white font-sf-b text-h4">기부 추가</Text>
+        </Pressable>
+
         {/* 기존 로그아웃 버튼 */}
         <Pressable
           onPress={onLogout}
