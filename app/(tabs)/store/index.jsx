@@ -33,6 +33,8 @@ export default function StoreListPage() {
   const [query, setQuery] = useState(""); // 검색어
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [filterType, setFilterType] = useState("전체"); // 필터 타입
+  const [sortOrder, setSortOrder] = useState("default"); // "asc", "desc", "default"
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -71,25 +73,60 @@ export default function StoreListPage() {
     setRefreshing(false);
   }, [loadProducts]);
 
-  // 🔎 검색: 실시간 필터
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((it) => {
-      const name = (it?.name ?? "").toLowerCase();
-      const desc = (it?.description ?? "").toLowerCase();
-      return name.includes(q) || desc.includes(q);
-    });
-  }, [items, query]);
+    let data = items;
+
+    // 🔹 타입 필터
+    if (filterType === "기부") {
+      data = data.filter((it) => it.name?.startsWith("[기부]"));
+    } else if (filterType === "상품") {
+      data = data.filter((it) => !it.name?.startsWith("[기부]"));
+    }
+
+    // 🔹 검색 필터
+    if (q) {
+      data = data.filter((it) => {
+        const name = (it?.name ?? "").toLowerCase();
+        const desc = (it?.description ?? "").toLowerCase();
+        return name.includes(q) || desc.includes(q);
+      });
+    }
+
+    return data;
+  }, [items, query, filterType]);
 
   const handleSearchSubmit = () => {
     // 실시간 필터라 submit 시 별도 요청은 없음.
   };
 
   const clearQuery = () => setQuery("");
+  const sortedItems = useMemo(() => {
+    if (filterType !== "상품") return filtered; // 상품이 아니면 그냥 필터링된 데이터
 
-  const goDetail = (id) => {
-    router.push({ pathname: "/pages/shop/detail", params: { id: String(id) } });
+    if (sortOrder === "asc") {
+      return [...filtered].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    } else if (sortOrder === "desc") {
+      return [...filtered].sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+    } else if (sortOrder === "latest") {
+      return [...filtered].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    } else {
+      return filtered;
+    }
+  }, [filtered, sortOrder, filterType]);
+
+  const goDetail = (item) => {
+    const isDonation = item.name?.startsWith("[기부]");
+    const pathname = isDonation
+      ? "/pages/shop/donationDetail"
+      : "/pages/shop/detail";
+
+    router.push({
+      pathname,
+      params: { id: String(item.productId) },
+    });
   };
 
   const renderItem = ({ item, index }) => {
@@ -98,7 +135,7 @@ export default function StoreListPage() {
 
     return (
       <Pressable
-        onPress={() => goDetail(item.productId)}
+        onPress={() => goDetail(item)}
         android_ripple={{ color: "#00000010" }}
         className={`
           w-[48%] ${isRight ? "mr-0" : "mr-[4%]"}
@@ -131,12 +168,14 @@ export default function StoreListPage() {
         )}
 
         {/* 가격 배지: 우측 하단 고정 */}
-        <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
-          <Text className="text-green font-sf-b mr-xs">
-            {(item.price ?? 0).toLocaleString()}
-          </Text>
-          <Images.Ice width={16} height={16} />
-        </View>
+        {!item.name?.startsWith("[기부]") && (
+          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
+            <Text className="text-green font-sf-b mr-xs">
+              {(item.price ?? 0).toLocaleString()}
+            </Text>
+            <Images.Ice width={16} height={16} />
+          </View>
+        )}
       </Pressable>
     );
   };
@@ -154,7 +193,7 @@ export default function StoreListPage() {
     <View className="flex-1">
       <BgGradient />
       <View className="absolute inset-0 pb-[150px]">
-        <HeaderBar title="굿즈샵" />
+        <HeaderBar title="얼음 거래소" />
 
         {/* 🔎 검색창 */}
         <View className="px-pageX mt-4">
@@ -189,10 +228,92 @@ export default function StoreListPage() {
                 ? `검색 결과 ${filtered.length}개`
                 : `전체 ${items.length}개`}
             </Text>
+
+            <View
+              className="flex-row items-center gap-2 mt-md
+            "
+            >
+              {["전체", "기부", "상품"].map((type) => (
+                <Pressable
+                  key={type}
+                  onPress={() => setFilterType(type)}
+                  className={`px-md py-xs rounded-xl  ${
+                    filterType === type
+                      ? "bg-emerald-600 border-emerald-600"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  <Text
+                    className={`font-sf-md ${
+                      filterType === type ? "text-white" : "text-gray-700"
+                    }`}
+                  >
+                    {type}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View className="flex-row items-center mb-4 mt-lg">
+            {filterType === "상품" && (
+              <>
+                <Pressable
+                  onPress={() => setSortOrder("latest")}
+                  className={`ml-2 px-3 py-1 rounded-xl ${
+                    sortOrder === "latest"
+                      ? "bg-emerald-600 border-emerald-600"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  <Text
+                    className={
+                      sortOrder === "latest" ? "text-white" : "text-gray-700"
+                    }
+                  >
+                    최신 순
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setSortOrder("asc")}
+                  className={`ml-2 px-3 py-1 rounded-xl ${
+                    sortOrder === "asc"
+                      ? "bg-emerald-600 border-emerald-600"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  <Text
+                    className={
+                      sortOrder === "asc" ? "text-white" : "text-gray-700"
+                    }
+                  >
+                    낮은 가격 순
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setSortOrder("desc")}
+                  className={`ml-2 px-3 py-1 rounded-xl ${
+                    sortOrder === "desc"
+                      ? "bg-emerald-600 border-emerald-600"
+                      : "bg-white border-gray-300"
+                  }`}
+                >
+                  <Text
+                    className={
+                      sortOrder === "desc" ? "text-white" : "text-gray-700"
+                    }
+                  >
+                    높은 가격 순
+                  </Text>
+                </Pressable>
+              </>
+            )}
           </View>
 
           <FlatList
-            data={filtered}
+            data={filterType === "상품" ? sortedItems : filtered}
             keyExtractor={(it) => String(it.productId)}
             renderItem={renderItem}
             numColumns={NUM_COLUMNS}

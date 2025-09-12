@@ -22,6 +22,7 @@ const reasonLabels = {
   SURVEY: "설문",
   MISSION_REWARD: "미션 보상",
   SHOP_PURCHASE: "굿즈 구매",
+  DONATION: "기부",
 };
 
 // 월별 그룹화
