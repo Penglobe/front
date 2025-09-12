@@ -61,7 +61,7 @@ export default function MissionSection({
       {/* 타이틀 */}
       <View className="flex-row items-center mb-md">
         <View className="mr-xs">{icon}</View>
-        <Text className="text-xl font-sf-b text-black">{title}</Text>
+        <Text className="text-h3 font-sf-b text-black">{title}</Text>
         {unit === "kg" && <Text className="text-black ml-xs">(kg)</Text>}
       </View>
 

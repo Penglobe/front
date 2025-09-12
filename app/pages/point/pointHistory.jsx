@@ -21,7 +21,7 @@ const reasonLabels = {
   QUIZ: "퀴즈",
   SURVEY: "설문",
   MISSION_REWARD: "미션 보상",
-  SHOP_PURCHASE: "굿즈 구매",
+  SHOP_PURCHASE: "얼음 사용",
 };
 
 // 월별 그룹화
@@ -89,10 +89,10 @@ export default function PointHistory() {
         }}
       >
         <View className="flex-1">
-          <Text className="text-base font-sf-md">
+          <Text className="text-h4 font-sf-md">
             {reasonLabels[item.reason] ?? item.reason}
           </Text>
-          <Text className="text-xs text-zinc-400 mt-xs">
+          <Text className="text-overline py-xs">
             {new Date(item.eventDate).toLocaleDateString("ko-KR")}
           </Text>
         </View>
@@ -103,9 +103,7 @@ export default function PointHistory() {
           >
             {isPlus ? `+${item.changeAmount}` : item.changeAmount}
           </Text>
-          <Text className="text-xs text-zinc-500 mt-xs">
-            {item.balanceAfter} 얼음
-          </Text>
+          <Text className="text-overline py-xs">{item.balanceAfter} 얼음</Text>
         </View>
       </View>
     );
@@ -130,7 +128,7 @@ export default function PointHistory() {
       <HeaderBar title="얼음 적립 내역" className="px-pageX" />
 
       {/* 잔액 카드 */}
-      <View className="px-pageX mt-lg">
+      <View className="px-pageX mt-5">
         <View
           className="rounded-xl p-lg flex-row justify-between items-center"
           style={{
@@ -142,9 +140,7 @@ export default function PointHistory() {
             elevation: 4,
           }}
         >
-          <Text className="text-lg text-zinc-600 font-sf-md">
-            현재 보유 얼음
-          </Text>
+          <Text className="text-h4 font-sf-md">현재 보유 얼음</Text>
           <View className="flex-row items-center">
             <Text
               className="text-2xl font-grotesk-b mr-sm"

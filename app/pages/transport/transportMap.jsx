@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Alert, Platform, ScrollView } from "react-native";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { View, Text, Alert, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
@@ -10,10 +10,12 @@ import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
 
+// --- 상수 및 설정 ---
 const TASK_NAME = "TRANSPORT_TRACKING_TASK";
 const SPEED_LIMITS = { WALK: 5, BIKE: 12 }; // m/s
+
 const LOCATION_OPTIONS = {
-  accuracy: Location.Accuracy.High,
+  accuracy: Location.Accuracy.BestForNavigation,
   distanceInterval: 5,
   timeInterval: 3000,
   showsBackgroundLocationIndicator: true,
@@ -23,7 +25,14 @@ const LOCATION_OPTIONS = {
   },
 };
 
-// 거리 계산 함수
+const GPS_ACCURACY_THRESHOLD = 20; // m
+const COORD_BUFFER_SIZE = 5;
+const MIN_DISTANCE_UPDATE = 2; // m
+const MAX_DISTANCE_UPDATE = 40; // m
+const BEARING_DIFF_THRESHOLD = 90; // deg
+const ARRIVAL_RADIUS = 30; // m
+
+// --- Helper Functions ---
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const toRad = (x) => (x * Math.PI) / 180;
@@ -35,7 +44,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// 이동 평균 좌표 계산
 function getSmoothedCoord(buffer) {
   if (buffer.length === 0) return null;
   const avgLat = buffer.reduce((sum, p) => sum + p.latitude, 0) / buffer.length;
@@ -44,7 +52,6 @@ function getSmoothedCoord(buffer) {
   return { latitude: avgLat, longitude: avgLng, timestamp: Date.now() };
 }
 
-// 두 벡터 방향 차이 계산
 function bearingDiff(coord1, coord2, coord3) {
   const toRad = (d) => (d * Math.PI) / 180;
   const toDeg = (r) => (r * 180) / Math.PI;
@@ -65,7 +72,7 @@ function bearingDiff(coord1, coord2, coord3) {
   return Math.abs(b1 - b2);
 }
 
-// TaskManager 정의
+// --- TaskManager ---
 if (!TaskManager.isTaskDefined(TASK_NAME)) {
   TaskManager.defineTask(TASK_NAME, ({ data: { locations }, error }) => {
     if (error) {
@@ -79,54 +86,35 @@ if (!TaskManager.isTaskDefined(TASK_NAME)) {
 }
 
 export default function TransportMap() {
-  const {
-    startLat,
-    startLng,
-    endLat,
-    endLng,
-    placeName,
-    mode: rawMode,
-  } = useLocalSearchParams();
+  const { endLat, endLng, placeName, mode: rawMode } = useLocalSearchParams();
   const mode = rawMode || "TRANSIT";
   const router = useRouter();
 
   const [transportId, setTransportId] = useState(null);
   const [distance, setDistance] = useState(0);
-  const [currentLat, setCurrentLat] = useState(null);
-  const [currentLng, setCurrentLng] = useState(null);
+  const [currentCoord, setCurrentCoord] = useState(null);
+  const [startCoord, setStartCoord] = useState(null);
 
   const distanceRef = useRef(0);
   const prevCoord = useRef(null);
   const coordBuffer = useRef([]);
-  const ended = useRef(false);
+  const isTrackingEnded = useRef(false);
   const startTime = useRef(Date.now());
+  const nearEndCounter = useRef(0);
 
+  // --- 1. 이동 시작 ---
   useEffect(() => {
-    distanceRef.current = distance;
-  }, [distance]);
-
-  // 속도 검증
-  const checkSpeed = (speed) => {
-    if (mode === "WALK" && speed > SPEED_LIMITS.WALK)
-      return "도보 이동 속도가 너무 빠릅니다.";
-    if (mode === "BIKE" && speed > SPEED_LIMITS.BIKE)
-      return "자전거 이동 속도가 너무 빠릅니다.";
-    return null;
-  };
-
-  // 이동 시작
-  useEffect(() => {
-    (async () => {
+    const initializeTracking = async () => {
       try {
         const activity = await startTransport(mode);
         if (!activity?.transportId) {
           Alert.alert("이동 시작 실패", "transportId를 가져올 수 없습니다.");
+          router.back();
           return;
         }
-
         setTransportId(activity.transportId);
 
-        const { status } = await Location.requestForegroundPermissionsAsync();
+        let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           Alert.alert(
             "위치 권한 필요",
@@ -135,19 +123,25 @@ export default function TransportMap() {
           );
           return;
         }
-        if (Platform.OS === "ios") {
-          await Location.requestBackgroundPermissionsAsync();
-        }
 
-        const hasStarted =
-          await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
-        if (!hasStarted) {
-          await Location.startLocationUpdatesAsync(TASK_NAME, LOCATION_OPTIONS);
+        if (Platform.OS === "android") {
+          const backgroundStatus =
+            await Location.requestBackgroundPermissionsAsync();
+          if (backgroundStatus.status !== "granted") {
+            Alert.alert(
+              "백그라운드 위치 권한 필요",
+              "앱이 꺼져도 이동을 기록하려면 권한을 허용해주세요."
+            );
+          }
         }
       } catch (err) {
         console.error("이동 시작 실패:", err);
+        Alert.alert("오류", "이동 시작 중 문제가 발생했습니다.");
+        router.back();
       }
-    })();
+    };
+
+    initializeTracking();
 
     return () => {
       (async () => {
@@ -160,117 +154,146 @@ export default function TransportMap() {
     };
   }, []);
 
-  // 위치 추적
+  // --- 2. 위치 추적 ---
   useEffect(() => {
-    let subscription;
-    (async () => {
-      subscription = await Location.watchPositionAsync(
-        LOCATION_OPTIONS,
-        async (loc) => {
-          if (ended.current) return;
+    if (!transportId) return;
 
-          const { latitude, longitude, accuracy } = loc.coords;
-          const now = Date.now();
+    const watchPromise = Location.watchPositionAsync(
+      LOCATION_OPTIONS,
+      (loc) => {
+        if (isTrackingEnded.current) return;
 
-          if (accuracy > 20) return;
+        const { latitude, longitude, accuracy } = loc.coords;
+        const now = Date.now();
 
-          coordBuffer.current.push({ latitude, longitude, timestamp: now });
-          if (coordBuffer.current.length > 5) coordBuffer.current.shift();
+        if (accuracy > GPS_ACCURACY_THRESHOLD) return;
 
-          const smoothed = getSmoothedCoord(coordBuffer.current);
-          if (!smoothed) return;
+        coordBuffer.current.push({ latitude, longitude, timestamp: now });
+        if (coordBuffer.current.length > COORD_BUFFER_SIZE)
+          coordBuffer.current.shift();
 
-          if (!prevCoord.current) {
-            prevCoord.current = smoothed;
-            setCurrentLat(smoothed.latitude);
-            setCurrentLng(smoothed.longitude);
-            return;
-          }
+        const smoothed = getSmoothedCoord(coordBuffer.current);
+        if (!smoothed) return;
 
-          const d = calculateDistance(
-            prevCoord.current.latitude,
-            prevCoord.current.longitude,
-            smoothed.latitude,
-            smoothed.longitude
-          );
-          const dt = (now - prevCoord.current.timestamp) / 1000;
-          const speed = d / dt;
+        setCurrentCoord(smoothed);
 
-          if (d < 2 || d > 40) return;
-          if (mode === "WALK" && speed > 3) return;
-          if (mode === "BIKE" && speed > 8) return;
-
-          if (coordBuffer.current.length >= 3) {
-            const len = coordBuffer.current.length;
-            const diff = bearingDiff(
-              coordBuffer.current[len - 3],
-              coordBuffer.current[len - 2],
-              smoothed
-            );
-            if (diff > 90) return;
-          }
-
-          setDistance((prev) => prev + d);
+        if (!prevCoord.current) {
+          setStartCoord(smoothed);
           prevCoord.current = smoothed;
-          setCurrentLat(smoothed.latitude);
-          setCurrentLng(smoothed.longitude);
+          return;
+        }
 
-          if (!ended.current && endLat && endLng) {
-            const distToEnd = calculateDistance(
-              smoothed.latitude,
-              smoothed.longitude,
-              parseFloat(endLat),
-              parseFloat(endLng)
-            );
-            if (distToEnd <= 20) {
-              ended.current = true;
-              await handleStop(true);
+        const d = calculateDistance(
+          prevCoord.current.latitude,
+          prevCoord.current.longitude,
+          smoothed.latitude,
+          smoothed.longitude
+        );
+
+        const dt = (now - prevCoord.current.timestamp) / 1000;
+        if (dt === 0) return;
+
+        if (d < MIN_DISTANCE_UPDATE || d > MAX_DISTANCE_UPDATE) return;
+
+        if (coordBuffer.current.length >= 3) {
+          const len = coordBuffer.current.length;
+          const diff = bearingDiff(
+            coordBuffer.current[len - 3],
+            coordBuffer.current[len - 2],
+            smoothed
+          );
+          if (diff > BEARING_DIFF_THRESHOLD) return;
+        }
+
+        distanceRef.current += d;
+        setDistance(distanceRef.current);
+        prevCoord.current = smoothed;
+
+        // 도착 판정 (2번 연속 진입)
+        if (endLat && endLng) {
+          const distToEnd = calculateDistance(
+            smoothed.latitude,
+            smoothed.longitude,
+            parseFloat(endLat),
+            parseFloat(endLng)
+          );
+          if (distToEnd <= ARRIVAL_RADIUS) {
+            nearEndCounter.current++;
+            if (nearEndCounter.current >= 2) {
+              handleStop(true);
             }
+          } else {
+            nearEndCounter.current = 0;
           }
         }
-      );
-    })();
-    return () => subscription && subscription.remove();
-  }, []);
+      }
+    );
 
-  // 이동 종료
-  const handleStop = async () => {
-    try {
-      const usedDistance = distanceRef.current;
-      const elapsedSec = (Date.now() - startTime.current) / 1000;
-      const avgSpeed = usedDistance / elapsedSec;
+    return () => {
+      watchPromise.then((sub) => sub.remove());
+    };
+  }, [transportId, endLat, endLng]);
 
-      const warning = checkSpeed(avgSpeed);
-      if (warning) {
+  // --- 3. 이동 종료 ---
+  const handleStop = useCallback(
+    async (isAuto = false) => {
+      if (isTrackingEnded.current) return;
+      isTrackingEnded.current = true;
+
+      try {
+        const usedDistance = distanceRef.current;
+        const elapsedSec = (Date.now() - startTime.current) / 1000;
+        const avgSpeed = elapsedSec > 0 ? usedDistance / elapsedSec : 0;
+
+        const warning =
+          mode === "WALK" && avgSpeed > SPEED_LIMITS.WALK
+            ? "도보 이동 속도가 너무 빠릅니다."
+            : mode === "BIKE" && avgSpeed > SPEED_LIMITS.BIKE
+              ? "자전거 이동 속도가 너무 빠릅니다."
+              : null;
+
+        if (warning) {
+          router.replace({
+            pathname: "/pages/transport/transportFail",
+            params: { placeName, reason: warning },
+          });
+          return;
+        }
+
+        if (!transportId) {
+          Alert.alert("이동 종료 실패", "transportId가 없습니다.");
+          return;
+        }
+
+        const result = await stopTransport(
+          transportId,
+          Math.round(usedDistance)
+        );
+
         router.replace({
-          pathname: "/pages/transport/transportFail",
-          params: { placeName, reason: warning },
+          pathname: "/pages/transport/transportFinish",
+          params: {
+            placeName,
+            endLat,
+            endLng,
+            distanceM: String(result.distanceM),
+            co2Kg: String(result.co2Kg),
+            durationM: String(result.durationM),
+            points: String(result.points || 0),
+          },
         });
-        return;
+      } catch (err) {
+        console.error("stopTransport 실패:", err);
+        Alert.alert("오류", "이동 종료 중 문제가 발생했습니다.");
       }
+    },
+    [transportId, mode, placeName, endLat, endLng, router]
+  );
 
-      if (!transportId) {
-        Alert.alert("이동 종료 실패", "transportId가 없습니다.");
-        return;
-      }
-
-      const result = await stopTransport(transportId, Math.round(usedDistance));
-      router.replace({
-        pathname: "/pages/transport/transportFinish",
-        params: {
-          placeName,
-          endLat,
-          endLng,
-          distanceM: String(result.distanceM),
-          co2Kg: String(result.co2Kg),
-          durationM: String(result.durationM),
-          points: String(result.points || 0),
-        },
-      });
-    } catch (err) {
-      console.error("stopTransport 실패:", err);
-    }
-  };
+  const currentLat = currentCoord?.latitude;
+  const currentLng = currentCoord?.longitude;
+  const startLat = startCoord?.latitude;
+  const startLng = startCoord?.longitude;
 
   return (
     <View className="flex-1">
@@ -280,11 +303,11 @@ export default function TransportMap() {
         className="px-pageX absolute top-0 left-0 right-0 z-20"
       />
 
-      {/* 지도 전체화면 */}
+      {/* 지도 */}
       {currentLat && currentLng ? (
         <KakaoMapView
-          startLat={startLat}
-          startLng={startLng}
+          startLat={startLat || currentLat}
+          startLng={startLng || currentLng}
           endLat={endLat}
           endLng={endLng}
           currentLat={currentLat}
@@ -294,11 +317,11 @@ export default function TransportMap() {
         />
       ) : (
         <View className="flex-1 items-center justify-center bg-gray-100">
-          <Text>지도를 불러오는 중...</Text>
+          <Text>현재 위치를 찾는 중...</Text>
         </View>
       )}
 
-      {/* ✅ 도착지 & 이동거리 카드 (헤더 밑) */}
+      {/* 도착지 & 이동거리 카드 */}
       <View className="absolute left-0 right-0 px-xl py-md top-[120px]">
         <View className="bg-white rounded-2xl shadow-sm px-xl py-lg">
           <View className="flex-row items-center mb-3">
@@ -319,11 +342,11 @@ export default function TransportMap() {
         </View>
       </View>
 
-      {/* ✅ 하단 버튼 */}
+      {/* 하단 버튼 */}
       <View className="absolute bottom-0 left-0 right-0 px-xl py-3xl">
         <MainButton
           label="이동 종료"
-          onPress={handleStop}
+          onPress={() => handleStop(false)}
           className="bg-red-500 mb-md"
         />
         <MainButton
