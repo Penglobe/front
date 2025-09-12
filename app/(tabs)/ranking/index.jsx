@@ -42,28 +42,27 @@ export default function Ranking() {
   }, []);
 
   // 2. 탭 또는 지역 변경 시 랭킹 데이터 가져오기
-  const fetchRegionRankingData = useCallback(async () => {
-    if (!selectedRegion) return; // 지역이 설정되지 않은 경우 가져오지 않음
-
-    try {
-      const response = await apiFetch("/rankings/regions");
-
-      if (!response.ok) {
-        throw new Error(`Server response error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setRankingData(data);
-    } catch (error) {
-      console.error("Error fetching region ranking:", error);
-    }
-  }, [selectedRegion]); // selectedRegion에 대한 의존성
-
   useEffect(() => {
-    if (activeTab === "regions") {
-      fetchRegionRankingData();
-    }
-  }, [activeTab, fetchRegionRankingData]);
+    const fetchRegionRankingData = async () => {
+      // 지역 랭킹 탭이 아니거나, 지역이 아직 선택되지 않았으면 실행하지 않음
+      if (activeTab !== "regions" || !selectedRegion) return;
+
+      try {
+        const response = await apiFetch("/rankings/regions");
+
+        if (!response.ok) {
+          throw new Error(`Server response error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setRankingData(data);
+      } catch (error) {
+        console.error("Error fetching region ranking:", error);
+      }
+    };
+
+    fetchRegionRankingData();
+  }, [activeTab, selectedRegion]); // 탭 또는 선택된 지역이 변경될 때만 실행
 
   return (
     <View style={{ flex: 1 }}>
@@ -104,17 +103,17 @@ export default function Ranking() {
         </View>
 
         {/* 탭 내용 */}
-        {activeTab === "regions" && (
-          <RegionRanking
-            selectedRegion={selectedRegion}
-            setSelectedRegion={setSelectedRegion}
-            rankingData={rankingData}
-          />
-        )}
-        {activeTab === "weekly" && (
-          <WeeklyRanking fetchRegionRankingData={fetchRegionRankingData} />
-        )}
-        {activeTab === "global" && <GlobalRanking />}
+        <View style={{ flex: 1 }}>
+          {activeTab === "regions" && (
+            <RegionRanking
+              selectedRegion={selectedRegion}
+              setSelectedRegion={setSelectedRegion}
+              rankingData={rankingData}
+            />
+          )}
+          {activeTab === "weekly" && <WeeklyRanking />}
+          {activeTab === "global" && <GlobalRanking />}
+        </View>
       </View>
     </View>
   );
