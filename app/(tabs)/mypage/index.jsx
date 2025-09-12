@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-} from "react-native";
+import { View, Text, ActivityIndicator, Alert, ScrollView } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch, me, logout as authLogout } from "@services/authService";
@@ -14,6 +8,7 @@ import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { Pressable } from "react-native";
 
 // 한글 설정
 LocaleConfig.locales["ko"] = {
@@ -416,7 +411,7 @@ export default function MyPage() {
             />
           </View>
           {/* 일일 탄소 절감량 섹션 */}
-          <View className="bg-white rounded-xl p-lg shadow mt-4">
+          <View className="bg-white rounded-xl p-lg shadow mt-1">
             <Text className="text-bodyLg text-center font-bold mb-2">
               {selectedDate}
             </Text>
@@ -447,6 +442,17 @@ export default function MyPage() {
                       {dailyReductionData.dietCo2Kg} kg
                     </Text>
                   </View>
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center">
+                      <Images.Diet width={24} height={24} />
+                      <Text className="text-black font-sf-md text-body ml-2">
+                        빙하 리포트
+                      </Text>
+                    </View>
+                    <Text className="text-black font-sf-b text-body">
+                      {dailyReductionData.surveyCo2Kg} kg
+                    </Text>
+                  </View>
                   <View className="mt-2 pt-sm flex-row justify-between items-center">
                     <Text className="font-bold text-body text-green">
                       총 절감량
@@ -467,23 +473,39 @@ export default function MyPage() {
               </Text>
             )}
           </View>
+
+          <View className="bg-white rounded-xl p-lg shadow mt-4">
+            {/* 주문 내역 항목 */}
+            <Pressable
+              onPress={() => router.push("/pages/shop/orderlist")}
+              className="flex-row items-center justify-between py-md"
+            >
+              <View className="flex-row items-center">
+                <Images.Order width={24} height={24} />
+                <Text className="text-black font-sf-md text-body ml-md">
+                  주문 내역
+                </Text>
+              </View>
+            </Pressable>
+            {/* 로그아웃 항목 */}
+
+            <Pressable
+              onPress={handleLogout}
+              className="flex-row items-center justify-between py-md"
+            >
+              <View className="flex-row items-center">
+                <Images.LogOut width={24} height={24} />
+                <Text className="text-black font-sf-md text-body ml-md">
+                  로그아웃
+                </Text>
+              </View>
+            </Pressable>
+          </View>
           {/* 테스트 버튼 */}
           <MainButton
             label="출석 데이터 초기화 (테스트용)"
             onPress={handleResetAttendance}
             className="mt-4 bg-red-500"
-          />
-          {/* 로그아웃 버튼 */}
-          <MainButton
-            label="로그아웃"
-            onPress={handleLogout}
-            className="mt-4 bg-gray" // Using a different color for logout
-          />
-          {/* 주문 내역 확인 버튼 */}
-          <MainButton
-            label="주문 내역 확인"
-            onPress={() => router.push("/pages/orders/history")} // Navigate to order history page
-            className="mt-4 bg-blue-500" // A distinct color for this button
           />
         </ScrollView>
       </View>

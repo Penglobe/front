@@ -101,7 +101,6 @@ export default function KakaoMapView({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    borderRadius: 12,
     overflow: "hidden",
   },
 });

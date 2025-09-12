@@ -6,7 +6,6 @@ import Constants from "expo-constants";
 
 const { SERVER_URL } = Constants.expoConfig.extra;
 const BASE_URL = `${SERVER_URL}`;
-//const BASE_URL = "http://192.168.0.52:8080";
 
 const K_AT = "accessToken";
 const K_RT = "refreshToken";

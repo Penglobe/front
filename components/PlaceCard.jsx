@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Platform } from "react-native";
 import colors from "@constants/Colors.cjs";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function PlaceCard({
   item,
@@ -33,7 +34,7 @@ export default function PlaceCard({
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => !readOnly && onSelect(item)}
-      className="px-4 py-4 rounded-2xl"
+      className="px-lg py-lg rounded-2xl"
       style={{
         backgroundColor,
         marginBottom: 8,
@@ -44,7 +45,7 @@ export default function PlaceCard({
         {/* 제목+주소 묶음 */}
         <View className="flex-1 mr-3">
           <Text
-            className="font-sf-b text-lg mb-1"
+            className="font-sf-b text-body py-xxs"
             style={{
               color: isSelected ? colors.Colors.green : colors.Colors.black,
             }}
@@ -54,7 +55,7 @@ export default function PlaceCard({
           </Text>
 
           <Text
-            className="font-sf-md text-base"
+            className="font-sf-md text-caption"
             numberOfLines={1}
             style={{
               color: isSelected ? colors.Colors.green : colors.Colors.darkGray,
@@ -68,16 +69,16 @@ export default function PlaceCard({
         {!isBookmark ? (
           <TouchableOpacity
             onPress={() => onAdd(item)}
-            className="px-3 py-1 rounded-lg bg-[#4CAF50]"
+            className="px-md py-sm rounded-lg bg-transparen"
           >
-            <Text className="text-white text-label">북마크 추가</Text>
+            <Ionicons name="bookmark-outline" size={22} color="#318643" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             onPress={() => onDetail(item)}
-            className="px-3 py-1 rounded-lg bg-[#318643]"
+            className="px-sm py-sm rounded-lg bg-transparent border border-green-500"
           >
-            <Text className="text-white text-label">상세보기</Text>
+            <Text className="text-green-500 text-label">상세보기</Text>
           </TouchableOpacity>
         )}
       </View>
