@@ -20,7 +20,7 @@ module.exports = function (api) {
       [
         "module-resolver",
         {
-          root: ["."], // app 폴더를 절대 경로의 시작점으로 설정
+          root: ["."], 
           alias: {
             "@app": "./app",
             "@tabs": "./app/(tabs)",
