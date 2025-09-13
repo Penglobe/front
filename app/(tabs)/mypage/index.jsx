@@ -443,8 +443,8 @@ export default function MyPage() {
                     </Text>
                   </View>
                   <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <Images.Diet width={24} height={24} />
+                    <View className="flex-row items-center pl-xs">
+                      <Images.Survey width={20} height={20} />
                       <Text className="text-black font-sf-md text-body ml-2">
                         빙하 리포트
                       </Text>

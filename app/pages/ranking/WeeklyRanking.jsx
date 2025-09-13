@@ -12,7 +12,7 @@ import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch } from "@services/authService";
 import { useAuth } from "@hooks/useAuth"; // Import useAuth hook
 
-export default function WeeklyRanking({ fetchRegionRankingData }) {
+export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,9 +76,7 @@ export default function WeeklyRanking({ fetchRegionRankingData }) {
       }
 
       await fetchRankingData(); // Re-fetch data to show changes
-      if (fetchRegionRankingData) {
-        await fetchRegionRankingData(); // Re-fetch region data as well
-      }
+      
       Alert.alert("성공", "데이터가 추가되고 랭킹이 갱신되었습니다."); // Add a success alert
     } catch (error) {
       console.error("Error adding dummy data:", error);
