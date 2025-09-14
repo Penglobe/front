@@ -1,10 +1,9 @@
 import Expo
-import KakaoSDKAuth
-import KakaoSDKCommon
-import KakaoSDKUser
 import React
 import ReactAppDependencyProvider
-import UIKit
+import KakaoSDKCommon
+import KakaoSDKAuth
+import KakaoSDKUser
 
 @UIApplicationMain
 public class AppDelegate: ExpoAppDelegate {
@@ -12,13 +11,12 @@ public class AppDelegate: ExpoAppDelegate {
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
   var reactNativeFactory: RCTReactNativeFactory?
 
-  // Kakao SDK 1회 초기화
+  // ✅ 타입 스코프에 static으로 정의
   private static var didInitSDK = false
   private static func initSDKOnce() {
     guard !didInitSDK else { return }
     if let key = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String,
-      !key.isEmpty
-    {
+       !key.isEmpty {
       KakaoSDK.initSDK(appKey: key)
       didInitSDK = true
       NSLog("✅ Kakao SDK initialized (key length=%d)", key.count)
@@ -31,10 +29,10 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    // 1) Kakao SDK 먼저
+
+    // ✅ 가장 먼저 초기화
     AppDelegate.initSDKOnce()
 
-    // 2) RN Factory 구성
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -42,21 +40,18 @@ public class AppDelegate: ExpoAppDelegate {
     reactNativeFactory = factory
     bindReactNativeFactory(factory)
 
-    // 3) 윈도우 + RN 시작
     #if os(iOS) || os(tvOS)
       window = UIWindow(frame: UIScreen.main.bounds)
       factory.startReactNative(
         withModuleName: "main",
         in: window,
-        launchOptions: launchOptions
-      )
+        launchOptions: launchOptions)
     #endif
 
-    // ExpoAppDelegate 기본 처리
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // MARK: - URL 스킴 (Kakao/Linking)
+  // Linking API
   public override func application(
     _ app: UIApplication,
     open url: URL,
@@ -71,46 +66,30 @@ public class AppDelegate: ExpoAppDelegate {
       || RCTLinkingManager.application(app, open: url, options: options)
   }
 
-  // MARK: - Universal Links
+  // Universal Links
   public override func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
   ) -> Bool {
-    let rnHandled = RCTLinkingManager.application(
-      application, continue: userActivity, restorationHandler: restorationHandler
-    )
-    let expoHandled = super.application(
-      application, continue: userActivity, restorationHandler: restorationHandler
-    )
-    return expoHandled || rnHandled
+    let result = RCTLinkingManager.application(
+      application, continue: userActivity, restorationHandler: restorationHandler)
+    return super.application(
+      application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
 }
 
-// MARK: - 번들 URL 결정 (Debug=DevClient/Metro, Release=내장 번들)
 class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
   override func sourceURL(for bridge: RCTBridge) -> URL? {
-    // ✅ Dev Client/Expo Launcher가 지정해 준 URL이 있으면 그걸 최우선 사용
-    if let fromBridge = bridge.bundleURL {
-      return fromBridge
-    }
-    return bundleURL()
+    bridge.bundleURL ?? bundleURL()
   }
-
   override func bundleURL() -> URL? {
     #if DEBUG
-      // ✅ 최신 시그니처: fallbackExtension (이전 fallbackResource는 에러)
-      // Dev Client URL이 없을 때만 로컬 Metro로 폴백
       return RCTBundleURLProvider.sharedSettings()
-        .jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry", fallbackExtension: nil)
+        .jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
     #else
-      // ✅ Release: 내장 main.jsbundle
-      if let embedded = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
-        return embedded
-      }
-      // 안전망 (일반적으론 사용 안 함)
-      return RCTBundleURLProvider.sharedSettings()
-        .jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry", fallbackExtension: "jsbundle")
+      return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
     #endif
   }
 }
+
