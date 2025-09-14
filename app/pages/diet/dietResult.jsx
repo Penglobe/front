@@ -115,7 +115,8 @@ export default function DietResult() {
         >
           <View className="flex-1 px-pageX gap-4">
             {/* 날짜 */}
-            <View className="pt-llg">
+            <View className="pt-llg flex-row">
+            <Images.Ipa_diet width={48} height={48} />
               <Text className="font-sb-md text-black text-caption">
                 식사 날짜
               </Text>
