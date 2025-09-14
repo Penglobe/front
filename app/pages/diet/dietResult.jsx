@@ -195,12 +195,6 @@ export default function DietResult() {
                 saving || totalKg == null || savedKg == null || savedKg <= 0
               }
             />
-
-            <MainButton
-              className="mt-4"
-              label="지도 테스트"
-              onPress={() => router.push("/pages/diet/Test")}
-            />
           </View>
         </ScrollView>
       </View>
