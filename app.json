@@ -32,7 +32,9 @@
             }
           }
         },
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": [
+          "location"
+        ]
       }
     },
     "android": {
@@ -56,7 +58,9 @@
       ],
       "package": "com.penglobe9.app"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
@@ -76,11 +80,11 @@
     ],
     "extra": {
       "router": {},
+      "SERVER_URL": "http://penglobe.shinhanacademy.co.kr",
       "eas": {
-        "projectId": "63934cda-fdb2-4f4b-bf3e-9a77877deba3"
-      },
-      "SERVER_URL": "http://penglobe.shinhanacademy.co.kr"
+        "projectId": "58a9181b-cb76-4969-97b6-a92547c5b64f"
+      }
     },
-    "owner": "panicddd"
+    "owner": "panicahteddddd"
   }
 }
