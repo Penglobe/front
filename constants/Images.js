@@ -24,6 +24,8 @@ import Tori3 from "@assets/images/character/tori-3.svg";
 import Tori4 from "@assets/images/character/tori-4.svg";
 import ToriObstacle from "@assets/images/character/tori-obstacle.svg";
 import survey_ipa from "@assets/images/character/survey_ipa.svg";
+import Ipa_diet from "@assets/images/character/ipa-diet.svg";
+import Tori_diet from "@assets/images/character/tori-diet.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -113,4 +115,6 @@ export const Images = {
   Order,
   Survey,
   ToriObstacle,
+  Ipa_diet,
+  Tori_diet,
 };
