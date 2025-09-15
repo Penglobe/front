@@ -212,8 +212,6 @@ export default function PointWebviewRoute() {
         originWhitelist={["*"]}
         startInLoadingState
         style={{ flex: 1, marginTop: 22 }}
-        setSupportMultipleWindows={false}
-        allowsBackForwardNavigationGestures={false}
         renderLoading={() => (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -221,16 +219,27 @@ export default function PointWebviewRoute() {
             <ActivityIndicator size="large" />
           </View>
         )}
-        // 딥링크가 웹뷰 안에서 열리려 하면 차단하고 우리가 직접 처리
         onShouldStartLoadWithRequest={(req) => {
-          if (req.url.startsWith("penglobe://pay/complete")) {
-            const parsed = LinkingExpo.parse(req.url);
+          const url = req.url;
+          // 1) penglobe:// (앱 딥링크 - 결제 완료)
+          if (url.startsWith("penglobe://pay/complete")) {
+            const parsed = LinkingExpo.parse(url);
             const imp_uid = parsed.queryParams?.imp_uid || null;
             const mid = parsed.queryParams?.merchant_uid || merchantUid || null;
             verifyAndClose({ imp_uid, merchant_uid: mid });
             return false; // 웹뷰에서 로드 막음
           }
-          return true;
+          // 2) http, https는 그대로 웹뷰에서 열기
+          if (url.startsWith("http") || url.startsWith("https")) {
+            return true;
+          }
+          // 3) 그 외 (intent://, kakaotalk://, naversearchapp://, ispmobile:// 등)
+          try {
+            Linking.openURL(url);
+          } catch (e) {
+            console.warn("외부 앱 열기 실패:", e.message);
+          }
+          return false; // 웹뷰에서 처리 안 함
         }}
       />
     </>

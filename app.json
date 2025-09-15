@@ -32,7 +32,16 @@
             }
           }
         },
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": ["location"],
+        "LSApplicationQueriesSchemes": [
+          "kakaotalk",
+          "kakaopay",
+          "naversearchapp",
+          "ispmobile",
+          "payco",
+          "smilepayapp",
+          "samsungpay"
+        ]
       }
     },
     "android": {
