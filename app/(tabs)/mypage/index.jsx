@@ -339,25 +339,6 @@ export default function MyPage() {
               <Text className="text-black font-sf-b text-h3 mb-4">
                 {myPageInfo.nickname}
               </Text>
-              <View
-                className="flex-1 p-sm rounded-md shadow-sm mx-1 mb-sm"
-                style={{
-                  backgroundColor: "#9fcbe8ff",
-                  width: "98%",
-                  height: 60,
-                }}
-              >
-                <Text className="text-black font-sf-r px-xxs -mb-xs text-caption">
-                  보유 얼음
-                </Text>
-                <View className="flex-row items-center mt-1">
-                  <Text className="text-black font-sf-b text-body ml-1">
-                    10000000000000
-                    {/*totalPoint.toLocaleString("ko-KR")*/}
-                  </Text>
-                  <Images.Ice width={30} height={30} />
-                </View>
-              </View>
               <View className="flex-row justify-around w-full max-w-md">
                 <View
                   className="items-center flex-1 p-sm rounded-md shadow-sm mx-1 "
@@ -386,6 +367,24 @@ export default function MyPage() {
                       {longestAttendanceStreak}일
                     </Text>
                   </View>
+                </View>
+              </View>
+              <View
+                className="flex-1 p-sm rounded-md border-2 border-gray mx-1 mt-sm"
+                style={{
+                  width: "98%",
+                  height: 60,
+                }}
+              >
+                <Text className="text-black font-sf-r px-xxs text-left -mb-xs text-caption">
+                  보유 얼음
+                </Text>
+                <View className="flex-row justify-end items-end mt-1">
+                  <Text className="text-black font-sf-b text-body ml-1">
+                    10000
+                    {/*totalPoint.toLocaleString("ko-KR")*/}
+                  </Text>
+                  <Images.Ice width={30} height={30} />
                 </View>
               </View>
             </View>
@@ -503,7 +502,7 @@ export default function MyPage() {
               <View className="flex-row items-center">
                 <Images.Faq width={24} height={24} />
                 <Text className="text-black font-sf-md text-body ml-md">
-                  QnA
+                  도움말
                 </Text>
               </View>
             </Pressable>
