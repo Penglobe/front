@@ -30,7 +30,7 @@ export default function PointWebviewRoute() {
       try {
         if (!imp_uid || !merchant_uid) {
           Alert.alert("오류", "검증 정보가 올바르지 않습니다.");
-          router.back();
+          router.replace("/pages/point/pointHistory");
           return;
         }
 
@@ -40,6 +40,7 @@ export default function PointWebviewRoute() {
         });
 
         if (res.ok) {
+          router.replace("/pages/point/pointHistory");
           Alert.alert("결제 성공", "얼음 구매가 완료되었습니다.");
         } else {
           const txt = await res.text().catch(() => "");
@@ -48,7 +49,7 @@ export default function PointWebviewRoute() {
       } catch (e) {
         Alert.alert("오류", "결제 결과 처리 중 문제가 발생했습니다.");
       } finally {
-        router.back();
+        router.replace("/pages/point/pointHistory");
       }
     },
     [router]
@@ -60,7 +61,7 @@ export default function PointWebviewRoute() {
       try {
         if (!amount || Number.isNaN(amount) || amount <= 0) {
           Alert.alert("결제 오류", "유효하지 않은 금액입니다.");
-          router.back();
+          router.replace("/pages/point/pointHistory");
           return;
         }
 
@@ -74,7 +75,7 @@ export default function PointWebviewRoute() {
         setMerchantUid(json?.data); // 서버에서 발급한 merchant_uid
       } catch (e) {
         Alert.alert("결제 준비 오류", e.message || "서버와 통신 실패");
-        router.back();
+        router.replace("/pages/point/pointHistory");
       } finally {
         setIsLoading(false);
       }
@@ -120,7 +121,7 @@ export default function PointWebviewRoute() {
               "결제 취소",
               data.error_msg || "결제가 취소되었습니다."
             );
-            router.back();
+            router.replace("/pages/point/pointHistory");
           }
         }
       } catch {
