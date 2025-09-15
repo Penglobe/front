@@ -159,7 +159,9 @@ export default function PointWebviewRoute() {
                 buyer_name: "홍길동",
                 app_scheme: "${SCHEME}",
                 // 결제 완료 후 PortOne이 앱으로 리다이렉트 (일부 PG는 imp_uid를 자동으로 쿼리에 추가)
-                m_redirect_url: "${SCHEME}://pay/complete?merchant_uid=${merchantUid || ""}"
+                m_redirect_url: "${SCHEME}://pay/complete?merchant_uid=${
+      merchantUid || ""
+    }"
               };
 
               IMP.request_pay(params, function(rsp) {

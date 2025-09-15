@@ -17,7 +17,7 @@
         "buildType": "apk"
       },
       "env": {
-        "SERVER_URL": "https://penglobe-test.shinhanacademy.co.kr"
+        "SERVER_URL": "https://penglobe.shinhanacademy.co.kr"
       }
     },
     "production": {
