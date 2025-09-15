@@ -154,7 +154,7 @@ export default function AttendanceReward({
               </View>
             ) : (
               // <Text className="text-[200px]">🎁</Text>
-              <Images.Box width={200} height={200} />
+              <Images.Box width={180} height={180} />
             )}
           </Animated.View>
         </Pressable>
@@ -165,12 +165,12 @@ export default function AttendanceReward({
         <>
           <Animated.View
             style={cardStyle}
-            className="w-64 h-56 bg-white items-center justify-center px-5 py-6 mb-4 mt-4"
+            className="w-64 h-56 bg-white items-center justify-center px-5 mb-4"
           >
             {hasPreview ? (
               <>
                 <View className="flex-row items-center">
-                  <Text className="text-emerald-600 font-sf-b text-[90px]">
+                  <Text className="text-green font-sf-b text-h0">
                     {Number(previewPoints).toLocaleString("ko-KR")}
                   </Text>
                   <Images.Ice width={150} height={150} />
