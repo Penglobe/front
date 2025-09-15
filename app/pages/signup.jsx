@@ -328,6 +328,7 @@ export default function Signup() {
                 <View className="mt-sm bg-white rounded-2xl border border-gray overflow-hidden">
                   <ScrollView
                     style={{ maxHeight: 240 }}
+                    nestedScrollEnabled
                     keyboardShouldPersistTaps="handled"
                   >
                     {regions.map((r) => {

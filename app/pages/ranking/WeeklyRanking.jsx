@@ -76,7 +76,7 @@ export default function WeeklyRanking() {
       }
 
       await fetchRankingData(); // Re-fetch data to show changes
-      
+
       Alert.alert("성공", "데이터가 추가되고 랭킹이 갱신되었습니다."); // Add a success alert
     } catch (error) {
       console.error("Error adding dummy data:", error);
@@ -125,11 +125,11 @@ export default function WeeklyRanking() {
 
       {/* 랭킹 참여 조건 미달 메시지 */}
       {showParticipationMessage && (
-        <View className="bg-deactivateButton border-l-4 border-500 text-yellow-700 p-lg mb-4 rounded-lg">
+        <View className="bg-deactivateButton border-l-4 border-500 p-lg mb-sm rounded-lg">
           <Text className="font-bold">랭킹 참여 조건 미달</Text>
           <Text>
-            주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! 이번 주에
-            출석을 완료하고 다음 주에 다시 도전해보세요!
+            주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! {"\n"}
+            이번 주에 출석을 완료하고 다음 주에 다시 도전해보세요!
           </Text>
         </View>
       )}
