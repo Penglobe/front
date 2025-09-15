@@ -1,4 +1,4 @@
-// 외부 JSON -> 최소 페이로드
+// transformFoodlens.js  (예: features/diet/transformFoodlens.js)
 
 function pickBestCandidate(candidates = []) {
   const score = (c) => {
@@ -34,7 +34,6 @@ function mergeSameItems(items) {
   return [...map.values()];
 }
 
-// 최소 페이로드 생성
 export function toCarbonRequestPayload(
   aiJson,
   opts = { merge: true, userId: null }
@@ -77,8 +76,11 @@ export function toCarbonRequestPayload(
 
   const finalItems = opts.merge ? mergeSameItems(cleaned) : cleaned;
 
-  return {
-    userId: opts.userId,
-    items: finalItems,
-  };
+  return { userId: opts.userId, items: finalItems };
 }
+
+// 필요하면 헬퍼도 같이 export
+export { pickBestCandidate, mergeSameItems };
+
+// 기본(default) export도 제공
+export default toCarbonRequestPayload;

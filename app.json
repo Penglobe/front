@@ -32,8 +32,15 @@
             }
           }
         },
-        "UIBackgroundModes": [
-          "location"
+        "UIBackgroundModes": ["location"],
+        "LSApplicationQueriesSchemes": [
+          "kakaotalk",
+          "kakaopay",
+          "naversearchapp",
+          "ispmobile",
+          "payco",
+          "smilepayapp",
+          "samsungpay"
         ]
       }
     },
@@ -60,9 +67,7 @@
       ],
       "package": "com.penglobe9.app"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
@@ -82,7 +87,7 @@
     ],
     "extra": {
       "router": {},
-      "SERVER_URL": "http://penglobe.shinhanacademy.co.kr",
+      "SERVER_URL": "https://penglobe.shinhanacademy.co.kr",
       "eas": {
         "projectId": "315ea738-4d43-4580-9823-38af233c0afb"
       }
