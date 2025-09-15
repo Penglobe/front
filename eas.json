@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "SERVER_URL": "http://192.168.0.20:8080"
+        "SERVER_URL": "https://penglobe-test.shinhanacademy.co.kr"
       }
     },
     "preview": {
