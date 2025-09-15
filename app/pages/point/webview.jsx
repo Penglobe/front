@@ -160,8 +160,8 @@ export default function PointWebviewRoute() {
                 app_scheme: "${SCHEME}",
                 // 결제 완료 후 PortOne이 앱으로 리다이렉트 (일부 PG는 imp_uid를 자동으로 쿼리에 추가)
                 m_redirect_url: "${SCHEME}://pay/complete?merchant_uid=${
-      merchantUid || ""
-    }"
+                  merchantUid || ""
+                }"
               };
 
               IMP.request_pay(params, function(rsp) {
@@ -221,6 +221,12 @@ export default function PointWebviewRoute() {
         )}
         onShouldStartLoadWithRequest={(req) => {
           const url = req.url;
+
+          // 0) about:blank 는 그냥 웹뷰가 처리하게 둠
+          if (url === "about:blank") {
+            return true;
+          }
+
           // 1) penglobe:// (앱 딥링크 - 결제 완료)
           if (url.startsWith("penglobe://pay/complete")) {
             const parsed = LinkingExpo.parse(url);
@@ -229,10 +235,12 @@ export default function PointWebviewRoute() {
             verifyAndClose({ imp_uid, merchant_uid: mid });
             return false; // 웹뷰에서 로드 막음
           }
+
           // 2) http, https는 그대로 웹뷰에서 열기
           if (url.startsWith("http") || url.startsWith("https")) {
             return true;
           }
+
           // 3) 그 외 (intent://, kakaotalk://, naversearchapp://, ispmobile:// 등)
           try {
             Linking.openURL(url);
