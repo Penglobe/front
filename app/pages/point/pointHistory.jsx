@@ -231,25 +231,30 @@ export default function PointHistory() {
             elevation: 4,
           }}
         >
-          <Text className="text-h4 font-sf-md">현재 보유 얼음</Text>
-          <View className="flex-row items-center">
-            <Text
-              className="text-2xl font-grotesk-b mr-sm"
-              style={{ color: Colors.green }}
-            >
-              {balance.toLocaleString("ko-KR")}
-            </Text>
-            <Images.Ice width={40} height={40} />
+          {/* 좌측 (텍스트들) */}
+          <View className="flex-col">
+            <Text className="text-caption font-sf-md">보유 얼음</Text>
+            <View className="flex-row items-center mt-1">
+              <Text
+                className="text-h1 font-grotesk-b"
+                style={{ color: Colors.green }}
+              >
+                {balance.toLocaleString("ko-KR")}
+              </Text>
+              <Images.Ice width={50} height={50} />
+            </View>
           </View>
-        </View>
-        <View className="flex-row justify-end mt-md">
+
+          {/* 우측 (버튼) */}
           <Pressable
             onPress={() => setIsChargeModalVisible(true)}
             accessibilityRole="button"
-            className="rounded-xl py-sm px-xl active:bg-green"
+            className="rounded-xl py-sm px-lg active:bg-green"
             style={{ backgroundColor: Colors.green }}
           >
-            <Text className="text-white font-sf-md text-button">얼음 구매</Text>
+            <Text className="text-white font-sf-md text-caption">
+              얼음 구매
+            </Text>
           </Pressable>
         </View>
       </View>
