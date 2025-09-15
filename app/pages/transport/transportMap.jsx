@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { View, Text, Alert, AppState } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { startTransport, stopTransport } from "@services/transportService";
@@ -46,6 +46,7 @@ const FINISH_RESULT_KEY = "@transport/finishResult";
 const STOP_KIND_KEY = "@transport/stopKind";
 const STOP_REASON_KEY = "@transport/stopReason";
 const START_KEY = "@transport/startAtMs";
+const FINISHING_KEY = "@transport/finishing";
 
 const SPEED_LIMITS = { WALK: 2.2, BIKE: 8.5 };
 const GPS_ACCURACY_THRESHOLD_FG_BASE = 20; // WALK
@@ -72,9 +73,13 @@ function log(tag, msg, extra = {}) {
   try {
     if (extra && Object.keys(extra).length) console.log(base, extra);
     else console.log(base);
-  } catch { console.log(base); }
+  } catch {
+    console.log(base);
+  }
 }
-function drop(reason, extra = {}) { log("DROP", reason, extra); }
+function drop(reason, extra = {}) {
+  log("DROP", reason, extra);
+}
 
 /* -------------------- 유틸 -------------------- */
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -92,8 +97,15 @@ function getSmoothedCoord(buffer) {
   const avgLat = buffer.reduce((s, p) => s + p.latitude, 0) / buffer.length;
   const avgLng = buffer.reduce((s, p) => s + p.longitude, 0) / buffer.length;
   const accs = buffer.map((p) => p.accuracy).filter((a) => Number.isFinite(a));
-  const avgAcc = accs.length ? accs.reduce((s, a) => s + a, 0) / accs.length : undefined;
-  return { latitude: avgLat, longitude: avgLng, timestamp: Date.now(), accuracy: avgAcc };
+  const avgAcc = accs.length
+    ? accs.reduce((s, a) => s + a, 0) / accs.length
+    : undefined;
+  return {
+    latitude: avgLat,
+    longitude: avgLng,
+    timestamp: Date.now(),
+    accuracy: avgAcc,
+  };
 }
 function dynamicMinStep(prevAcc, currAcc, mode, speedForMotion = 0) {
   const a = Number.isFinite(prevAcc) ? prevAcc : 0;
@@ -101,22 +113,31 @@ function dynamicMinStep(prevAcc, currAcc, mode, speedForMotion = 0) {
   const maxAcc = Math.max(a, b);
   const accBased = 0.8 * maxAcc;
   const idleBase =
-    mode === "WALK" ? MIN_IDLE_DIST_WALK :
-    mode === "BIKE" ? MIN_IDLE_DIST_BIKE :
-    MIN_IDLE_DIST_TRANSIT;
+    mode === "WALK"
+      ? MIN_IDLE_DIST_WALK
+      : mode === "BIKE"
+        ? MIN_IDLE_DIST_BIKE
+        : MIN_IDLE_DIST_TRANSIT;
   const moving =
-    mode === "WALK" ? speedForMotion > 0.6 :
-    mode === "BIKE" ? speedForMotion > 1.5 :
-    true;
-  const baseWhenMoving = Math.max(MIN_DISTANCE_UPDATE, Math.min(idleBase, accBased));
+    mode === "WALK"
+      ? speedForMotion > 0.6
+      : mode === "BIKE"
+        ? speedForMotion > 1.5
+        : true;
+  const baseWhenMoving = Math.max(
+    MIN_DISTANCE_UPDATE,
+    Math.min(idleBase, accBased)
+  );
   const baseWhenIdle = Math.max(idleBase, accBased);
   return moving ? baseWhenMoving : baseWhenIdle;
 }
 function getStepCap(mode, dtSec) {
   const baseCap =
-    mode === "WALK" ? MAX_STEP_WALK_BASE :
-    mode === "BIKE" ? MAX_STEP_BIKE_BASE :
-    Infinity;
+    mode === "WALK"
+      ? MAX_STEP_WALK_BASE
+      : mode === "BIKE"
+        ? MAX_STEP_BIKE_BASE
+        : Infinity;
   const dynCap = (STEP_SPEED_CAP[mode] || 60) * dtSec + 5;
   return Math.max(baseCap, dynCap);
 }
@@ -151,9 +172,14 @@ async function markActive(flag) {
 /* -------------------- 전역 락 -------------------- */
 let __TM_INIT_LOCK = false;
 
-/* -------------------- 화면 -------------------- */
 export default function TransportMap() {
-  const { endLat, endLng, placeName, mode: rawMode, fresh: freshParam } = useLocalSearchParams();
+  const {
+    endLat,
+    endLng,
+    placeName,
+    mode: rawMode,
+    fresh: freshParam,
+  } = useLocalSearchParams();
   const router = useRouter();
 
   const allowedModes = new Set(["WALK", "BIKE", "TRANSIT"]);
@@ -194,8 +220,12 @@ export default function TransportMap() {
 
   const stopForegroundWatch = useCallback(async () => {
     if (locationSubRef.current) {
-      try { locationSubRef.current.remove(); log("FG", "watchPositionAsync(stop)"); }
-      catch (e) { log("FG", "watch remove error", { e: String(e) }); }
+      try {
+        locationSubRef.current.remove();
+        log("FG", "watchPositionAsync(stop)");
+      } catch (e) {
+        log("FG", "watch remove error", { e: String(e) });
+      }
       locationSubRef.current = null;
     }
   }, []);
@@ -214,7 +244,10 @@ export default function TransportMap() {
       const before = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
       log("BG", "hasStarted(before) = " + before);
       if (!before) {
-        await Location.startLocationUpdatesAsync(TASK_NAME, BG_LOCATION_OPTIONS);
+        await Location.startLocationUpdatesAsync(
+          TASK_NAME,
+          BG_LOCATION_OPTIONS
+        );
       }
       const after = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
       log("BG", "hasStarted(after) = " + after);
@@ -229,7 +262,9 @@ export default function TransportMap() {
   const stopBackgroundUpdates = useCallback(async () => {
     const started = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
     if (started) {
-      try { await Location.stopLocationUpdatesAsync(TASK_NAME); } catch {}
+      try {
+        await Location.stopLocationUpdatesAsync(TASK_NAME);
+      } catch {}
       log("BG", "stop updates");
     }
   }, []);
@@ -249,7 +284,15 @@ export default function TransportMap() {
     if (kind === "finish") {
       const raw = await AsyncStorage.getItem(FINISH_RESULT_KEY);
       const res = raw ? JSON.parse(raw) : {};
-      await AsyncStorage.multiRemove([STOPPED_KEY, FINISH_RESULT_KEY, STOP_KIND_KEY, STOP_REASON_KEY, ID_KEY, ACTIVE_KEY]);
+      await AsyncStorage.multiRemove([
+        STOPPED_KEY,
+        FINISH_RESULT_KEY,
+        STOP_KIND_KEY,
+        STOP_REASON_KEY,
+        ID_KEY,
+        ACTIVE_KEY,
+        FINISHING_KEY,
+      ]);
       isTrackingEnded.current = true;
       log("APP", "navigate finish(BG)", res);
       router.replace({
@@ -258,7 +301,9 @@ export default function TransportMap() {
           placeName: place,
           endLat,
           endLng,
-          distanceM: String(res?.distanceM ?? Math.round(await readTotalDistance())),
+          distanceM: String(
+            res?.distanceM ?? Math.round(await readTotalDistance())
+          ),
           co2Kg: String(res?.co2Kg ?? 0),
           durationM: String(res?.durationM ?? 0),
           points: String(res?.points ?? 0),
@@ -266,171 +311,298 @@ export default function TransportMap() {
       });
       return true;
     } else if (kind === "fail") {
-      const reason = (await AsyncStorage.getItem(STOP_REASON_KEY)) || "이동이 종료되었습니다.";
-      await AsyncStorage.multiRemove([STOPPED_KEY, STOP_KIND_KEY, STOP_REASON_KEY, FINISH_RESULT_KEY, ID_KEY, ACTIVE_KEY]);
+      const reason =
+        (await AsyncStorage.getItem(STOP_REASON_KEY)) ||
+        "이동이 종료되었습니다.";
+      await AsyncStorage.multiRemove([
+        STOPPED_KEY,
+        STOP_KIND_KEY,
+        STOP_REASON_KEY,
+        FINISH_RESULT_KEY,
+        ID_KEY,
+        ACTIVE_KEY,
+        FINISHING_KEY,
+      ]);
       isTrackingEnded.current = true;
       log("APP", "navigate fail(BG)", { reason });
-      router.replace({ pathname: "/pages/transport/transportFail", params: { placeName: place, reason } });
+      router.replace({
+        pathname: "/pages/transport/transportFail",
+        params: { placeName: place, reason },
+      });
       return true;
     }
     return false;
   }, [router, placeName, endLat, endLng]);
 
-  const handleStop = useCallback(async (isAuto = false, forceFailReason) => {
-    if (isTrackingEnded.current) return;
-    let usedDistance = 0;
-    try {
-      await stopAllLocation();
-      usedDistance = await readTotalDistance();
-      distanceRef.current = usedDistance;
-      setDistance(usedDistance);
-
-      const startedAt = Number((await AsyncStorage.getItem(START_KEY)) || startTime.current);
-      const elapsedSec = (Date.now() - startedAt) / 1000;
-      const avgSpeed = elapsedSec > 0 ? usedDistance / elapsedSec : 0;
-
-      if (forceFailReason && (mode === "WALK" || mode === "BIKE")) {
-        isTrackingEnded.current = true;
-        await markActive(false);
-        await AsyncStorage.multiRemove([ID_KEY, DEST_KEY, IN_RADIUS_SINCE_KEY, STOPPED_KEY, START_KEY]);
-        router.replace({ pathname: "/pages/transport/transportFail", params: { placeName, reason: forceFailReason } });
-        return;
-      }
-
-      const limit = (mode === "WALK") ? SPEED_LIMITS.WALK : (mode === "BIKE") ? SPEED_LIMITS.BIKE : Infinity;
-      if ((mode === "WALK" || mode === "BIKE") && avgSpeed > limit) {
-        isTrackingEnded.current = true;
-        await markActive(false);
-        await AsyncStorage.multiRemove([ID_KEY, DEST_KEY, IN_RADIUS_SINCE_KEY, STOPPED_KEY, START_KEY]);
-        router.replace({ pathname: "/pages/transport/transportFail", params: { placeName, reason: "이동 속도가 너무 빠릅니다." } });
-        return;
-      }
-
-      const id = transportIdRef.current ?? transportId;
-      if (!id) {
-        pendingStopRef.current = isAuto ? "auto" : "manual";
-        Alert.alert("잠시만요", "이동 시작 초기화 중입니다. 곧 종료됩니다.");
-        return;
-      }
-
-      const result = await stopTransport(id, Math.round(usedDistance));
-      isTrackingEnded.current = true;
-      await markActive(false);
-      await AsyncStorage.multiRemove([ID_KEY, DEST_KEY, IN_RADIUS_SINCE_KEY, STOPPED_KEY, START_KEY]);
-      router.replace({
-        pathname: "/pages/transport/transportFinish",
-        params: {
-          placeName,
-          endLat,
-          endLng,
-          distanceM: String(result?.distanceM ?? Math.round(usedDistance)),
-          co2Kg: String(result?.co2Kg ?? 0),
-          durationM: String(result?.durationM ?? Math.round((Date.now() - startedAt) / 60000)),
-          points: String(result?.points ?? 0),
-        },
-      });
-    } catch {
+  const handleStop = useCallback(
+    async (isAuto = false, forceFailReason) => {
+      if (isTrackingEnded.current) return;
+      let usedDistance = 0;
       try {
+        await stopAllLocation();
+        usedDistance = await readTotalDistance();
+        distanceRef.current = usedDistance;
+        setDistance(usedDistance);
+
+        const startedAt = Number(
+          (await AsyncStorage.getItem(START_KEY)) || startTime.current
+        );
+        const elapsedSec = (Date.now() - startedAt) / 1000;
+        const avgSpeed = elapsedSec > 0 ? usedDistance / elapsedSec : 0;
+
+        if (forceFailReason && (mode === "WALK" || mode === "BIKE")) {
+          isTrackingEnded.current = true;
+          await markActive(false);
+          await AsyncStorage.multiRemove([
+            ID_KEY,
+            DEST_KEY,
+            IN_RADIUS_SINCE_KEY,
+            STOPPED_KEY,
+            START_KEY,
+            FINISHING_KEY,
+          ]);
+          router.replace({
+            pathname: "/pages/transport/transportFail",
+            params: { placeName, reason: forceFailReason },
+          });
+          return;
+        }
+
+        const limit =
+          mode === "WALK"
+            ? SPEED_LIMITS.WALK
+            : mode === "BIKE"
+              ? SPEED_LIMITS.BIKE
+              : Infinity;
+        if ((mode === "WALK" || mode === "BIKE") && avgSpeed > limit) {
+          isTrackingEnded.current = true;
+          await markActive(false);
+          await AsyncStorage.multiRemove([
+            ID_KEY,
+            DEST_KEY,
+            IN_RADIUS_SINCE_KEY,
+            STOPPED_KEY,
+            START_KEY,
+            FINISHING_KEY,
+          ]);
+          router.replace({
+            pathname: "/pages/transport/transportFail",
+            params: { placeName, reason: "이동 속도가 너무 빠릅니다." },
+          });
+          return;
+        }
+
+        const id = transportIdRef.current ?? transportId;
+        if (!id) {
+          pendingStopRef.current = isAuto ? "auto" : "manual";
+          Alert.alert("잠시만요", "이동 시작 초기화 중입니다. 곧 종료됩니다.");
+          return;
+        }
+
+        const result = await stopTransport(id, Math.round(usedDistance));
         isTrackingEnded.current = true;
         await markActive(false);
-        await AsyncStorage.multiRemove([ID_KEY, DEST_KEY, IN_RADIUS_SINCE_KEY, STOPPED_KEY, START_KEY]);
-        const startedAt = Number((await AsyncStorage.getItem(START_KEY)) || startTime.current);
+        await AsyncStorage.multiRemove([
+          ID_KEY,
+          DEST_KEY,
+          IN_RADIUS_SINCE_KEY,
+          STOPPED_KEY,
+          START_KEY,
+          FINISHING_KEY,
+        ]);
         router.replace({
           pathname: "/pages/transport/transportFinish",
           params: {
             placeName,
             endLat,
             endLng,
-            distanceM: String(Math.round(usedDistance)),
-            co2Kg: "0",
-            durationM: String(Math.round((Date.now() - startedAt) / 60000)),
-            points: "0",
+            distanceM: String(result?.distanceM ?? Math.round(usedDistance)),
+            co2Kg: String(result?.co2Kg ?? 0),
+            durationM: String(
+              result?.durationM ?? Math.round((Date.now() - startedAt) / 60000)
+            ),
+            points: String(result?.points ?? 0),
           },
         });
       } catch {
-        Alert.alert("오류", "이동 종료 중 문제가 발생했습니다.");
-      }
-    }
-  }, [transportId, mode, placeName, endLat, endLng, router, stopAllLocation]);
-
-  const onLocation = useCallback(async (loc) => {
-    if (isTrackingEnded.current) return;
-    const { latitude, longitude, accuracy } = loc.coords;
-    const now = Date.now();
-    const ts = loc.timestamp ?? now;
-
-    setCurrentCoord({ latitude, longitude, timestamp: ts });
-
-    // FG 도착 판정 (정밀 기준)
-    if (endLat && endLng && typeof accuracy === "number") {
-      const distRaw = calculateDistance(latitude, longitude, Number(endLat), Number(endLng));
-      const accOk = accuracy <= ARRIVAL_ACCURACY;
-      if (accOk && distRaw <= ARRIVAL_RADIUS) {
-        if (!inRadiusSince.current) {
-          const persisted = Number((await AsyncStorage.getItem(IN_RADIUS_SINCE_KEY)) || "0");
-          inRadiusSince.current = persisted || now;
-          if (!persisted) await AsyncStorage.setItem(IN_RADIUS_SINCE_KEY, String(now));
-          log("FG", "enter arrival radius", { distRaw, accuracy, since: inRadiusSince.current });
+        try {
+          isTrackingEnded.current = true;
+          await markActive(false);
+          await AsyncStorage.multiRemove([
+            ID_KEY,
+            DEST_KEY,
+            IN_RADIUS_SINCE_KEY,
+            STOPPED_KEY,
+            START_KEY,
+            FINISHING_KEY,
+          ]);
+          const startedAt = Number(
+            (await AsyncStorage.getItem(START_KEY)) || startTime.current
+          );
+          router.replace({
+            pathname: "/pages/transport/transportFinish",
+            params: {
+              placeName,
+              endLat,
+              endLng,
+              distanceM: String(Math.round(usedDistance)),
+              co2Kg: "0",
+              durationM: String(Math.round((Date.now() - startedAt) / 60000)),
+              points: "0",
+            },
+          });
+        } catch {
+          Alert.alert("오류", "이동 종료 중 문제가 발생했습니다.");
         }
-        if (now - inRadiusSince.current >= ARRIVAL_STAY_MS) {
-          if (!transportIdRef.current) { pendingStopRef.current = "auto"; return; }
-          handleStop(true);
-          return;
-        }
-      } else {
-        if (inRadiusSince.current) log("FG", "leave arrival radius");
-        inRadiusSince.current = null;
-        await AsyncStorage.removeItem(IN_RADIUS_SINCE_KEY);
       }
-    }
+    },
+    [transportId, mode, placeName, endLat, endLng, router, stopAllLocation]
+  );
 
-    if (now - ts > STALE_SAMPLE_MS_FG) { drop("FG_stale", { ageMs: now - ts }); return; }
-    const accThreshFG = accThreshFGByMode(mode);
-    if (!(typeof accuracy === "number") || accuracy > accThreshFG) {
-      drop("accuracyFG", { accuracy, accThreshFG });
-      return;
-    }
+  const onLocation = useCallback(
+    async (loc) => {
+      if (isTrackingEnded.current) return;
+      const { latitude, longitude, accuracy } = loc.coords;
+      const now = Date.now();
+      const ts = loc.timestamp ?? now;
 
-    coordBuffer.current.push({ latitude, longitude, timestamp: ts, accuracy });
-    if (coordBuffer.current.length > COORD_BUFFER_SIZE) coordBuffer.current.shift();
-    const smoothed = getSmoothedCoord(coordBuffer.current);
-    if (!smoothed) return;
+      setCurrentCoord({ latitude, longitude, timestamp: ts });
 
-    if (!prevCoord.current) {
-      setStartCoord(smoothed);
+      // FG 도착 판정 (정밀 기준)
+      if (endLat && endLng && typeof accuracy === "number") {
+        const distRaw = calculateDistance(
+          latitude,
+          longitude,
+          Number(endLat),
+          Number(endLng)
+        );
+        const accOk = accuracy <= ARRIVAL_ACCURACY;
+        if (accOk && distRaw <= ARRIVAL_RADIUS) {
+          if (!inRadiusSince.current) {
+            const persisted = Number(
+              (await AsyncStorage.getItem(IN_RADIUS_SINCE_KEY)) || "0"
+            );
+            inRadiusSince.current = persisted || now;
+            if (!persisted)
+              await AsyncStorage.setItem(IN_RADIUS_SINCE_KEY, String(now));
+            log("FG", "enter arrival radius", {
+              distRaw,
+              accuracy,
+              since: inRadiusSince.current,
+            });
+          }
+          if (now - inRadiusSince.current >= ARRIVAL_STAY_MS) {
+            if (!transportIdRef.current) {
+              pendingStopRef.current = "auto";
+              return;
+            }
+            handleStop(true);
+            return;
+          }
+        } else {
+          if (inRadiusSince.current) log("FG", "leave arrival radius");
+          inRadiusSince.current = null;
+          await AsyncStorage.removeItem(IN_RADIUS_SINCE_KEY);
+        }
+      }
+
+      if (now - ts > STALE_SAMPLE_MS_FG) {
+        drop("FG_stale", { ageMs: now - ts });
+        return;
+      }
+      const accThreshFG = accThreshFGByMode(mode);
+      if (!(typeof accuracy === "number") || accuracy > accThreshFG) {
+        drop("accuracyFG", { accuracy, accThreshFG });
+        return;
+      }
+
+      coordBuffer.current.push({
+        latitude,
+        longitude,
+        timestamp: ts,
+        accuracy,
+      });
+      if (coordBuffer.current.length > COORD_BUFFER_SIZE)
+        coordBuffer.current.shift();
+      const smoothed = getSmoothedCoord(coordBuffer.current);
+      if (!smoothed) return;
+
+      if (!prevCoord.current) {
+        setStartCoord(smoothed);
+        prevCoord.current = smoothed;
+        await writeLastCoord(smoothed);
+        log("FG", "seed prevCoord", smoothed);
+        return;
+      }
+
+      const d = calculateDistance(
+        prevCoord.current.latitude,
+        prevCoord.current.longitude,
+        smoothed.latitude,
+        smoothed.longitude
+      );
+      const rawDt = (ts - (prevCoord.current.timestamp || ts)) / 1000;
+      const dt = Math.max(0.5, rawDt);
+      if (dt <= 0) {
+        prevCoord.current = smoothed;
+        return;
+      }
+
+      const instV = d / dt;
+      const stepCap = getStepCap(mode, dt);
+      const spikeCap = getSpikeCap(mode);
+
+      if (instV > spikeCap) {
+        drop("vSpike", { instV, d, dt });
+        prevCoord.current = smoothed;
+        return;
+      }
+
+      const minStep = dynamicMinStep(
+        prevCoord.current?.accuracy,
+        smoothed?.accuracy,
+        mode,
+        instV
+      );
+      if (d < minStep) {
+        drop("smallStep", { d, minStep });
+        prevCoord.current = smoothed;
+        await writeLastCoord(smoothed);
+        return;
+      }
+
+      if (d > stepCap) {
+        drop("jumpStep", { d, cap: stepCap, dt });
+        if (mode === "WALK" || mode === "BIKE") {
+          return handleStop(false, "이동 속도가 너무 빠릅니다.");
+        }
+      }
+
       prevCoord.current = smoothed;
-      await writeLastCoord(smoothed);
-      log("FG", "seed prevCoord", smoothed);
-      return;
-    }
+      await applyDistance(d, smoothed);
+      log("FG", "accumulate", {
+        d: Math.round(d),
+        total: Math.round(distanceRef.current),
+      });
+    },
+    [endLat, endLng, mode, applyDistance, handleStop]
+  );
 
-    const d = calculateDistance(prevCoord.current.latitude, prevCoord.current.longitude, smoothed.latitude, smoothed.longitude);
-    const rawDt = (ts - (prevCoord.current.timestamp || ts)) / 1000;
-    const dt = Math.max(0.5, rawDt);
-    if (dt <= 0) { prevCoord.current = smoothed; return; }
+  useEffect(() => {
+    onLocationRef.current = onLocation;
+  }, [onLocation]);
 
-    const instV = d / dt;
-    const stepCap = getStepCap(mode, dt);
-    const spikeCap = getSpikeCap(mode);
-
-    if (instV > spikeCap) { drop("vSpike", { instV, d, dt }); prevCoord.current = smoothed; return; }
-
-    const minStep = dynamicMinStep(prevCoord.current?.accuracy, smoothed?.accuracy, mode, instV);
-    if (d < minStep) { drop("smallStep", { d, minStep }); prevCoord.current = smoothed; await writeLastCoord(smoothed); return; }
-
-    if (d > stepCap) {
-      drop("jumpStep", { d, cap: stepCap, dt });
-      if (mode === "WALK" || mode === "BIKE") {
-        return handleStop(false, "이동 속도가 너무 빠릅니다.");
-      }
-    }
-
-    prevCoord.current = smoothed;
-    await applyDistance(d, smoothed);
-    log("FG", "accumulate", { d: Math.round(d), total: Math.round(distanceRef.current) });
-  }, [endLat, endLng, mode, applyDistance, handleStop]);
-
-  useEffect(() => { onLocationRef.current = onLocation; }, [onLocation]);
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      (async () => {
+        if (!cancelled) await handleStoppedFromBGAndNavigate();
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [handleStoppedFromBGAndNavigate])
+  );
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", async (state) => {
@@ -455,18 +627,25 @@ export default function TransportMap() {
           setCurrentCoord(last);
         }
 
-        const persistedSince = Number((await AsyncStorage.getItem(IN_RADIUS_SINCE_KEY)) || "0");
+        const persistedSince = Number(
+          (await AsyncStorage.getItem(IN_RADIUS_SINCE_KEY)) || "0"
+        );
         if (persistedSince) inRadiusSince.current = persistedSince;
-        const sAt = Number((await AsyncStorage.getItem(START_KEY)) || Date.now());
+        const sAt = Number(
+          (await AsyncStorage.getItem(START_KEY)) || Date.now()
+        );
         startTime.current = isFinite(sAt) ? sAt : Date.now();
-        log("APP", "active-sync", { saved, startAt: startTime.current, inRadiusSince: inRadiusSince.current });
+        log("APP", "active-sync", {
+          saved,
+          startAt: startTime.current,
+          inRadiusSince: inRadiusSince.current,
+        });
 
         const t0 = Date.now();
         const poll = setInterval(async () => {
           const done = await handleStoppedFromBGAndNavigate();
-          if (done || Date.now() - t0 > 5000) clearInterval(poll);
+          if (done || Date.now() - t0 > 8000) clearInterval(poll);
         }, 500);
-
       } else if (state === "background" || state === "inactive") {
         await stopForegroundWatch();
         await startBackgroundUpdatesOnce();
@@ -474,45 +653,82 @@ export default function TransportMap() {
       }
     });
     return () => sub.remove();
-  }, [router, placeName, endLat, endLng, startForegroundWatch, stopForegroundWatch, startBackgroundUpdatesOnce, stopBackgroundUpdates, handleStoppedFromBGAndNavigate]);
+  }, [
+    router,
+    placeName,
+    endLat,
+    endLng,
+    startForegroundWatch,
+    stopForegroundWatch,
+    startBackgroundUpdatesOnce,
+    stopBackgroundUpdates,
+    handleStoppedFromBGAndNavigate,
+  ]);
 
   useEffect(() => {
     let unmounted = false;
     const initialize = async () => {
       try {
-        if (__TM_INIT_LOCK) { log("BOOT", "skip initialize: locked"); return; }
+        if (__TM_INIT_LOCK) {
+          log("BOOT", "skip initialize: locked");
+          return;
+        }
         __TM_INIT_LOCK = true;
 
-        log("BOOT", "initialize start", { mode, placeName, endLat, endLng, fresh: isFreshStart });
+        log("BOOT", "initialize start", {
+          mode,
+          placeName,
+          endLat,
+          endLng,
+          fresh: isFreshStart,
+        });
 
         const fg = await Location.requestForegroundPermissionsAsync();
         if (fg.status !== "granted") {
-          Alert.alert("위치 권한 필요", "서비스 이용을 위해 권한을 허용해주세요.", [{ text: "확인", onPress: () => router.back() }]);
+          Alert.alert(
+            "위치 권한 필요",
+            "서비스 이용을 위해 권한을 허용해주세요.",
+            [{ text: "확인", onPress: () => router.back() }]
+          );
           return;
         }
         const bg = await Location.requestBackgroundPermissionsAsync();
         if (bg.status !== "granted") {
-          Alert.alert("백그라운드 위치 권한", "앱이 꺼져도 이동을 기록하려면 권한을 허용해주세요.");
+          Alert.alert(
+            "백그라운드 위치 권한",
+            "앱이 꺼져도 이동을 기록하려면 권한을 허용해주세요."
+          );
         }
 
-        // BG에서 이미 종료된 세션 우선 처리
         const stoppedAtBG = await AsyncStorage.getItem(STOPPED_KEY);
         if (stoppedAtBG === "1") {
           const ok = await handleStoppedFromBGAndNavigate();
           if (ok) return;
         }
 
-        // 새 출발 강제
         if (isFreshStart) {
-          try { await Location.stopLocationUpdatesAsync(TASK_NAME); } catch {}
+          try {
+            await Location.stopLocationUpdatesAsync(TASK_NAME);
+          } catch {}
           await markActive(false);
           await AsyncStorage.multiRemove([
-            ID_KEY, DIST_KEY, LAST_KEY, DEST_KEY, IN_RADIUS_SINCE_KEY, STOPPED_KEY,
-            STOP_KIND_KEY, STOP_REASON_KEY, FINISH_RESULT_KEY, START_KEY, MODE_KEY, PLACE_KEY, ACTIVE_KEY,
+            ID_KEY,
+            DIST_KEY,
+            LAST_KEY,
+            DEST_KEY,
+            IN_RADIUS_SINCE_KEY,
+            STOPPED_KEY,
+            STOP_KIND_KEY,
+            STOP_REASON_KEY,
+            FINISH_RESULT_KEY,
+            START_KEY,
+            MODE_KEY,
+            PLACE_KEY,
+            ACTIVE_KEY,
+            FINISHING_KEY,
           ]);
         }
 
-        // 진행 중 세션 재개
         const existingId = await AsyncStorage.getItem(ID_KEY);
         const stoppedFlag = (await AsyncStorage.getItem(STOPPED_KEY)) === "1";
         if (existingId && !stoppedFlag) {
@@ -534,7 +750,9 @@ export default function TransportMap() {
               setStartCoord(lastSaved);
             }
           } else {
-            const seedPos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
+            const seedPos = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.BestForNavigation,
+            });
             const { latitude, longitude } = seedPos.coords;
             const seeded = { latitude, longitude, timestamp: Date.now() };
             prevCoord.current = seeded;
@@ -546,16 +764,23 @@ export default function TransportMap() {
             await writeLastCoord(seeded);
           }
 
-          const sAt = Number((await AsyncStorage.getItem(START_KEY)) || Date.now());
+          const sAt = Number(
+            (await AsyncStorage.getItem(START_KEY)) || Date.now()
+          );
           startTime.current = isFinite(sAt) ? sAt : Date.now();
 
           await startForegroundWatch();
-          log("BOOT", "resumed session", { id: existingId, saved, startAt: startTime.current });
+          log("BOOT", "resumed session", {
+            id: existingId,
+            saved,
+            startAt: startTime.current,
+          });
           return;
         }
 
-        // 새 세션: 초기 좌표 seed
-        const seedPos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
+        const seedPos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.BestForNavigation,
+        });
         const { latitude, longitude } = seedPos.coords;
         const seeded = { latitude, longitude, timestamp: Date.now() };
         if (!unmounted) {
@@ -564,7 +789,14 @@ export default function TransportMap() {
         }
         prevCoord.current = seeded;
 
-        await AsyncStorage.multiRemove([STOPPED_KEY, FINISH_RESULT_KEY, IN_RADIUS_SINCE_KEY, STOP_KIND_KEY, STOP_REASON_KEY]);
+        await AsyncStorage.multiRemove([
+          STOPPED_KEY,
+          FINISH_RESULT_KEY,
+          IN_RADIUS_SINCE_KEY,
+          STOP_KIND_KEY,
+          STOP_REASON_KEY,
+          FINISHING_KEY,
+        ]);
         await writeTotalDistance(0);
         await writeLastCoord(seeded);
         await markActive(true);
@@ -575,21 +807,35 @@ export default function TransportMap() {
         startTime.current = now;
 
         if (endLat && endLng) {
-          await AsyncStorage.setItem(DEST_KEY, JSON.stringify({ endLat: Number(endLat), endLng: Number(endLng) }));
+          await AsyncStorage.setItem(
+            DEST_KEY,
+            JSON.stringify({ endLat: Number(endLat), endLng: Number(endLng) })
+          );
         } else {
           await AsyncStorage.removeItem(DEST_KEY);
         }
 
-        const d0 = endLat && endLng
-          ? calculateDistance(latitude, longitude, Number(endLat), Number(endLng))
-          : Infinity;
-        if (d0 <= ARRIVAL_RADIUS) { pendingStopRef.current = "auto"; log("BOOT", "seed-in-arrival", { d0 }); }
+        const d0 =
+          endLat && endLng
+            ? calculateDistance(
+                latitude,
+                longitude,
+                Number(endLat),
+                Number(endLng)
+              )
+            : Infinity;
+        if (d0 <= ARRIVAL_RADIUS) {
+          pendingStopRef.current = "auto";
+          log("BOOT", "seed-in-arrival", { d0 });
+        }
 
         await startForegroundWatch();
 
-        // 서버 세션 시작
         const idCheck = await AsyncStorage.getItem(ID_KEY);
-        if (idCheck) { log("BOOT", "skip startTransport: id already set"); return; }
+        if (idCheck) {
+          log("BOOT", "skip startTransport: id already set");
+          return;
+        }
         const activity = await startTransport(mode);
         const newId = activity?.transportId ?? activity?.id;
         if (!newId) {
@@ -603,7 +849,6 @@ export default function TransportMap() {
         await AsyncStorage.setItem(ID_KEY, String(newId));
         log("BOOT", "transport started", { id: newId });
 
-        // ✅ BG 업데이트 즉시 등록 (알림/콜백 보장)
         await startBackgroundUpdatesOnce();
 
         if (pendingStopRef.current) {
@@ -633,12 +878,28 @@ export default function TransportMap() {
         log("BOOT", "unmount cleanup");
       })();
     };
-  }, [mode, placeName, endLat, endLng, router, startForegroundWatch, stopForegroundWatch, startBackgroundUpdatesOnce, stopBackgroundUpdates, handleStop, handleStoppedFromBGAndNavigate, isFreshStart]);
+  }, [
+    mode,
+    placeName,
+    endLat,
+    endLng,
+    router,
+    startForegroundWatch,
+    stopForegroundWatch,
+    startBackgroundUpdatesOnce,
+    stopBackgroundUpdates,
+    handleStop,
+    handleStoppedFromBGAndNavigate,
+    isFreshStart,
+  ]);
 
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="이동 중" className="px-pageX absolute top-0 left-0 right-0 z-20" />
+      <HeaderBar
+        title="이동 중"
+        className="px-pageX absolute top-0 left-0 right-0 z-20"
+      />
       {currentLat && currentLng ? (
         <KakaoMapView
           startLat={startLat || currentLat}
@@ -660,12 +921,17 @@ export default function TransportMap() {
         <View className="bg-white rounded-2xl shadow-sm px-xl py-lg">
           <View className="flex-row items-center mb-3">
             <Ionicons name="location-outline" size={22} color="#318643" />
-            <Text className="font-sf-b text-lg text-gray-800" numberOfLines={1}>도착지: {placeName}</Text>
+            <Text className="font-sf-b text-lg text-gray-800" numberOfLines={1}>
+              도착지: {placeName}
+            </Text>
           </View>
           <View className="flex-row items-center">
             <Ionicons name="walk-outline" size={20} color="#555" />
             <Text className="font-sf-md text-base text-gray-600">
-              이동 거리: <Text className="font-sf-b text-[#318643]">{Math.round(distance)} m</Text>
+              이동 거리:{" "}
+              <Text className="font-sf-b text-[#318643]">
+                {Math.round(distance)} m
+              </Text>
             </Text>
           </View>
         </View>
