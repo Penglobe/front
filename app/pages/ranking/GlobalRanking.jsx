@@ -64,8 +64,7 @@ export default function GlobalRanking() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUserNickname, setCurrentUserNickname] = useState(null); // Re-add state for nickname
-  const [showParticipationMessage,
-    setShowParticipationMessage] =
+  const [showParticipationMessage, setShowParticipationMessage] =
     useState(false);
 
   useEffect(() => {
@@ -122,9 +121,9 @@ export default function GlobalRanking() {
   const myRankInList = rankingList.find((r) => r.userId === currentUserId);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="px-pageX" style={{ flex: 1 }}>
       {/* --- Podium Section (Height Adjusted) --- */}
-      <View className="h-48 flex-row items-end p-sm mx-sm mt-xs">
+      <View className="h-48 flex-row items-end p-sm mt-xs">
         <PodiumItem
           ranker={ranker2}
           height={70}
@@ -147,7 +146,7 @@ export default function GlobalRanking() {
 
       {/* --- Separator / Message --- */}
       {showParticipationMessage ? (
-        <View className="px-md">
+        <View>
           <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
             <Text className="font-bold">랭킹 참여 조건 미달</Text>
             <Text>
@@ -176,7 +175,7 @@ export default function GlobalRanking() {
       )}
 
       {/* --- Rest of the Ranking List --- */}
-      <View className="flex-1 px-md pb-md">
+      <View className="flex-1 pb-md">
         <ScrollView style={{ flex: 1 }}>
           {others.map((item) => {
             const isCurrentUser = item.userId === currentUserId;

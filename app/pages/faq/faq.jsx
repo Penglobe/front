@@ -82,8 +82,8 @@ export default function FaqPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="QnA" />
-      <ScrollView className="flex-1 p-md">
+      <HeaderBar title="도움말" />
+      <ScrollView className="flex-1 p-md px-pageX">
         {FAQ_DATA.map((item, index) => (
           <FaqItem
             key={index}
