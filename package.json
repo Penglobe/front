@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@types/react": "~19.0.10",
     "axios": "^1.11.0",
     "expo": "^53.0.22",
@@ -17,6 +18,7 @@
     "expo-build-properties": "~0.14.8",
     "expo-camera": "~16.1.11",
     "expo-constants": "~17.1.7",
+    "expo-dev-client": "~5.2.4",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.4.0",
@@ -41,6 +43,7 @@
     "react-native-css-interop": "^0.1.22",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
@@ -48,9 +51,7 @@
     "react-native-svg": "^15.11.2",
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
-    "typescript": "~5.8.3",
-    "@react-native-async-storage/async-storage": "2.1.2",
-    "expo-dev-client": "~5.2.4"
+    "typescript": "~5.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

@@ -182,7 +182,6 @@ export default function PointHistory() {
                 }`}
                 style={{
                   width: "30%", // 3개씩 배치
-                  minWidth: 100, // 너무 작아지는 거 방지
                   height: 48, // 버튼 높이 고정
                 }}
               >
