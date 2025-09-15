@@ -15,16 +15,9 @@ export default function RankingCard({ item, isProminent, onPress }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
-        className={`bg-white rounded-xl p-lg mb-2 shadow-sm ${
-          isProminent ? "border-2 border-green" : ""
+        className={`bg-white rounded-xl p-lg mb-sm shadow-sm ${
+          isProminent ? "border-2 border-green" : "border-2 border-gray"
         }`}
-        style={{
-          shadowColor: "#000000", // 검은색으로 변경
-          shadowOffset: { width: 0, height: 5 }, // 세로 오프셋 증가
-          shadowOpacity: 1,
-          shadowRadius: 5, // 블러 반경 증가
-          elevation: 8, // Android 그림자 깊이 증가
-        }}
       >
         <View className="flex-row justify-between items-center">
           <Text className="font-sf-b text-black w-1/6">{item.rank}위</Text>

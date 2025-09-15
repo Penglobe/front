@@ -39,7 +39,6 @@ export default function StoreListPage() {
   const insets = useSafeAreaInsets();
 
   const NUM_COLUMNS = 2;
-  const TABBAR_H = 70; // 전역 탭바 높이에 맞게 조정
 
   // 서버에서 상품 불러오기
   const loadProducts = useCallback(async () => {
@@ -154,13 +153,13 @@ export default function StoreListPage() {
           />
         )}
 
-        <Text className="text-h4 text-gray-900 font-sf-b" numberOfLines={1}>
+        <Text className="text-h4 text-black font-sf-b" numberOfLines={1}>
           {item.name}
         </Text>
 
         {!!item.description && (
           <Text
-            className="text-caption text-gray-500 font-sf-md mt-xxs"
+            className="text-caption text-darkGray font-sf-md mt-xxs mb-xxs"
             numberOfLines={2}
           >
             {item.description}
@@ -169,11 +168,11 @@ export default function StoreListPage() {
 
         {/* 가격 배지: 우측 하단 고정 */}
         {!item.name?.startsWith("[기부]") && (
-          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
-            <Text className="text-green font-sf-b mr-xs">
+          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full px-sm py-xs">
+            <Text className="text-green font-sf-b">
               {(item.price ?? 0).toLocaleString()}
             </Text>
-            <Images.Ice width={16} height={16} />
+            <Images.Ice width={20} height={20} />
           </View>
         )}
       </Pressable>
@@ -196,50 +195,46 @@ export default function StoreListPage() {
         <HeaderBar title="얼음 거래소" />
 
         {/* 🔎 검색창 */}
-        <View className="px-pageX mt-4">
+        <View className="px-pageX mt-5">
           <View className="flex-row items-center bg-white rounded-xl px-md py-md shadow-md shadow-black/5">
-            <Ionicons name="search-outline" size={20} color={"#10B981"} />
-            <View className="flex-1 ml-sm mr-sm">
-              <View className="-mt-xs" />
-              <View>
-                <TextInput
-                  value={query}
-                  onChangeText={setQuery}
-                  placeholder="상품명을 검색하세요"
-                  className="font-sf-md text-gray-800"
-                  returnKeyType="search"
-                  onSubmitEditing={handleSearchSubmit}
-                />
-              </View>
-            </View>
-            {!!query && (
-              <Pressable onPress={clearQuery} hitSlop={8}>
-                <Ionicons name="close-circle" size={20} color={"#94A3B8"} />
-              </Pressable>
-            )}
+            <Ionicons
+              name="search-outline"
+              size={20}
+              color={"green"}
+              className="mr-1"
+            />
+            <TextInput
+              placeholder="상품명을 검색하세요"
+              value={query}
+              onChangeText={setQuery}
+              className="flex-1 font-sf-md text-gray-800"
+              style={{
+                paddingVertical: 0, // iOS 잘림 방지
+                textAlignVertical: "center", // Android 중앙 정렬
+              }}
+              returnKeyType="search"
+              onSubmitEditing={handleSearchSubmit}
+            />
           </View>
         </View>
 
         {/* 목록 */}
         <View className="flex-1 px-pageX pt-md">
-          <View className="flex-row justify-between items-center mb-sm px-xs">
-            <Text className="text-gray-500 font-sf-md">
+          <View className="flex-row justify-between items-center px-xs">
+            <Text className="text-black font-sf-sb">
               {query
                 ? `검색 결과 ${filtered.length}개`
                 : `전체 ${items.length}개`}
             </Text>
 
-            <View
-              className="flex-row items-center gap-2 mt-md
-            "
-            >
+            <View className="flex-row items-center gap-2">
               {["전체", "기부", "상품"].map((type) => (
                 <Pressable
                   key={type}
                   onPress={() => setFilterType(type)}
                   className={`px-md py-xs rounded-xl  ${
                     filterType === type
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -255,14 +250,14 @@ export default function StoreListPage() {
             </View>
           </View>
 
-          <View className="flex-row items-center mb-4 mt-lg">
+          <View className="flex-row items-center mb-sm mt-md">
             {filterType === "상품" && (
               <>
                 <Pressable
                   onPress={() => setSortOrder("latest")}
-                  className={`ml-2 px-3 py-1 rounded-xl ${
+                  className={`px-3 py-1 rounded-xl ${
                     sortOrder === "latest"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -279,7 +274,7 @@ export default function StoreListPage() {
                   onPress={() => setSortOrder("asc")}
                   className={`ml-2 px-3 py-1 rounded-xl ${
                     sortOrder === "asc"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -296,7 +291,7 @@ export default function StoreListPage() {
                   onPress={() => setSortOrder("desc")}
                   className={`ml-2 px-3 py-1 rounded-xl ${
                     sortOrder === "desc"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -319,9 +314,6 @@ export default function StoreListPage() {
             numColumns={NUM_COLUMNS}
             key={`cols-${NUM_COLUMNS}`}
             columnWrapperStyle={{ justifyContent: "flex-start" }}
-            contentContainerStyle={{
-              paddingBottom: TABBAR_H + insets.bottom + 12,
-            }}
             ListEmptyComponent={
               !loading ? (
                 <Text className="text-center text-gray-500 mt-2xl">

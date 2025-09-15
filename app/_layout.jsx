@@ -1,4 +1,19 @@
 // app/_layout.jsx
+
+if (__DEV__ && !global.__FETCH_WRAPPED__) {
+  const _fetch = global.fetch;
+  global.fetch = async (...args) => {
+    try {
+      const [input, init] = args;
+      const url = typeof input === "string" ? input : input?.url;
+      const method = init?.method || "GET";
+      console.log("[FETCH]", method, url);
+    } catch {}
+    return _fetch(...args);
+  };
+  global.__FETCH_WRAPPED__ = true;
+}
+
 import "../styles/global.css";
 import { SplashScreen, Stack, useRouter } from "expo-router";
 import { View } from "react-native";
@@ -49,6 +64,6 @@ export default function RootLayout() {
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <Stack screenOptions={{ headerShown: false }} />
       </View>
-     </AuthProvider>
+    </AuthProvider>
   );
 }

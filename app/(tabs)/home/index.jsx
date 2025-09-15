@@ -258,9 +258,7 @@ export default function Home() {
           }}
         >
           <Images.Quiz width={24} height={24} />
-          <Text className="text-white text-body font-sf-b text-body">
-            오늘의 퀴즈
-          </Text>
+          <Text className="text-white font-sf-b text-body">오늘의 퀴즈</Text>
         </Pressable>
       </Animated.View>
 

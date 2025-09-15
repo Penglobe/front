@@ -152,7 +152,7 @@ export default function QuizPage() {
       <View className="px-pageX pt-2xl gap-2xl">
         {/* 날짜/설명 */}
         <View className="bg-white rounded-xl p-4">
-          <Text className="text-green font-sf-md text-lg">{formattedDate}</Text>
+          <Text className="text-green font-sf-b text-lg">{formattedDate}</Text>
           <Text className="font-sf-b text-h4 mt-sm">
             환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}하지만 얼음은 없어도 지식은
             쌓을 수 있어요!

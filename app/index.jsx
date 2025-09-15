@@ -7,7 +7,6 @@ import {
   Pressable,
   Platform,
   StyleSheet,
-  KeyboardAvoidingView,
   Alert,
 } from "react-native";
 import { Images } from "@constants/Images";
@@ -16,6 +15,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { login, getAccessToken } from "@services/authService";
 import { useAuth } from "@hooks/useAuth";
 import { useKakaoLogin } from "@hooks/useKakaoLogin";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 const INPUT_H = 56; // 입력칸 높이
 const BTN_H = 56; // 버튼 높이
@@ -74,8 +74,8 @@ export default function Index() {
       }
       const result = await loginWithKakao();
       await refreshUser();
-
       // TODO: result 또는 사용자 정보에서 profileCompleted 여부 확인 후 분기
+
       router.replace("/(tabs)/home");
     } catch (e) {
       Alert.alert("카카오 로그인 실패", e.message ?? "다시 시도해주세요");
@@ -101,14 +101,16 @@ export default function Index() {
       </View>
 
       {/* 입력 + 버튼 영역 */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: (insets?.bottom ?? 0) + BLOCK_BOTTOM,
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "flex-end",
+          paddingBottom: (insets?.bottom ?? 0) + BLOCK_BOTTOM,
         }}
+        enableOnAndroid={true}
+        enableAutomaticScroll={Platform.OS === "ios"}
+        extraScrollHeight={20} // 입력칸 위로 살짝 더 올려줌
+        keyboardShouldPersistTaps="handled"
       >
         <View className="px-pageX">
           {/* 아이디 / 비밀번호 */}
@@ -125,7 +127,6 @@ export default function Index() {
                 styles.inputShadow,
                 {
                   height: INPUT_H,
-                  paddingVertical: 14,
                   fontSize: FONT,
                   textAlignVertical: "center",
                 },
@@ -143,7 +144,6 @@ export default function Index() {
                 styles.inputShadow,
                 {
                   height: INPUT_H,
-                  paddingVertical: 14,
                   fontSize: FONT,
                   textAlignVertical: "center",
                 },
@@ -167,7 +167,9 @@ export default function Index() {
             ]}
           >
             <Text
-              className={`font-sf-b text-h3 ${canLogin ? "text-white" : "text-[#9CA3AF]"}`}
+              className={`font-sf-b text-h3 ${
+                canLogin ? "text-white" : "text-[#9CA3AF]"
+              }`}
             >
               {loading ? "로그인 중..." : "로그인"}
             </Text>
@@ -196,7 +198,7 @@ export default function Index() {
             <Images.Kakao width={30} height={30} />
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </View>
   );
 }

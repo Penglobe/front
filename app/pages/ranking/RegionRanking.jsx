@@ -1,9 +1,14 @@
-import React, { useRef, useMemo, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, {
+  useRef,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import { View, Text, ScrollView, FlatList } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import Svg, { Path, G, Text as SvgText, Rect } from "react-native-svg";
 import geojson from "@assets/map/krmap.json";
-import { useEffect } from "react/cjs/react.development";
 
 export default function RegionRanking({
   selectedRegion,
@@ -11,10 +16,11 @@ export default function RegionRanking({
   rankingData,
 }) {
   const scrollViewRef = useRef(null);
-  const layoutMap = useRef({});
   const [mapLayout, setMapLayout] = useState(null);
-  const scrollViewHeight = useRef(0);
 
+  // 지도 데이터 계산
+
+  // 지도 데이터 계산
   const mapData = useMemo(() => {
     if (!mapLayout) return null;
 
@@ -24,7 +30,6 @@ export default function RegionRanking({
     const jejuFeature = geojson.features.find(
       (f) => f.properties.title === "제주특별자치도"
     );
-
     if (!jejuFeature) return null;
 
     const getBBox = (features) => {
@@ -58,15 +63,13 @@ export default function RegionRanking({
       };
     };
 
-    // 1. Mainland Map Calculation
     const mainlandBBox = getBBox(mainlandFeatures);
-    const mapContainerWidth = mapLayout.width;
-    const mapContainerHeight = mapLayout.height;
+    const { width: mapContainerWidth, height: mapContainerHeight } = mapLayout;
 
-    const mainScaleX = (mapContainerWidth - 40) / mainlandBBox.width;
-    const mainScaleY = (mapContainerHeight - 40) / mainlandBBox.height;
-    const mainScale = Math.min(mainScaleX, mainScaleY);
-
+    const mainScale = Math.min(
+      (mapContainerWidth - 40) / mainlandBBox.width,
+      (mapContainerHeight - 40) / mainlandBBox.height
+    );
     const mainOffsetX =
       (mapContainerWidth - mainlandBBox.width * mainScale) / 2 -
       mainlandBBox.minX * mainScale;
@@ -74,20 +77,17 @@ export default function RegionRanking({
       (mapContainerHeight - mainlandBBox.height * mainScale) / 2 -
       mainlandBBox.minY * mainScale;
 
-    // 2. Jeju Inset Map Calculation
+    // 제주도 인셋
     const jejuBBox = getBBox([jejuFeature]);
-    const insetWidth = 60;
-    const insetHeight = 80;
-    const insetPadding = 20;
-    const insetX = insetPadding;
-    const insetY = mapContainerHeight - insetHeight - insetPadding;
-
-    const jejuInternalPadding = 15;
-    const jejuScaleX = (insetWidth - jejuInternalPadding * 2) / jejuBBox.width;
-    const jejuScaleY =
-      (insetHeight - jejuInternalPadding * 2) / jejuBBox.height;
-    const jejuScale = Math.min(jejuScaleX, jejuScaleY);
-
+    const insetWidth = 60,
+      insetHeight = 80,
+      insetPadding = 20;
+    const insetX = insetPadding,
+      insetY = mapContainerHeight - insetHeight - insetPadding;
+    const jejuScale = Math.min(
+      (insetWidth - 30) / jejuBBox.width,
+      (insetHeight - 30) / jejuBBox.height
+    );
     const jejuOffsetX =
       insetX +
       (insetWidth - jejuBBox.width * jejuScale) / 2 -
@@ -97,7 +97,7 @@ export default function RegionRanking({
       (insetHeight - jejuBBox.height * jejuScale) / 2 +
       jejuBBox.maxY * jejuScale;
 
-    // 3. Center Coords for Labels
+    // 중심 좌표
     const centerCoords = geojson.features.reduce((acc, feature) => {
       const title = feature.properties.title;
       const isJeju = title === "제주특별자치도";
@@ -105,7 +105,6 @@ export default function RegionRanking({
       let centerX = bbox.minX + bbox.width / 2;
       let centerY = bbox.minY + bbox.height / 2;
 
-      // Manual label position adjustments for specific regions
       switch (title) {
         case "경상북도":
           centerX -= 25000;
@@ -115,17 +114,16 @@ export default function RegionRanking({
           break;
       }
 
-      if (isJeju) {
-        acc[title] = {
-          x: centerX * jejuScale + jejuOffsetX,
-          y: jejuOffsetY - centerY * jejuScale,
-        };
-      } else {
-        acc[title] = {
-          x: centerX * mainScale + mainOffsetX,
-          y: mapContainerHeight - (centerY * mainScale + mainOffsetY),
-        };
-      }
+      acc[title] = isJeju
+        ? {
+            x: centerX * jejuScale + jejuOffsetX,
+            y: jejuOffsetY - centerY * jejuScale,
+          }
+        : {
+            x: centerX * mainScale + mainOffsetX,
+            y: mapContainerHeight - (centerY * mainScale + mainOffsetY),
+          };
+
       return acc;
     }, {});
 
@@ -149,61 +147,61 @@ export default function RegionRanking({
     };
   }, [mapLayout]);
 
-  const handleRegionPress = (title) => {
-    setSelectedRegion(title);
-    const cardLayout = layoutMap.current[title];
-    if (cardLayout && scrollViewRef.current && scrollViewHeight.current > 0) {
-      const yPosition = cardLayout.y;
-      const cardHeight = cardLayout.height;
-      const svHeight = scrollViewHeight.current;
+  const onScrollToIndexFailed = (info) => {
+    // Workaround for a common FlatList bug
+    const wait = new Promise((resolve) => setTimeout(resolve, 100));
+    wait.then(() => {
+      if (rankingData.length > info.index) {
+        scrollViewRef.current?.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }
+    });
+  };
 
-      const scrollToY = yPosition - svHeight / 2 + cardHeight / 2;
-      const finalY = Math.max(0, scrollToY);
+  // 카드로 스크롤
+  const scrollToRegion = (regionName) => {
+    if (!scrollViewRef.current) {
+      console.log("[scrollToRegion] ScrollView ref not ready yet.");
+      return;
+    }
 
-      scrollViewRef.current.scrollTo({ y: finalY, animated: true });
+    const index = rankingData.findIndex((item) => item.regionName === regionName);
+
+    if (index !== -1) {
+      console.log(`[scrollToRegion] Scrolling to index ${index}`);
+      scrollViewRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5, // 0: top, 0.5: center, 1: bottom
+      });
+    } else {
+      console.log(`[scrollToRegion] Could not find index for ${regionName}`);
     }
   };
 
-  // 초기 로드 또는 데이터 변경 시 선택된 지역으로 자동 스크롤
+  const handleRegionPress = (title) => {
+    console.log("handleRegionPress:", title);
+    setSelectedRegion(title);
+    scrollToRegion(title);
+  };
+
+  // 초기 선택 지역 자동 스크롤
   useEffect(() => {
-    if (selectedRegion && rankingData.length > 0) {
-      const selectedItem = rankingData.find(
-        (item) => item.regionName === selectedRegion
-      );
-
-      if (selectedItem) {
-        // Use a timeout to ensure layout is calculated
-        setTimeout(() => {
-          const cardLayout = layoutMap.current[selectedItem.regionName];
-          if (
-            cardLayout &&
-            scrollViewRef.current &&
-            scrollViewHeight.current > 0
-          ) {
-            const yPosition = cardLayout.y;
-            const cardHeight = cardLayout.height;
-            const svHeight = scrollViewHeight.current;
-
-            const scrollToY = yPosition - svHeight / 2 + cardHeight / 2;
-            const finalY = Math.max(0, scrollToY);
-
-            scrollViewRef.current.scrollTo({ y: finalY, animated: true });
-          }
-        }, 100); // Small delay to ensure layout is ready
-      }
-    }
-  }, [selectedRegion, rankingData]); // Dependencies
+    if (selectedRegion) scrollToRegion(selectedRegion);
+  }, [selectedRegion, rankingData]);
 
   return (
-    <View style={{ flex: 1, flexDirection: "column" }}>
+    <View style={{ flex: 1 }}>
+      {/* 지도 */}
       <View
-        className="bg-white rounded-2xl p-sm shadow"
         style={{ flex: 1 }}
-        onLayout={(event) => setMapLayout(event.nativeEvent.layout)}
+        onLayout={(e) => setMapLayout(e.nativeEvent.layout)}
       >
         {mapData && (
           <Svg width="100%" height="100%">
-            {/* 본토 */}
             <G>
               {mapData.mainlandFeatures.map((feature) => {
                 const title = feature.properties.title;
@@ -212,6 +210,7 @@ export default function RegionRanking({
                   feature.geometry.type === "Polygon"
                     ? [feature.geometry.coordinates]
                     : feature.geometry.coordinates;
+
                 return (
                   <G key={feature.properties.id}>
                     {polygons.map((polygon, p_idx) => {
@@ -220,10 +219,7 @@ export default function RegionRanking({
                         polygon[0]
                           .map(
                             ([x, y]) =>
-                              `${x * mapData.mainScale + mapData.mainOffsetX},${
-                                mapData.mapContainerHeight -
-                                (y * mapData.mainScale + mapData.mainOffsetY)
-                              }`
+                              `${x * mapData.mainScale + mapData.mainOffsetX},${mapData.mapContainerHeight - (y * mapData.mainScale + mapData.mainOffsetY)}`
                           )
                           .join("L") +
                         "Z";
@@ -268,9 +264,7 @@ export default function RegionRanking({
                     polygon[0]
                       .map(
                         ([x, y]) =>
-                          `${x * mapData.jejuScale + mapData.jejuOffsetX},${
-                            mapData.jejuOffsetY - y * mapData.jejuScale
-                          }`
+                          `${x * mapData.jejuScale + mapData.jejuOffsetX},${mapData.jejuOffsetY - y * mapData.jejuScale}`
                       )
                       .join("L") +
                     "Z";
@@ -295,7 +289,7 @@ export default function RegionRanking({
                 y={mapData.centerCoords[selectedRegion].y}
                 textAnchor="middle"
                 alignmentBaseline="middle"
-                fontSize="16"
+                fontSize={16}
                 fontWeight="bold"
                 fill="white"
                 stroke="black"
@@ -308,33 +302,29 @@ export default function RegionRanking({
         )}
       </View>
 
-      <View
-        className="bg-deactivateButton/75 rounded-2xl p-sm"
-        style={{ flex: 1, paddingLeft: 10, paddingRight: 10, marginTop: 10 }}
-      >
-        <Text className="text-green text-center font-sf-b text-bodyLg mb-2">
-          지역별 탄소 절감량 랭킹
-        </Text>
-        <ScrollView
-          ref={scrollViewRef}
-          className="flex-1"
-          contentContainerStyle={{ flexGrow: 1 }}
-          onLayout={(event) => {
-            scrollViewHeight.current = event.nativeEvent.layout.height;
+      {/* 카드 리스트 */}
+      <View style={{ flex: 1, paddingHorizontal: 10, marginTop: 10 }}>
+        <Text
+          style={{
+            textAlign: "center",
+            color: "#4CAF50",
+            fontWeight: "bold",
+            marginBottom: 8,
           }}
         >
-          {rankingData.map((item) => {
+          지역별 탄소 절감량 랭킹
+        </Text>
+        <FlatList
+          style={{ flex: 1 }}
+          ref={scrollViewRef}
+          data={rankingData}
+          keyExtractor={(item) => item.rank + item.regionName}
+          onScrollToIndexFailed={onScrollToIndexFailed}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={({ item }) => {
             const isProminent = item.regionName === selectedRegion;
             return (
-              <View
-                key={item.rank + item.regionName}
-                onLayout={(event) => {
-                  layoutMap.current[item.regionName] = {
-                    y: event.nativeEvent.layout.y,
-                    height: event.nativeEvent.layout.height,
-                  };
-                }}
-              >
+              <View>
                 <RankingCard
                   item={{
                     rank: item.rank,
@@ -346,8 +336,8 @@ export default function RegionRanking({
                 />
               </View>
             );
-          })}
-        </ScrollView>
+          }}
+        />
       </View>
     </View>
   );

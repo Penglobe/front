@@ -82,6 +82,7 @@ export default function TransportBookmark() {
           ? selectedPlace.bookmarkLabel
           : selectedPlace.place_name,
         mode,
+        fresh: "1", 
       },
     });
   };

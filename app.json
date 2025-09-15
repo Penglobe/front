@@ -32,7 +32,16 @@
             }
           }
         },
-        "UIBackgroundModes": ["location"]
+        "UIBackgroundModes": ["location"],
+        "LSApplicationQueriesSchemes": [
+          "kakaotalk",
+          "kakaopay",
+          "naversearchapp",
+          "ispmobile",
+          "payco",
+          "smilepayapp",
+          "samsungpay"
+        ]
       }
     },
     "android": {
@@ -51,8 +60,10 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE_LOCATION",
         "FOREGROUND_SERVICE",
-        "INTERNET"
+        "INTERNET",
+        "POST_NOTIFICATIONS"
       ],
       "package": "com.penglobe9.app"
     },
@@ -76,11 +87,10 @@
     ],
     "extra": {
       "router": {},
+      "SERVER_URL": "https://penglobe.shinhanacademy.co.kr",
       "eas": {
         "projectId": "63934cda-fdb2-4f4b-bf3e-9a77877deba3"
-      },
-      "SERVER_URL": "http://192.168.0.51:8080"
-    },
-    "owner": "panicddd"
+      }
+    }
   }
 }

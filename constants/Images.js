@@ -22,7 +22,10 @@ import Tori1 from "@assets/images/character/tori-1.svg";
 import Tori2 from "@assets/images/character/tori-2.svg";
 import Tori3 from "@assets/images/character/tori-3.svg";
 import Tori4 from "@assets/images/character/tori-4.svg";
+import ToriObstacle from "@assets/images/character/tori-obstacle.svg";
 import survey_ipa from "@assets/images/character/survey_ipa.svg";
+import Ipa_diet from "@assets/images/character/ipa-diet.svg";
+import Tori_diet from "@assets/images/character/tori-diet.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -40,6 +43,8 @@ import Kakao from "@assets/icons/kakao.svg";
 import Box from "@assets/icons/giftbox.svg";
 import LogOut from "@assets/icons/logout.svg";
 import Order from "@assets/icons/order.svg";
+import Survey from "@assets/icons/survey.svg";
+import Faq from "@assets/icons/faq.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -109,4 +114,9 @@ export const Images = {
   survey_ipa,
   LogOut,
   Order,
+  Survey,
+  ToriObstacle,
+  Ipa_diet,
+  Tori_diet,
+  Faq,
 };

@@ -1,4 +1,6 @@
-import { Pressable, View, Text } from "react-native";
+// components/ShutterButton.jsx   (권장 위치: app/ 밖 혹은 _components/ 폴더)
+import React from "react";
+import { Pressable, View } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,9 +9,8 @@ import Animated, {
   withRepeat,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import React from "react";
 
-export function ShutterButton({ onPress, disabled, loading }) {
+const ShutterButton = ({ onPress, disabled, loading }) => {
   const pressScale = useSharedValue(1);
   const ringScale = useSharedValue(1);
 
@@ -64,7 +65,9 @@ export function ShutterButton({ onPress, disabled, loading }) {
       >
         <Animated.View
           style={[wrapStyle, { overflow: "visible" }]}
-          className={`w-[80px] h-[80px] bg-transparent items-center justify-center ${disabled ? "opacity-60" : ""}`}
+          className={`w-[80px] h-[80px] bg-transparent items-center justify-center ${
+            disabled ? "opacity-60" : ""
+          }`}
         >
           {/* 바깥 흰색 링 */}
           <Animated.View
@@ -82,4 +85,7 @@ export function ShutterButton({ onPress, disabled, loading }) {
       </Pressable>
     </View>
   );
-}
+};
+
+export default ShutterButton; // ✅ default export
+export { ShutterButton }; // (원하면 named export도 함께)

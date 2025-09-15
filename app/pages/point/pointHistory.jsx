@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,9 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import colors from "@constants/Colors.cjs";
+import { useFocusEffect, useRouter } from "expo-router";
+import Modal from "@components/Modal";
+import MainButton from "@components/MainButton";
 
 const { Colors } = colors;
 
@@ -23,6 +26,7 @@ const reasonLabels = {
   MISSION_REWARD: "미션 보상",
   SHOP_PURCHASE: "굿즈 구매",
   DONATION: "기부",
+  PAYMENT: "얼음 충전",
 };
 
 // 월별 그룹화
@@ -41,10 +45,13 @@ const groupByMonth = (points) => {
 };
 
 export default function PointHistory() {
+  const router = useRouter();
   const [sections, setSections] = useState([]);
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isChargeModalVisible, setIsChargeModalVisible] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -75,6 +82,12 @@ export default function PointHistory() {
     fetchData();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
+
   const renderItem = ({ item, index }) => {
     const isPlus = item.changeAmount > 0;
     return (
@@ -90,10 +103,10 @@ export default function PointHistory() {
         }}
       >
         <View className="flex-1">
-          <Text className="text-base font-sf-md">
+          <Text className="text-h4 font-sf-md">
             {reasonLabels[item.reason] ?? item.reason}
           </Text>
-          <Text className="text-xs text-zinc-400 mt-xs">
+          <Text className="text-overline py-xs">
             {new Date(item.eventDate).toLocaleDateString("ko-KR")}
           </Text>
         </View>
@@ -104,9 +117,7 @@ export default function PointHistory() {
           >
             {isPlus ? `+${item.changeAmount}` : item.changeAmount}
           </Text>
-          <Text className="text-xs text-zinc-500 mt-xs">
-            {item.balanceAfter} 얼음
-          </Text>
+          <Text className="text-overline py-xs">{item.balanceAfter} 얼음</Text>
         </View>
       </View>
     );
@@ -125,13 +136,91 @@ export default function PointHistory() {
     }
   };
 
+  // ⬇️ 결제 진행 함수 (선택 후 버튼 눌렀을 때만 이동)
+  const proceedCharge = () => {
+    if (!selectedAmount) return;
+    setIsChargeModalVisible(false);
+    router.push({
+      pathname: "/pages/point/webview", // ← 경로 소문자 webview
+      params: { amount: String(selectedAmount) },
+    });
+  };
+
+  const renderChargeModalContent = () => {
+    const amounts = [1000, 5000, 10000, 30000, 50000, 100000];
+    return (
+      <View>
+        <View className="flex-row items-center justify-center mb-md">
+          {/* 왼쪽 더미 (취소와 폭 맞추기용) */}
+          <View className="w-[40px]" />
+
+          <Text className="text-h2 font-sf-b text-center flex-1 text-green">
+            얼음 구매
+          </Text>
+
+          <Pressable
+            onPress={() => setIsChargeModalVisible(false)}
+            className="w-[40px] items-end"
+          >
+            <Text className="text-body text-darkGray">취소</Text>
+          </Pressable>
+        </View>
+        <Text className="text-body font-sf-md text-center flex-1 mb-md">
+          충전할 금액을 선택하세요.
+        </Text>
+
+        {/* 금액 칩 리스트 */}
+        <View className="flex-row flex-wrap justify-between mb-xs">
+          {amounts.map((amt) => {
+            const selected = selectedAmount === amt;
+            return (
+              <Pressable
+                key={amt}
+                onPress={() => setSelectedAmount(amt)}
+                className={`rounded-xl items-center justify-center m-1.5 ${
+                  selected ? "bg-green" : "bg-gray"
+                }`}
+                style={{
+                  width: "30%", // 3개씩 배치
+                  minWidth: 100, // 너무 작아지는 거 방지
+                  height: 48, // 버튼 높이 고정
+                }}
+              >
+                <Text
+                  className={`text-button font-sf-sb ${
+                    selected ? "text-white" : "text-black"
+                  }`}
+                >
+                  {amt.toLocaleString()}원
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* 진행 버튼 */}
+        <View className="mt-lg">
+          <MainButton
+            label={
+              selectedAmount
+                ? `${selectedAmount.toLocaleString()}원 충전`
+                : "금액을 선택하세요"
+            }
+            onPress={proceedCharge}
+            disabled={!selectedAmount}
+          />
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.white }}>
       <BgGradient />
       <HeaderBar title="얼음 적립 내역" className="px-pageX" />
 
       {/* 잔액 카드 */}
-      <View className="px-pageX mt-lg">
+      <View className="px-pageX mt-5">
         <View
           className="rounded-xl p-lg flex-row justify-between items-center"
           style={{
@@ -143,9 +232,7 @@ export default function PointHistory() {
             elevation: 4,
           }}
         >
-          <Text className="text-lg text-zinc-600 font-sf-md">
-            현재 보유 얼음
-          </Text>
+          <Text className="text-h4 font-sf-md">현재 보유 얼음</Text>
           <View className="flex-row items-center">
             <Text
               className="text-2xl font-grotesk-b mr-sm"
@@ -155,6 +242,16 @@ export default function PointHistory() {
             </Text>
             <Images.Ice width={40} height={40} />
           </View>
+        </View>
+        <View className="flex-row justify-end mt-md">
+          <Pressable
+            onPress={() => setIsChargeModalVisible(true)}
+            accessibilityRole="button"
+            className="rounded-xl py-sm px-xl active:bg-green"
+            style={{ backgroundColor: Colors.green }}
+          >
+            <Text className="text-white font-sf-md text-button">얼음 구매</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -232,6 +329,8 @@ export default function PointHistory() {
           />
         </View>
       )}
+
+      <Modal visible={isChargeModalVisible}>{renderChargeModalContent()}</Modal>
     </View>
   );
 }
