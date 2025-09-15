@@ -260,7 +260,7 @@ export default function MyPage() {
     // 3. 선택된 날짜의 스타일 재정의
     if (selectedDate) {
       const selectionColor =
-        marked[selectedDate]?.color === "#b1e666" ? "#2E8B57" : "#2E8B57";
+        marked[selectedDate]?.color === "#b1e666" ? "green" : "green";
       marked[selectedDate] = {
         ...(marked[selectedDate] || {}),
         color: selectionColor,
@@ -339,6 +339,25 @@ export default function MyPage() {
               <Text className="text-black font-sf-b text-h3 mb-4">
                 {myPageInfo.nickname}
               </Text>
+              <View
+                className="flex-1 p-sm rounded-md shadow-sm mx-1 mb-sm"
+                style={{
+                  backgroundColor: "#9fcbe8ff",
+                  width: "98%",
+                  height: 60,
+                }}
+              >
+                <Text className="text-black font-sf-r px-xxs -mb-xs text-caption">
+                  보유 얼음
+                </Text>
+                <View className="flex-row items-center mt-1">
+                  <Text className="text-black font-sf-b text-body ml-1">
+                    10000000000000
+                    {/*totalPoint.toLocaleString("ko-KR")*/}
+                  </Text>
+                  <Images.Ice width={30} height={30} />
+                </View>
+              </View>
               <View className="flex-row justify-around w-full max-w-md">
                 <View
                   className="items-center flex-1 p-sm rounded-md shadow-sm mx-1 "
@@ -365,20 +384,6 @@ export default function MyPage() {
                     <Images.Snow width={30} height={30} />
                     <Text className="text-black font-sf-b text-body ml-1">
                       {longestAttendanceStreak}일
-                    </Text>
-                  </View>
-                </View>
-                <View
-                  className="items-center flex-1 p-sm rounded-md shadow-sm mx-1"
-                  backgroundColor="#9fcbe8ff"
-                >
-                  <Text className="text-black font-sf-r text-caption">
-                    보유 얼음
-                  </Text>
-                  <View className="flex-row items-center mt-1">
-                    <Images.Ice width={30} height={30} />
-                    <Text className="text-black font-sf-b text-body ml-1">
-                      {totalPoint.toLocaleString("ko-KR")}
                     </Text>
                   </View>
                 </View>
@@ -456,11 +461,11 @@ export default function MyPage() {
                       {dailyReductionData.surveyCo2Kg} kg
                     </Text>
                   </View>
-                  <View className="mt-2 pt-sm flex-row justify-between items-center">
+                  <View className="pt-md flex-row px-2 justify-between items-center">
                     <Text className="font-bold text-body text-green">
                       총 절감량
                     </Text>
-                    <Text className="font-bold text-body text-green">
+                    <Text className="font-sf-md font-bold text-body text-right -mx-xs text-green">
                       {dailyReductionData.totalCo2Kg} kg
                     </Text>
                   </View>
