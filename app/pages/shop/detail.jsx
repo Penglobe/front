@@ -134,7 +134,7 @@ export default function ProductDetailPage() {
               )}
             </View>
 
-            <View className="px-sm py-sm">
+            <View className="px-xxs py-sm">
               <Text className="font-sf-b text-h3 mb-lg text-green">
                 상품 정보
               </Text>

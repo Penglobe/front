@@ -106,16 +106,14 @@ export default function MissionScreen() {
             style={{ elevation: 4 }}
           >
             <View className="flex-row items-start">
-              <Images.Notice width={18} height={18} />
+              <Images.Notice width={18} height={20} />
 
               <View className="flex-1 pl-sm">
-                <Text className="text-black font-sf-b text-h4 leading-[20px]">
+                <Text className="text-black font-sf-b text-h3 leading-[20px]">
                   누적 탄소 절감량을 확인하세요.
                 </Text>
                 <Text className="text-black font-sf-b text-caption leading-[20px] mt-xs">
-                  출석 미션은 매달 새로 시작됩니다.
-                </Text>
-                <Text className="text-black font-sf-b text-caption leading-[20px]">
+                  출석 미션은 매달 새로 시작됩니다.{"\n"}
                   이전 보상을 수령해야 다음 보상이 수령가능합니다.
                 </Text>
               </View>
@@ -191,54 +189,7 @@ export default function MissionScreen() {
           right: 16,
           bottom: 16,
         }}
-      >
-        {/* ✅ 상품 추가 페이지 이동 버튼 */}
-        <Pressable
-          onPress={() => router.push("/pages/shop/newproducts")}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#10B981", // emerald-600
-            marginBottom: 8, // 로그아웃 버튼과 간격
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">상품추가</Text>
-        </Pressable>
-
-        {/* 기부 추가 페이지*/}
-        <Pressable
-          onPress={() => router.push("/pages/shop/newDonation")}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#10B981", // emerald-600
-            marginBottom: 8, // 로그아웃 버튼과 간격
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">기부 추가</Text>
-        </Pressable>
-
-        {/* 기존 로그아웃 버튼 */}
-        <Pressable
-          onPress={onLogout}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#ef4444", // red-500
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">로그아웃</Text>
-        </Pressable>
-      </View>
+      ></View>
     </View>
   );
 }

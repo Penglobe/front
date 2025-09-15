@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import colors from "@constants/Colors.cjs";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
 
@@ -81,6 +81,12 @@ export default function PointHistory() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const renderItem = ({ item, index }) => {
     const isPlus = item.changeAmount > 0;
