@@ -211,7 +211,7 @@ export default function PointWebviewRoute() {
         javaScriptEnabled
         originWhitelist={["*"]}
         startInLoadingState
-        style={{ flex: 1, marginTop: 22 }}
+        style={{ flex: 1, marginTop: 22, marginBottom: 40 }}
         renderLoading={() => (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
