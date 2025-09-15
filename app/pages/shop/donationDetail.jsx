@@ -69,8 +69,7 @@ export default function ProductDetailPage() {
 
   // 모달 열기
   const openConfirm = () => {
-    if (qty < 1) {
-      //100으로 수정***************************************************************
+    if (qty < 100) {
       Alert.alert(
         "최소 기부금 안내",
         "기부금은 최소 100얼음 이상이어야 합니다."
@@ -126,61 +125,63 @@ export default function ProductDetailPage() {
 
       {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
       <View className="flex-1 px-pageX pt-md">
-        <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
-          {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
-          <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
-            {/* 이미지 */}
-            <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
-              {imgUri ? (
-                <Image
-                  source={{ uri: imgUri }}
-                  className="w-full h-full"
-                  resizeMode="contain"
-                />
-              ) : (
-                <Text className="text-gray-400">이미지 없음</Text>
-              )}
-            </View>
+        {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
+        <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
+          {/* 이미지 */}
+          <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
+            {imgUri ? (
+              <Image
+                source={{ uri: imgUri }}
+                className="w-full h-full"
+                resizeMode="contain"
+              />
+            ) : (
+              <Text className="text-gray-400">이미지 없음</Text>
+            )}
+          </View>
 
-            <View className="px-sm py-sm">
-              <Text className="font-sf-b text-h3 mb-sm text-green">기부명</Text>
-              <Text className="text-h2 font-sf-b">{item.name}</Text>
-              {!!item.description && (
-                <View className="mt-md mb-3xl">
-                  <Text className="text-body text-gray-700">
-                    {item.description}
-                  </Text>
-                </View>
-              )}
-              <Text className="font-sf-b text-h3 mb-sm text-green">
-                기부금(포인트)
-              </Text>
-              <View className="flex-row items-center justify-between h-10">
-                <View className="flex-1 h-full justify-center">
-                  <TextInput
-                    value={qty > 0 ? qty.toString() : ""} // 0이면 빈 문자열
-                    onChangeText={(text) => {
-                      const numText = text.replace(/[^0-9]/g, ""); // 숫자만 허용
-                      if (!numText) {
-                        setQty(0); // 빈 상태 유지
-                        return;
-                      }
-                      let num = parseInt(numText, 10);
-                      setQty(num);
-                    }}
-                    placeholder="기부금 입력 (최소 100얼음)"
-                    keyboardType="numeric"
-                    className="flex-1 h-10 px-4 text-lg font-sf-b rounded-3xl border border-gray-300 bg-white"
-                  />
-                </View>
+          <View className="px-sm py-sm">
+            <Text className="font-sf-b text-h3 mb-sm text-green">기부명</Text>
+            <Text className="text-h2 font-sf-b">{item.name}</Text>
+            {!!item.description && (
+              <View className="mt-md mb-3xl">
+                <Text className="text-body text-gray-700">
+                  {item.description}
+                </Text>
               </View>
-              <View className="flex-row items-center mt-llg self-end">
-                <Text className="text-green font-sf-b text-h1">{qty}</Text>
-                <Images.Ice width={35} height={35} />
-              </View>
+            )}
+            <Text className="font-sf-b text-h3 mb-sm text-green">
+              기부금 (포인트){" "}
+            </Text>
+
+            <View className="flex-row">
+              <TextInput
+                value={qty > 0 ? qty.toString() : ""}
+                onChangeText={(text) => {
+                  const numText = text.replace(/[^0-9]/g, "");
+                  if (!numText) {
+                    setQty(0);
+                    return;
+                  }
+                  setQty(parseInt(numText, 10));
+                }}
+                placeholder="기부금 입력 (최소 100얼음)"
+                keyboardType="numeric"
+                multiline={false} // ✅ 명시
+                scrollEnabled={false} // ✅ 스크롤 막기
+                textAlignVertical="center" // ✅ 세로 중앙
+                className="flex-1 text-black h-10 px-3 text-md font-sf-b rounded-3xl border"
+                style={{
+                  paddingVertical: 1, // ✅ 위아래 여백 없애서 스크롤 방지
+                }}
+              />
+            </View>
+            <View className="flex-row items-center mt-llg self-end">
+              <Text className="text-green font-sf-b text-h1">{qty}</Text>
+              <Images.Ice width={35} height={35} />
             </View>
           </View>
-        </ScrollView>
+        </View>
 
         {/* 플로팅 결제 버튼 (배경 바 없음) */}
         <View
