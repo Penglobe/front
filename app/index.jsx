@@ -52,9 +52,13 @@ export default function Index() {
   const onLogin = async () => {
     try {
       setLoading(true);
-      await login(email.trim(), pw.trim());
-      await refreshUser();
-      router.replace("/(tabs)/home");
+      const res = await login(email.trim(), pw.trim());
+
+      if (res.type?.toUpperCase() === "ADMIN") {
+        router.replace("/pages/admin/adminMain"); // 관리자 페이지
+      } else {
+        router.replace("/(tabs)/home"); // 일반 유저 홈
+      }
     } catch (e) {
       Alert.alert("로그인 실패", e.message ?? "다시 시도해주세요");
     } finally {
@@ -70,6 +74,7 @@ export default function Index() {
       }
       const result = await loginWithKakao();
       await refreshUser();
+
       // TODO: result 또는 사용자 정보에서 profileCompleted 여부 확인 후 분기
       router.replace("/(tabs)/home");
     } catch (e) {

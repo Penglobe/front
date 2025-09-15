@@ -164,6 +164,7 @@ export async function login(email, password) {
     payload?.user || {
       userId: payload?.userId,
       profileCompleted: payload?.profileCompleted,
+      type: payload?.type,
     }
   );
 }

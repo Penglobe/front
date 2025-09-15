@@ -15,8 +15,10 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
+import HeaderBar from "@components/HeaderBar";
+import BgGradient from "@components/BgGradient";
 
-export default function ProductNew() {
+export default function newDonation() {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -25,11 +27,7 @@ export default function ProductNew() {
   const [asset, setAsset] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const canSave =
-    name.trim().length > 0 &&
-    String(price).trim().length > 0 &&
-    !Number.isNaN(Number(price)) &&
-    asset;
+  const canSave = name.trim().length > 0 && asset;
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,7 +50,6 @@ export default function ProductNew() {
       const fd = new FormData();
       fd.append("name", name.trim());
       fd.append("description", description.trim());
-      fd.append("price", String(Math.max(0, Number(price)))); // 음수 방지
       fd.append("image", {
         uri: asset.uri,
         name: asset.fileName ?? "image.jpg",
@@ -60,15 +57,15 @@ export default function ProductNew() {
       });
 
       // ⚠️ apiFetch가 FormData면 Content-Type 자동 처리
-      const res = await apiFetch("/shop/products", {
+      const res = await apiFetch("/shop/products/donation", {
         method: "POST",
         body: fd,
       });
       const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || "상품 생성 실패");
+      if (!res.ok) throw new Error(json?.message || "기부 등록 실패");
 
-      Alert.alert("완료", "상품이 생성되었습니다.");
-      router.replace("/(tabs)/store");
+      Alert.alert("완료", "기부이 생성되었습니다.");
+      router.replace("/pages/admin/showlist");
     } catch (e) {
       Alert.alert("오류", e?.message ?? "잠시 후 다시 시도해주세요.");
     } finally {
@@ -81,45 +78,30 @@ export default function ProductNew() {
       className="flex-1 bg-white"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <BgGradient />
+      {/* 헤더 */}
+      <HeaderBar title="기부 등록" />
+
       <ScrollView
         className="flex-1 px-pageX py-4"
         keyboardShouldPersistTaps="handled"
       >
-        {/* 헤더 */}
-        <View className="flex-row items-center justify-between mb-lg">
-          <Text className="text-2xl font-sf-b">상품 생성</Text>
-          <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Text className="text-[#2563EB] font-sf-b">취소</Text>
-          </Pressable>
-        </View>
-
-        <L label="상품명">
+        <L label="기부명">
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="에코 텀블러"
             className="bg-white rounded-2xl px-lg py-md border border-gray-200"
             autoCapitalize="none"
           />
         </L>
 
-        <L label="설명">
+        <L label="모금 소개">
           <TextInput
             value={description}
             onChangeText={setDescription}
             placeholder="상세 설명"
             className="bg-white rounded-2xl px-lg py-md border border-gray-200"
             multiline
-          />
-        </L>
-
-        <L label="가격(포인트)">
-          <TextInput
-            value={price}
-            onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
-            placeholder="3000"
-            keyboardType="number-pad"
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
           />
         </L>
 
@@ -155,19 +137,14 @@ export default function ProductNew() {
           )}
         </L>
 
-        <Pressable
-          onPress={onSubmit}
-          disabled={!canSave || loading}
-          className={`mt-xl rounded-2xl py-md items-center ${
-            canSave && !loading ? "bg-emerald-600" : "bg-gray-300"
-          }`}
-        >
-          {loading ? (
-            <ActivityIndicator />
-          ) : (
+        {canSave && !loading && (
+          <Pressable
+            onPress={onSubmit}
+            className="mt-xl rounded-2xl py-md items-center bg-emerald-600"
+          >
             <Text className="text-white font-sf-b">생성</Text>
-          )}
-        </Pressable>
+          </Pressable>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

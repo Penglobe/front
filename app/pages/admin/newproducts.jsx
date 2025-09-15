@@ -15,9 +15,10 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
-import HeaderBar from "../../../components/HeaderBar";
+import HeaderBar from "@components/HeaderBar";
+import BgGradient from "@components/BgGradient";
 
-export default function newDonation() {
+export default function ProductNew() {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -26,7 +27,11 @@ export default function newDonation() {
   const [asset, setAsset] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const canSave = name.trim().length > 0 && asset;
+  const canSave =
+    name.trim().length > 0 &&
+    String(price).trim().length > 0 &&
+    !Number.isNaN(Number(price)) &&
+    asset;
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -49,6 +54,7 @@ export default function newDonation() {
       const fd = new FormData();
       fd.append("name", name.trim());
       fd.append("description", description.trim());
+      fd.append("price", String(Math.max(0, Number(price)))); // 음수 방지
       fd.append("image", {
         uri: asset.uri,
         name: asset.fileName ?? "image.jpg",
@@ -56,7 +62,7 @@ export default function newDonation() {
       });
 
       // ⚠️ apiFetch가 FormData면 Content-Type 자동 처리
-      const res = await apiFetch("/shop/products/donation", {
+      const res = await apiFetch("/shop/products", {
         method: "POST",
         body: fd,
       });
@@ -64,7 +70,7 @@ export default function newDonation() {
       if (!res.ok) throw new Error(json?.message || "상품 생성 실패");
 
       Alert.alert("완료", "상품이 생성되었습니다.");
-      router.replace("/(tabs)/store");
+      router.replace("/pages/admin/showlist");
     } catch (e) {
       Alert.alert("오류", e?.message ?? "잠시 후 다시 시도해주세요.");
     } finally {
@@ -77,14 +83,14 @@ export default function newDonation() {
       className="flex-1 bg-white"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <BgGradient />
+      <HeaderBar title="상품 등록" />
+
       <ScrollView
         className="flex-1 px-pageX py-4"
         keyboardShouldPersistTaps="handled"
       >
-        {/* 헤더 */}
-        <HeaderBar title="기부 등록" />
-
-        <L label="기부명">
+        <L label="상품명">
           <TextInput
             value={name}
             onChangeText={setName}
@@ -94,13 +100,23 @@ export default function newDonation() {
           />
         </L>
 
-        <L label="모금 소개">
+        <L label="설명">
           <TextInput
             value={description}
             onChangeText={setDescription}
             placeholder="상세 설명"
             className="bg-white rounded-2xl px-lg py-md border border-gray-200"
             multiline
+          />
+        </L>
+
+        <L label="가격(포인트)">
+          <TextInput
+            value={price}
+            onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
+            placeholder="3000"
+            keyboardType="number-pad"
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
           />
         </L>
 
@@ -136,19 +152,14 @@ export default function newDonation() {
           )}
         </L>
 
-        <Pressable
-          onPress={onSubmit}
-          disabled={!canSave || loading}
-          className={`mt-xl rounded-2xl py-md items-center ${
-            canSave && !loading ? "bg-emerald-600" : "bg-gray-300"
-          }`}
-        >
-          {loading ? (
-            <ActivityIndicator />
-          ) : (
+        {canSave && !loading && (
+          <Pressable
+            onPress={onSubmit}
+            className="mt-xl rounded-2xl py-md items-center bg-emerald-600"
+          >
             <Text className="text-white font-sf-b">생성</Text>
-          )}
-        </Pressable>
+          </Pressable>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );

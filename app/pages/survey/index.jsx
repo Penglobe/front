@@ -26,9 +26,6 @@ export default function Survey() {
   const scrollRef = useRef(null);
   const itemPositions = useRef({}); // 문항 id -> 화면 y좌표 저장
 
-  //console.log("user", user);
-  //console.log("userId", user.userId);
-
   /*질문 불러오기*/
   useEffect(() => {
     async function fetchQuestion() {
@@ -107,8 +104,6 @@ export default function Survey() {
     }
 
     try {
-      //console.log("보낼 answer 객체:", answer);
-
       // answer 객체 → DTO 배열 변환
       const answerArray = Object.entries(answer).map(
         ([itemId, selectValue]) => ({
@@ -140,13 +135,8 @@ export default function Survey() {
 
       // 서버 응답 데이터
       const data = await response.json();
-      //console.log("서버 응답:", data);
-      //console.log("데이터 : ", data.data.top3);
-
       // 결과 페이지로 이동
       const resultDataStr = encodeURIComponent(JSON.stringify(data.data));
-      //setResultData(data.data);
-      //console.log("resultDataStr", resultDataStr);
 
       router.push({
         pathname: "/pages/survey/result",
