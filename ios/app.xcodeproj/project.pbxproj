@@ -7,63 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		044D15923E95E73BEE9E5ACD /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */; };
-		0A210CBA2E6DEBAB00C23BB3 /* KakaoAuthModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */; };
-		0A210CBC2E6DEBDC00C23BB3 /* KakaoAuthModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */; };
-		0A24A2162E674C0200F04B69 /* FoodLensModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2142E674C0200F04B69 /* FoodLensModule.m */; };
-		0A24A2172E674C0200F04B69 /* FoodLensModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A24A2152E674C0200F04B69 /* FoodLensModule.swift */; };
-		0A917D0A2E69CAA9009D0697 /* RNKakaoMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */; };
-		0A917D0C2E69CAC0009D0697 /* RNKakaoMapViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */; };
-		0A917D132E69CB72009D0697 /* RNKakaoMapViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */; };
-		0AAEF1732E6E03D2003877DF /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1722E6E03D2003877DF /* KakaoSDKAuth */; };
-		0AAEF1752E6E03D2003877DF /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1742E6E03D2003877DF /* KakaoSDKCommon */; };
-		0AAEF1772E6E03D2003877DF /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1762E6E03D2003877DF /* KakaoSDKUser */; };
-		0AAEF17A2E6E03E2003877DF /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF1792E6E03E2003877DF /* FoodLensCore */; };
-		0AAEF17F2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */; };
-		0AAEF1802E6E0401003877DF /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		0A1216C42E76E65D00374757 /* KakaoAuthModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A1216BF2E76E65D00374757 /* KakaoAuthModule.m */; };
+		0A1216C52E76E65D00374757 /* KakaoAuthModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1216C02E76E65D00374757 /* KakaoAuthModule.swift */; };
+		0A1216C62E76E65D00374757 /* FoodLensModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A1216BD2E76E65D00374757 /* FoodLensModule.m */; };
+		0A1216C72E76E65D00374757 /* FoodLensModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1216BE2E76E65D00374757 /* FoodLensModule.swift */; };
+		0A1216C82E76E65D00374757 /* Podfile.properties.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A1216C32E76E65D00374757 /* Podfile.properties.json */; };
+		0A1216C92E76E65D00374757 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 0A1216C22E76E65D00374757 /* Podfile.lock */; };
+		0A1216CA2E76E65D00374757 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 0A1216C12E76E65D00374757 /* Podfile */; };
+		0A1216CD2E76E68600374757 /* FoodLensCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1216CC2E76E68600374757 /* FoodLensCore */; };
+		0A1216D02E76E69F00374757 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1216CF2E76E69F00374757 /* KakaoSDKAuth */; };
+		0A1216D22E76E69F00374757 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1216D12E76E69F00374757 /* KakaoSDKCommon */; };
+		0A1216D42E76E69F00374757 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 0A1216D32E76E69F00374757 /* KakaoSDKUser */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		180767365A5D81304482F421 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F9A85D0BEDBECCB387B48F8A /* PrivacyInfo.xcprivacy */; };
+		3472A2B8916D6CBF9DC78BCF /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCCD22207A98574B38C773D9 /* ExpoModulesProvider.swift */; };
+		3DB26D4099A057643144DB46 /* libPods-app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FCFF657DC249772B20D6FA00 /* libPods-app.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		6FF9F81F38E805910EFFA6F2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */; };
-		9BB68C1E139784A9B6BFDD78 /* libPods-app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CAFEBCAD7ED93C7FE92294E9 /* libPods-app.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		0A09422A2E69E82200D4E6D7 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				0AAEF1802E6E0401003877DF /* KakaoMapsSDK-SPM-Dynamic in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KakaoAuthModule.swift; sourceTree = "<group>"; };
-		0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KakaoAuthModule.m; sourceTree = "<group>"; };
-		0A24A2142E674C0200F04B69 /* FoodLensModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FoodLensModule.m; sourceTree = "<group>"; };
-		0A24A2152E674C0200F04B69 /* FoodLensModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLensModule.swift; sourceTree = "<group>"; };
-		0A24A2182E67590A00F04B69 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
-		0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNKakaoMapView.swift; sourceTree = "<group>"; };
-		0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNKakaoMapViewManager.swift; sourceTree = "<group>"; };
-		0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNKakaoMapViewManager.m; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* penglobe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = penglobe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A1216BD2E76E65D00374757 /* FoodLensModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FoodLensModule.m; sourceTree = "<group>"; };
+		0A1216BE2E76E65D00374757 /* FoodLensModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLensModule.swift; sourceTree = "<group>"; };
+		0A1216BF2E76E65D00374757 /* KakaoAuthModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KakaoAuthModule.m; sourceTree = "<group>"; };
+		0A1216C02E76E65D00374757 /* KakaoAuthModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KakaoAuthModule.swift; sourceTree = "<group>"; };
+		0A1216C12E76E65D00374757 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
+		0A1216C22E76E65D00374757 /* Podfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
+		0A1216C32E76E65D00374757 /* Podfile.properties.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Podfile.properties.json; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = app.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = app/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = app/Info.plist; sourceTree = "<group>"; };
-		28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-app/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = app/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		63DDDB2B6D85C3AB9C9C5292 /* Pods-app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.release.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = app/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AADD26F764441D1D2131B6C1 /* Pods-app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.release.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.release.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CAFEBCAD7ED93C7FE92294E9 /* libPods-app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCCD22207A98574B38C773D9 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-app/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = app/AppDelegate.swift; sourceTree = "<group>"; };
-		F511DE7B2091D7AAD9AE3B33 /* Pods-app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.debug.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.debug.xcconfig"; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* app-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "app-Bridging-Header.h"; path = "app/app-Bridging-Header.h"; sourceTree = "<group>"; };
+		F9A85D0BEDBECCB387B48F8A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = app/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		FA770434A91947EB275356D4 /* Pods-app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-app.debug.xcconfig"; path = "Target Support Files/Pods-app/Pods-app.debug.xcconfig"; sourceTree = "<group>"; };
+		FCFF657DC249772B20D6FA00 /* libPods-app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,12 +55,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0AAEF17A2E6E03E2003877DF /* FoodLensCore in Frameworks */,
-				0AAEF1772E6E03D2003877DF /* KakaoSDKUser in Frameworks */,
-				0AAEF17F2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic in Frameworks */,
-				0AAEF1752E6E03D2003877DF /* KakaoSDKCommon in Frameworks */,
-				0AAEF1732E6E03D2003877DF /* KakaoSDKAuth in Frameworks */,
-				9BB68C1E139784A9B6BFDD78 /* libPods-app.a in Frameworks */,
+				0A1216D22E76E69F00374757 /* KakaoSDKCommon in Frameworks */,
+				3DB26D4099A057643144DB46 /* libPods-app.a in Frameworks */,
+				0A1216CD2E76E68600374757 /* FoodLensCore in Frameworks */,
+				0A1216D42E76E69F00374757 /* KakaoSDKUser in Frameworks */,
+				0A1216D02E76E69F00374757 /* KakaoSDKAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,12 +70,12 @@
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
+				F11748442D0722820044C1D9 /* app-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				9578CF29C16C0CC5B14191FA /* PrivacyInfo.xcprivacy */,
-				0A24A2182E67590A00F04B69 /* App-Bridging-Header.h */,
+				F9A85D0BEDBECCB387B48F8A /* PrivacyInfo.xcprivacy */,
 			);
 			name = app;
 			sourceTree = "<group>";
@@ -101,17 +84,17 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				CAFEBCAD7ED93C7FE92294E9 /* libPods-app.a */,
+				FCFF657DC249772B20D6FA00 /* libPods-app.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		5385B80CA38A37983869B968 /* app */ = {
+		6E01290DE7ECB8835A37D646 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				28DADBF47348EFED34459B6F /* ExpoModulesProvider.swift */,
+				AEA9EE2DE79F4C588AA489B7 /* app */,
 			);
-			name = app;
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -124,19 +107,19 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				0A210CB92E6DEBAB00C23BB3 /* KakaoAuthModule.swift */,
-				0A210CBB2E6DEBDC00C23BB3 /* KakaoAuthModule.m */,
-				0A917D0B2E69CABC009D0697 /* RNKakaoMapViewManager.swift */,
-				0A917D122E69CB72009D0697 /* RNKakaoMapViewManager.m */,
-				0A917D092E69CAA5009D0697 /* RNKakaoMapView.swift */,
-				0A24A2142E674C0200F04B69 /* FoodLensModule.m */,
-				0A24A2152E674C0200F04B69 /* FoodLensModule.swift */,
+				0A1216BD2E76E65D00374757 /* FoodLensModule.m */,
+				0A1216BE2E76E65D00374757 /* FoodLensModule.swift */,
+				0A1216BF2E76E65D00374757 /* KakaoAuthModule.m */,
+				0A1216C02E76E65D00374757 /* KakaoAuthModule.swift */,
+				0A1216C12E76E65D00374757 /* Podfile */,
+				0A1216C22E76E65D00374757 /* Podfile.lock */,
+				0A1216C32E76E65D00374757 /* Podfile.properties.json */,
 				13B07FAE1A68108700A75B9A /* app */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				97F550EF227695F657D5638D /* Pods */,
-				9E6A0C9D481D1E3448A84F79 /* ExpoModulesProviders */,
+				DB5792615E2CCD7B29C29AA0 /* Pods */,
+				6E01290DE7ECB8835A37D646 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -146,26 +129,17 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* penglobe.app */,
+				13B07F961A680F5B00A75B9A /* app.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		97F550EF227695F657D5638D /* Pods */ = {
+		AEA9EE2DE79F4C588AA489B7 /* app */ = {
 			isa = PBXGroup;
 			children = (
-				F511DE7B2091D7AAD9AE3B33 /* Pods-app.debug.xcconfig */,
-				AADD26F764441D1D2131B6C1 /* Pods-app.release.xcconfig */,
+				DCCD22207A98574B38C773D9 /* ExpoModulesProvider.swift */,
 			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		9E6A0C9D481D1E3448A84F79 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				5385B80CA38A37983869B968 /* app */,
-			);
-			name = ExpoModulesProviders;
+			name = app;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -177,6 +151,15 @@
 			path = app/Supporting;
 			sourceTree = "<group>";
 		};
+		DB5792615E2CCD7B29C29AA0 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				FA770434A91947EB275356D4 /* Pods-app.debug.xcconfig */,
+				63DDDB2B6D85C3AB9C9C5292 /* Pods-app.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -184,15 +167,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "app" */;
 			buildPhases = (
-				52EBA87D1DB7D6F2503EF2D5 /* [CP] Check Pods Manifest.lock */,
-				9C46D17CD27371A582CE9CFD /* [Expo] Configure project */,
+				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				52246BD46B531EDE122C4A68 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				0A09422A2E69E82200D4E6D7 /* Embed Frameworks */,
-				4EA35603EBA74F6CC9484608 /* [CP] Embed Pods Frameworks */,
-				0E19EBE92A1D71A2F10C9C03 /* [CP] Copy Pods Resources */,
+				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
+				99670F9B5B5806F498530A06 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -200,7 +182,7 @@
 			);
 			name = app;
 			productName = app;
-			productReference = 13B07F961A680F5B00A75B9A /* penglobe.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* app.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -209,8 +191,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
@@ -227,9 +208,8 @@
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
-				0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
-				0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
-				0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */,
+				0A1216CB2E76E68600374757 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */,
+				0A1216CE2E76E69F00374757 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -246,9 +226,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
+				0A1216C82E76E65D00374757 /* Podfile.properties.json in Resources */,
+				0A1216C92E76E65D00374757 /* Podfile.lock in Resources */,
+				0A1216CA2E76E65D00374757 /* Podfile in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				6FF9F81F38E805910EFFA6F2 /* PrivacyInfo.xcprivacy in Resources */,
+				180767365A5D81304482F421 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,67 +251,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n# Expo export:embed — embed JS bundle only for Release\nset -euo pipefail\n\n# 0) Debug 빌드는 번들 내장 건너뜀 (Metro 사용)\ncase \"$CONFIGURATION\" in\n  *Debug*)\n    echo \"⚡️ Debug build: Metro 서버 사용 → JS 번들 생성/내장 건너뜀\"\n    exit 0\n    ;;\nesac\n\nPROJECT_ROOT=\"${PROJECT_DIR}/..\"\n\n# 1) nvm 등 사용 시 node 경로 고정 (.xcode.env.local에 PATH/NODE_BINARY 설정 가능)\nif [ -f \"$PROJECT_ROOT/.xcode.env.local\" ]; then\n  . \"$PROJECT_ROOT/.xcode.env.local\"\nfi\n: \"${NODE_BINARY:=$(command -v node)}\"\n\nif [ -z \"$NODE_BINARY\" ]; then\n  echo \"❌ node 실행 파일을 찾을 수 없습니다. .xcode.env.local에서 NODE_BINARY를 지정하세요.\"\n  exit 1\nfi\n\n# 2) Entry 자동 해석 (Expo helper)\nRESOLVER_JS=\"$(\"$NODE_BINARY\" -p \"require.resolve('expo/scripts/resolveAppEntry.js')\")\"\nENTRY_FILE=\"$(\"$NODE_BINARY\" \"$RESOLVER_JS\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\n\n# 3) 출력 경로(.app 내부)\nOUT_DIR=\"$CONFIGURATION_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\nmkdir -p \"$OUT_DIR\"\n\n# 4) Expo CLI로 내장 번들 생성 (Release 전용)\nCLI=\"$(\"$NODE_BINARY\" -p \"require.resolve('@expo/cli/build/bin/cli')\")\"\n\necho \"Expo embed -> entry: $ENTRY_FILE\"\necho \"             out:   $OUT_DIR/main.jsbundle\"\n\n# Release 기본값\nDEV=false\nMINIFY=true\n\n\"$NODE_BINARY\" \"$CLI\" export:embed \\\n  --platform ios \\\n  --entry-file \"$ENTRY_FILE\" \\\n  --bundle-output \"$OUT_DIR/main.jsbundle\" \\\n  --assets-dest \"$OUT_DIR\" \\\n  --dev $DEV \\\n  --minify $MINIFY\n\n";
+			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		0E19EBE92A1D71A2F10C9C03 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/EXTaskManager/ExpoTaskManager_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoTaskManager_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SDWebImage.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		4EA35603EBA74F6CC9484608 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		52EBA87D1DB7D6F2503EF2D5 /* [CP] Check Pods Manifest.lock */ = {
+		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -350,7 +275,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9C46D17CD27371A582CE9CFD /* [Expo] Configure project */ = {
+		52246BD46B531EDE122C4A68 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -369,6 +294,68 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-app/expo-configure-project.sh\"\n";
 		};
+		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXApplication/ExpoApplication_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXTaskManager/ExpoTaskManager_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/SDWebImage/SDWebImage.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-launcher/EXDevLauncher.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/expo-dev-menu/EXDevMenu.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoApplication_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoTaskManager_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SDWebImage.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevLauncher.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXDevMenu.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		99670F9B5B5806F498530A06 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-app/Pods-app-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -377,14 +364,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				044D15923E95E73BEE9E5ACD /* ExpoModulesProvider.swift in Sources */,
-				0A24A2162E674C0200F04B69 /* FoodLensModule.m in Sources */,
-				0A917D0C2E69CAC0009D0697 /* RNKakaoMapViewManager.swift in Sources */,
-				0A917D132E69CB72009D0697 /* RNKakaoMapViewManager.m in Sources */,
-				0A917D0A2E69CAA9009D0697 /* RNKakaoMapView.swift in Sources */,
-				0A24A2172E674C0200F04B69 /* FoodLensModule.swift in Sources */,
-				0A210CBC2E6DEBDC00C23BB3 /* KakaoAuthModule.m in Sources */,
-				0A210CBA2E6DEBAB00C23BB3 /* KakaoAuthModule.swift in Sources */,
+				3472A2B8916D6CBF9DC78BCF /* ExpoModulesProvider.swift in Sources */,
+				0A1216C42E76E65D00374757 /* KakaoAuthModule.m in Sources */,
+				0A1216C52E76E65D00374757 /* KakaoAuthModule.swift in Sources */,
+				0A1216C62E76E65D00374757 /* FoodLensModule.m in Sources */,
+				0A1216C72E76E65D00374757 /* FoodLensModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,7 +377,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F511DE7B2091D7AAD9AE3B33 /* Pods-app.debug.xcconfig */;
+			baseConfigurationReference = FA770434A91947EB275356D4 /* Pods-app.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -401,110 +385,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CSY8JBQL89;
 				ENABLE_BITCODE = NO;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FoodLensAppToken = 0b6fbe431b4144f190423b9630b6354a;
 				FoodLensCompanyToken = 774ee2d62e604f8a944242d471488ce6;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/BVLinearGradient\"",
-					"\"${PODS_ROOT}/Headers/Public/DoubleConversion\"",
-					"\"${PODS_ROOT}/Headers/Public/EXConstants\"",
-					"\"${PODS_ROOT}/Headers/Public/EXTaskManager\"",
-					"\"${PODS_ROOT}/Headers/Public/Expo\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoFileSystem\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoLocation\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoModulesCore\"",
-					"\"${PODS_ROOT}/Headers/Public/FBLazyVector\"",
-					"\"${PODS_ROOT}/Headers/Public/RCT-Folly\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTDeprecation\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTRequired\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTTypeSafety\"",
-					"\"${PODS_ROOT}/Headers/Public/RNReanimated\"",
-					"\"${PODS_ROOT}/Headers/Public/RNSVG\"",
-					"\"${PODS_ROOT}/Headers/Public/RNScreens\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Core\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Fabric\"",
-					"\"${PODS_ROOT}/Headers/Public/React-FabricComponents\"",
-					"\"${PODS_ROOT}/Headers/Public/React-FabricImage\"",
-					"\"${PODS_ROOT}/Headers/Public/React-ImageManager\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Mapbuffer\"",
-					"\"${PODS_ROOT}/Headers/Public/React-NativeModulesApple\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTAnimation\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTAppDelegate\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTBlob\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTFBReactNativeSpec\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTFabric\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTRuntime\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTText\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeApple\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeCore\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeHermes\"",
-					"\"${PODS_ROOT}/Headers/Public/React-callinvoker\"",
-					"\"${PODS_ROOT}/Headers/Public/React-cxxreact\"",
-					"\"${PODS_ROOT}/Headers/Public/React-debug\"",
-					"\"${PODS_ROOT}/Headers/Public/React-defaultsnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-domnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-featureflags\"",
-					"\"${PODS_ROOT}/Headers/Public/React-featureflagsnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-graphics\"",
-					"\"${PODS_ROOT}/Headers/Public/React-hermes\"",
-					"\"${PODS_ROOT}/Headers/Public/React-idlecallbacksnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jserrorhandler\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsi\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsiexecutor\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsinspector\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsinspectortracing\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsitooling\"",
-					"\"${PODS_ROOT}/Headers/Public/React-logger\"",
-					"\"${PODS_ROOT}/Headers/Public/React-microtasksnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-oscompat\"",
-					"\"${PODS_ROOT}/Headers/Public/React-perflogger\"",
-					"\"${PODS_ROOT}/Headers/Public/React-performancetimeline\"",
-					"\"${PODS_ROOT}/Headers/Public/React-rendererconsistency\"",
-					"\"${PODS_ROOT}/Headers/Public/React-renderercss\"",
-					"\"${PODS_ROOT}/Headers/Public/React-rendererdebug\"",
-					"\"${PODS_ROOT}/Headers/Public/React-runtimeexecutor\"",
-					"\"${PODS_ROOT}/Headers/Public/React-runtimescheduler\"",
-					"\"${PODS_ROOT}/Headers/Public/React-timing\"",
-					"\"${PODS_ROOT}/Headers/Public/React-utils\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactAppDependencyProvider\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactCodegen\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactCommon\"",
-					"\"${PODS_ROOT}/Headers/Public/SocketRocket\"",
-					"\"${PODS_ROOT}/Headers/Public/UMAppLoader\"",
-					"\"${PODS_ROOT}/Headers/Public/Yoga\"",
-					"\"${PODS_ROOT}/Headers/Public/ZXingObjC\"",
-					"\"${PODS_ROOT}/Headers/Public/boost\"",
-					"\"${PODS_ROOT}/Headers/Public/fast_float\"",
-					"\"${PODS_ROOT}/Headers/Public/fmt\"",
-					"\"${PODS_ROOT}/Headers/Public/glog\"",
-					"\"${PODS_ROOT}/Headers/Public/hermes-engine\"",
-					"\"${PODS_ROOT}/Headers/Public/react-native-safe-area-context\"",
-					"\"${PODS_ROOT}/Headers/Public/react-native-webview\"",
-					"\"$(PODS_ROOT)/DoubleConversion\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Expo/Swift Compatibility Header\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoModulesCore/Swift Compatibility Header\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
-					"\"$(PODS_ROOT)/boost\"",
-					"\"$(PODS_ROOT)/boost\"",
-					"\"$(PODS_ROOT)/boost-for-react-native\"",
-					"\"$(PODS_ROOT)/glog\"",
-					"\"$(PODS_ROOT)/RCT-Folly\"",
-					"\"$(PODS_ROOT)/Headers/Public/React-hermes\"",
-					"\"$(PODS_ROOT)/Headers/Public/hermes-engine\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native/ReactCommon\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native-reanimated/apple\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native-reanimated/Common/cpp\"",
-					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
-					"\"$(SRCROOT)/../node_modules/react-native/React\"",
-					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
 				);
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -521,8 +406,8 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.penglobe9.app;
-				PRODUCT_NAME = penglobe;
-				SWIFT_OBJC_BRIDGING_HEADER = "app/App-Bridging-Header.h";
+				PRODUCT_NAME = app;
+				SWIFT_OBJC_BRIDGING_HEADER = "app/app-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -532,114 +417,15 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AADD26F764441D1D2131B6C1 /* Pods-app.release.xcconfig */;
+			baseConfigurationReference = 63DDDB2B6D85C3AB9C9C5292 /* Pods-app.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = app/app.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CSY8JBQL89;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FoodLensAppToken = 0b6fbe431b4144f190423b9630b6354a;
 				FoodLensCompanyToken = 774ee2d62e604f8a944242d471488ce6;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"${PODS_ROOT}/Headers/Public\"",
-					"\"${PODS_ROOT}/Headers/Public/BVLinearGradient\"",
-					"\"${PODS_ROOT}/Headers/Public/DoubleConversion\"",
-					"\"${PODS_ROOT}/Headers/Public/EXConstants\"",
-					"\"${PODS_ROOT}/Headers/Public/EXTaskManager\"",
-					"\"${PODS_ROOT}/Headers/Public/Expo\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoFileSystem\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoLocation\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoModulesCore\"",
-					"\"${PODS_ROOT}/Headers/Public/FBLazyVector\"",
-					"\"${PODS_ROOT}/Headers/Public/RCT-Folly\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTDeprecation\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTRequired\"",
-					"\"${PODS_ROOT}/Headers/Public/RCTTypeSafety\"",
-					"\"${PODS_ROOT}/Headers/Public/RNReanimated\"",
-					"\"${PODS_ROOT}/Headers/Public/RNSVG\"",
-					"\"${PODS_ROOT}/Headers/Public/RNScreens\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Core\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Fabric\"",
-					"\"${PODS_ROOT}/Headers/Public/React-FabricComponents\"",
-					"\"${PODS_ROOT}/Headers/Public/React-FabricImage\"",
-					"\"${PODS_ROOT}/Headers/Public/React-ImageManager\"",
-					"\"${PODS_ROOT}/Headers/Public/React-Mapbuffer\"",
-					"\"${PODS_ROOT}/Headers/Public/React-NativeModulesApple\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTAnimation\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTAppDelegate\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTBlob\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTFBReactNativeSpec\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTFabric\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTRuntime\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RCTText\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeApple\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeCore\"",
-					"\"${PODS_ROOT}/Headers/Public/React-RuntimeHermes\"",
-					"\"${PODS_ROOT}/Headers/Public/React-callinvoker\"",
-					"\"${PODS_ROOT}/Headers/Public/React-cxxreact\"",
-					"\"${PODS_ROOT}/Headers/Public/React-debug\"",
-					"\"${PODS_ROOT}/Headers/Public/React-defaultsnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-domnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-featureflags\"",
-					"\"${PODS_ROOT}/Headers/Public/React-featureflagsnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-graphics\"",
-					"\"${PODS_ROOT}/Headers/Public/React-hermes\"",
-					"\"${PODS_ROOT}/Headers/Public/React-idlecallbacksnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jserrorhandler\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsi\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsiexecutor\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsinspector\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsinspectortracing\"",
-					"\"${PODS_ROOT}/Headers/Public/React-jsitooling\"",
-					"\"${PODS_ROOT}/Headers/Public/React-logger\"",
-					"\"${PODS_ROOT}/Headers/Public/React-microtasksnativemodule\"",
-					"\"${PODS_ROOT}/Headers/Public/React-oscompat\"",
-					"\"${PODS_ROOT}/Headers/Public/React-perflogger\"",
-					"\"${PODS_ROOT}/Headers/Public/React-performancetimeline\"",
-					"\"${PODS_ROOT}/Headers/Public/React-rendererconsistency\"",
-					"\"${PODS_ROOT}/Headers/Public/React-renderercss\"",
-					"\"${PODS_ROOT}/Headers/Public/React-rendererdebug\"",
-					"\"${PODS_ROOT}/Headers/Public/React-runtimeexecutor\"",
-					"\"${PODS_ROOT}/Headers/Public/React-runtimescheduler\"",
-					"\"${PODS_ROOT}/Headers/Public/React-timing\"",
-					"\"${PODS_ROOT}/Headers/Public/React-utils\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactAppDependencyProvider\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactCodegen\"",
-					"\"${PODS_ROOT}/Headers/Public/ReactCommon\"",
-					"\"${PODS_ROOT}/Headers/Public/SocketRocket\"",
-					"\"${PODS_ROOT}/Headers/Public/UMAppLoader\"",
-					"\"${PODS_ROOT}/Headers/Public/Yoga\"",
-					"\"${PODS_ROOT}/Headers/Public/ZXingObjC\"",
-					"\"${PODS_ROOT}/Headers/Public/boost\"",
-					"\"${PODS_ROOT}/Headers/Public/fast_float\"",
-					"\"${PODS_ROOT}/Headers/Public/fmt\"",
-					"\"${PODS_ROOT}/Headers/Public/glog\"",
-					"\"${PODS_ROOT}/Headers/Public/hermes-engine\"",
-					"\"${PODS_ROOT}/Headers/Public/react-native-safe-area-context\"",
-					"\"${PODS_ROOT}/Headers/Public/react-native-webview\"",
-					"\"$(PODS_ROOT)/DoubleConversion\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/Expo/Swift Compatibility Header\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoModulesCore/Swift Compatibility Header\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
-					"\"$(PODS_ROOT)/boost\"",
-					"\"$(PODS_ROOT)/boost\"",
-					"\"$(PODS_ROOT)/boost-for-react-native\"",
-					"\"$(PODS_ROOT)/glog\"",
-					"\"$(PODS_ROOT)/RCT-Folly\"",
-					"\"$(PODS_ROOT)/Headers/Public/React-hermes\"",
-					"\"$(PODS_ROOT)/Headers/Public/hermes-engine\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native/ReactCommon\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native-reanimated/apple\"",
-					"\"$(PODS_ROOT)/../../node_modules/react-native-reanimated/Common/cpp\"",
-					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
-					"\"$(SRCROOT)/../node_modules/react-native/React\"",
-					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
-					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
-				);
 				INFOPLIST_FILE = app/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				KAKAO_APP_KEY = d7e4f67977821a83057f4a5563b41415;
@@ -655,8 +441,8 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.penglobe9.app;
-				PRODUCT_NAME = penglobe;
-				SWIFT_OBJC_BRIDGING_HEADER = "app/App-Bridging-Header.h";
+				PRODUCT_NAME = app;
+				SWIFT_OBJC_BRIDGING_HEADER = "app/app-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -686,7 +472,6 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -696,7 +481,6 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -754,7 +538,6 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -764,7 +547,6 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -786,7 +568,6 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -816,15 +597,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.24.6;
-			};
-		};
-		0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
+		0A1216CB2E76E68600374757 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://bitbucket.org/doing-lab/ios_foodlenscoresdk";
 			requirement = {
@@ -832,41 +605,36 @@
 				minimumVersion = 3.1.1;
 			};
 		};
-		0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */ = {
+		0A1216CE2E76E69F00374757 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kakao-mapsSDK/KakaoMapsSDK-SPM.git";
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.12.10;
+				minimumVersion = 2.24.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0AAEF1722E6E03D2003877DF /* KakaoSDKAuth */ = {
+		0A1216CC2E76E68600374757 /* FoodLensCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKAuth;
-		};
-		0AAEF1742E6E03D2003877DF /* KakaoSDKCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKCommon;
-		};
-		0AAEF1762E6E03D2003877DF /* KakaoSDKUser */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0AAEF1712E6E03D2003877DF /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKUser;
-		};
-		0AAEF1792E6E03E2003877DF /* FoodLensCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0AAEF1782E6E03E2003877DF /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
+			package = 0A1216CB2E76E68600374757 /* XCRemoteSwiftPackageReference "ios_foodlenscoresdk" */;
 			productName = FoodLensCore;
 		};
-		0AAEF17E2E6E03F9003877DF /* KakaoMapsSDK-SPM-Dynamic */ = {
+		0A1216CF2E76E69F00374757 /* KakaoSDKAuth */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0AAEF17B2E6E03F9003877DF /* XCRemoteSwiftPackageReference "KakaoMapsSDK-SPM" */;
-			productName = "KakaoMapsSDK-SPM-Dynamic";
+			package = 0A1216CE2E76E69F00374757 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKAuth;
+		};
+		0A1216D12E76E69F00374757 /* KakaoSDKCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A1216CE2E76E69F00374757 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCommon;
+		};
+		0A1216D32E76E69F00374757 /* KakaoSDKUser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0A1216CE2E76E69F00374757 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKUser;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

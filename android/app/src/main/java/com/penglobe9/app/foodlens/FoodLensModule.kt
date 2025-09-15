@@ -7,8 +7,9 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.doinglab.foodlens.sdk.core.*
 import com.doinglab.foodlens.sdk.core.model.result.RecognitionResult
 import com.doinglab.foodlens.sdk.core.type.FoodLensType
+import com.doinglab.foodlens.sdk.core.type.LanguageConfig
+import com.doinglab.foodlens.sdk.core.type.ImageResizeOption
 import com.doinglab.foodlens.sdk.core.type.NutritionRetrieveOption
-import com.doinglab.foodlens.sdk.core.RecognitionResultHandler
 import com.doinglab.foodlens.sdk.core.error.BaseError
 
 private const val TAG = "FoodLensBridge"
@@ -16,20 +17,26 @@ private const val TAG = "FoodLensBridge"
 class FoodLensModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  // Core SDK 서비스 인스턴스
+  // ✅ Core SDK 서비스 인스턴스 (lazy 생성)
   private val foodLensCoreService: FoodLensCoreService by lazy {
-    FoodLensCore.createFoodLensService(reactContext, FoodLensType.CaloAI)
+    FoodLensCore.createFoodLensService(reactContext, FoodLensType.FoodLens).apply {
+      // 기본 옵션 세팅
+      setLanguage(LanguageConfig.KO) // 언어 (KO/EN/JA)
+      setImageResizeOption(ImageResizeOption.NORMAL) // 속도/품질 균형
+      setNutritionRetrieveOption(NutritionRetrieveOption.ALL_NUTRITION) // 모든 영양소 반환
+    }
   }
 
   override fun getName() = "FoodLensModule"
 
+  // === JS → Native 이벤트 전달 함수 ===
   private fun sendEvent(event: String, params: WritableMap?) {
     reactContext
       .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
       .emit(event, params)
   }
 
-  // === 1) 옵션 설정 ===
+  // === 옵션 변경 ===
   @ReactMethod
   fun setNutritionRetrieveOption(option: String, promise: Promise) {
     try {
@@ -46,7 +53,7 @@ class FoodLensModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
-  // === 2) 이미지 예측 (base64) ===
+  // === 이미지 예측 (base64) ===
   @ReactMethod
   fun predict(base64: String, promise: Promise) {
     try {
@@ -57,13 +64,17 @@ class FoodLensModule(private val reactContext: ReactApplicationContext) :
           val map = Arguments.createMap().apply {
             putString("rawJson", json)
           }
-          sendEvent("FoodLensResult", map)
-          promise.resolve(json)
+          sendEvent("FoodLensResult", map)  // JS 이벤트
+          promise.resolve(json)             // Promise 리턴
         }
 
         override fun onError(error: BaseError?) {
           val msg = error?.getMessage() ?: "Unknown error"
           Log.e(TAG, "predict() failed: $msg")
+          val map = Arguments.createMap().apply {
+            putString("message", msg)
+          }
+          sendEvent("FoodLensError", map)
           promise.reject("PREDICT_FAIL", msg)
         }
       })
