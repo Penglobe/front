@@ -69,7 +69,10 @@ export default function MyPage() {
   const [myPageInfo, setMyPageInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const today = new Date();
-  const todayDateString = today.toISOString().split("T")[0];
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, "0");
+  const day = today.getDate().toString().padStart(2, "0");
+  const todayDateString = `${year}-${month}-${day}`;
 
   const [selectedDate, setSelectedDate] = useState(todayDateString);
   const [currentMonth, setCurrentMonth] = useState(todayDateString);
@@ -484,6 +487,18 @@ export default function MyPage() {
                 <Images.Order width={24} height={24} />
                 <Text className="text-black font-sf-md text-body ml-md">
                   주문 내역
+                </Text>
+              </View>
+            </Pressable>
+            {/* 주문 내역 항목 */}
+            <Pressable
+              onPress={() => router.push("/pages/faq/faq")}
+              className="flex-row items-center justify-between py-md"
+            >
+              <View className="flex-row items-center">
+                <Images.Faq width={24} height={24} />
+                <Text className="text-black font-sf-md text-body ml-md">
+                  QnA
                 </Text>
               </View>
             </Pressable>

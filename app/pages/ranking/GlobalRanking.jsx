@@ -3,6 +3,7 @@ import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
+import { LinearGradient } from "expo-linear-gradient";
 
 // --- Avatar-related logic ---
 const AVATAR_MAP = {
@@ -21,33 +22,35 @@ const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
   const AvatarComponent = getAvatarRenderComponent(ranker.profile);
 
   return (
-    <View className="flex-1 items-center justify-center">
+    <View className="flex-1 items-center justify-end">
       {/* Profile Image */}
       {AvatarComponent && (
-        <View className="w-16 h-16 mt-2 mb-none">
-          <AvatarComponent width="80%" height="80%" />
+        <View className="absolute w-16 h-16 -top-[28px] ml-llg">
+          <AvatarComponent width="60%" height="60%" />
         </View>
       )}
 
       {/* Nickname */}
-      <Text className="font-sf-b text-base text-black mt-1">
+      <Text className="font-sf-b text-label text-black mt-xxs">
         {ranker.nickname}
       </Text>
 
       {/* Score */}
       <View
-        className="px-2 py-1 rounded-md my-1"
+        className="px-xs py-xs rounded-md my-xxs"
         style={{ backgroundColor: "#318643" }}
       >
-        <Text className="font-sf-r text-sm text-white">{ranker.score}kg</Text>
+        <Text className="font-sf-r text-footnote text-white">
+          {ranker.score}kg
+        </Text>
       </View>
 
       {/* Podium Platform */}
       <View
-        className="w-full items-center justify-center rounded-t-lg pt-1"
+        className="w-full items-center justify-center rounded-t-lg pt-xxs"
         style={{ height: height, backgroundColor: podiumColor }}
       >
-        <Text className={`font-sf-b text-2xl ${rankTextColor}`}>
+        <Text className={`font-sf-b text-h1 ${rankTextColor}`}>
           {ranker.rank}위
         </Text>
       </View>
@@ -61,7 +64,8 @@ export default function GlobalRanking() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUserNickname, setCurrentUserNickname] = useState(null); // Re-add state for nickname
-  const [showParticipationMessage, setShowParticipationMessage] =
+  const [showParticipationMessage,
+    setShowParticipationMessage] =
     useState(false);
 
   useEffect(() => {
@@ -118,14 +122,14 @@ export default function GlobalRanking() {
   const myRankInList = rankingList.find((r) => r.userId === currentUserId);
 
   return (
-    <View style={{ flex: 1 }} className="bg-gray-100">
+    <View style={{ flex: 1 }}>
       {/* --- Podium Section (Height Adjusted) --- */}
-      <View className="h-48 flex-row items-end p-2 mx-2 mt-4">
+      <View className="h-48 flex-row items-end p-sm mx-sm mt-xs">
         <PodiumItem
           ranker={ranker2}
           height={70}
           podiumColor="#DBDBDB" // 2nd place - Silver
-          rankTextColor="text-gray-800"
+          rankTextColor="text-black"
         />
         <PodiumItem
           ranker={ranker1}
@@ -141,51 +145,71 @@ export default function GlobalRanking() {
         />
       </View>
 
-      {/* --- Separator or Title --- */}
-      <Text className="text-center font-sf-b text-lg my-4 text-gray-700">
-        전체 랭킹
-      </Text>
-
-      {/* --- Rest of the Ranking List --- */}
-      <View className="flex-1 px-4 pb-4">
-        {showParticipationMessage ? (
-          <View className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg">
-            <Text className="font-bold">랭킹 확인 불가</Text>
+      {/* --- Separator / Message --- */}
+      {showParticipationMessage ? (
+        <View className="px-md">
+          <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
+            <Text className="font-bold">랭킹 참여 조건 미달</Text>
             <Text>
-              기록된 탄소 절감량이 없어서 전체 랭킹을 확인할 수 없습니다. 활동을
-              통해 탄소 절감량을 늘려보세요!
+              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! {"\n"}
+              활동을 통해 탄소 절감량을 늘리고 랭킹에 참여해보세요!
             </Text>
           </View>
-        ) : (
-          <ScrollView style={{ flex: 1 }}>
-            {others.map((item) => {
-              const isCurrentUser = item.userId === currentUserId;
-              return (
-                <RankingCard
-                  key={item.rank}
-                  item={item}
-                  isProminent={isCurrentUser}
-                />
-              );
-            })}
+        </View>
+      ) : (
+        <View className="flex-col items-center">
+          <LinearGradient
+            colors={["#58BE84", "#0C7B7E"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            className="p-lg mb-md shadow"
+            style={{ borderRadius: 8 }}
+          >
+            <Text className="text-center font-sf-b text-bodySm text-white">
+              전체 랭킹
+            </Text>
+            <Text className="text-center font-sf-b text-cpation text-white -mt-xs">
+              현재까지의 누적 탄소 절감량을 기준으로 랭킹을 매겨요!
+            </Text>
+          </LinearGradient>
+        </View>
+      )}
 
-            {/* Display user's rank if they exist but are not in the top list shown */}
-            {myRank && !myRankInList && (
-              <>
-                <Text className="text-center text-gray-500 my-2">...</Text>
-                <RankingCard
-                  item={{
-                    rank: myRank.rank,
-                    nickname: currentUserNickname,
-                    score: myRank.score,
-                    profile: myRank.profile,
-                  }}
-                  isProminent={true}
-                />
-              </>
-            )}
-          </ScrollView>
-        )}
+      {/* --- Rest of the Ranking List --- */}
+      <View className="flex-1 px-md pb-md">
+        <ScrollView style={{ flex: 1 }}>
+          {others.map((item) => {
+            const isCurrentUser = item.userId === currentUserId;
+            return (
+              <RankingCard
+                key={item.rank}
+                item={item}
+                isProminent={isCurrentUser}
+              />
+            );
+          })}
+
+          {/* Display user's rank if they exist but are not in the top list shown */}
+          {myRank && !myRankInList && (
+            <>
+              <Text
+                className="text-center text-black text-bold text-body my-xs -mt-sm"
+                style={{ lineHeight: 18, fontWeight: "900" }}
+              >
+                .{"\n"}.{"\n"}.
+              </Text>
+              <RankingCard
+                item={{
+                  rank: myRank.rank,
+                  nickname: currentUserNickname,
+                  score: myRank.score,
+                  profile: myRank.profile,
+                }}
+                isProminent={true}
+              />
+            </>
+          )}
+        </ScrollView>
       </View>
     </View>
   );

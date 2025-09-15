@@ -16,24 +16,7 @@ export default function RegionRanking({
   rankingData,
 }) {
   const scrollViewRef = useRef(null);
-  const setScrollViewRef = useCallback((node) => {
-    // This log is crucial to see if the ScrollView is mounting
-    console.log(
-      "[setScrollViewRef] Callback fired. Node:",
-      node ? "EXISTS" : "NULL"
-    );
-    if (node) {
-      scrollViewRef.current = node;
-      console.log("[setScrollViewRef] scrollViewRef.current has been SET.");
-    } else {
-      console.log(
-        "[setScrollViewRef] scrollViewRef.current has been UNSET (component unmounted)."
-      );
-    }
-  }, []);
   const [mapLayout, setMapLayout] = useState(null);
-  const scrollViewHeight = useRef(0);
-  const ITEM_HEIGHT = 72.66668701171875; // Exact item height
 
   // 지도 데이터 계산
 
@@ -164,6 +147,20 @@ export default function RegionRanking({
     };
   }, [mapLayout]);
 
+  const onScrollToIndexFailed = (info) => {
+    // Workaround for a common FlatList bug
+    const wait = new Promise((resolve) => setTimeout(resolve, 100));
+    wait.then(() => {
+      if (rankingData.length > info.index) {
+        scrollViewRef.current?.scrollToIndex({
+          index: info.index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }
+    });
+  };
+
   // 카드로 스크롤
   const scrollToRegion = (regionName) => {
     if (!scrollViewRef.current) {
@@ -174,21 +171,12 @@ export default function RegionRanking({
     const index = rankingData.findIndex((item) => item.regionName === regionName);
 
     if (index !== -1) {
-      const listHeight = scrollViewHeight.current;
-      if (listHeight === 0) {
-        console.log("[scrollToRegion] ScrollView height is not ready, retrying...");
-        setTimeout(() => scrollToRegion(regionName), 100);
-        return;
-      }
-
-      // Calculate offset to center the item
-      const itemY = index * ITEM_HEIGHT;
-      const scrollY = Math.max(0, itemY - listHeight / 2 + ITEM_HEIGHT / 2);
-
-      console.log(
-        `[scrollToRegion] Scrolling to offset ${scrollY} for index ${index}`
-      );
-      scrollViewRef.current.scrollToOffset({ offset: scrollY, animated: false });
+      console.log(`[scrollToRegion] Scrolling to index ${index}`);
+      scrollViewRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5, // 0: top, 0.5: center, 1: bottom
+      });
     } else {
       console.log(`[scrollToRegion] Could not find index for ${regionName}`);
     }
@@ -328,17 +316,10 @@ export default function RegionRanking({
         </Text>
         <FlatList
           style={{ flex: 1 }}
-          ref={setScrollViewRef}
+          ref={scrollViewRef}
           data={rankingData}
           keyExtractor={(item) => item.rank + item.regionName}
-          getItemLayout={(data, index) => ({
-            length: 72.66668701171875, // Exact height
-            offset: 72.66668701171875 * index,
-            index,
-          })}
-          onLayout={(e) =>
-            (scrollViewHeight.current = e.nativeEvent.layout.height)
-          }
+          onScrollToIndexFailed={onScrollToIndexFailed}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => {
             const isProminent = item.regionName === selectedRegion;

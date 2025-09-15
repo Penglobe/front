@@ -44,6 +44,7 @@ import Box from "@assets/icons/giftbox.svg";
 import LogOut from "@assets/icons/logout.svg";
 import Order from "@assets/icons/order.svg";
 import Survey from "@assets/icons/survey.svg";
+import Faq from "@assets/icons/faq.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -117,4 +118,5 @@ export const Images = {
   ToriObstacle,
   Ipa_diet,
   Tori_diet,
+  Faq,
 };
