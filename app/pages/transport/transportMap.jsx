@@ -49,7 +49,7 @@ const START_KEY = "@transport/startAtMs";
 const FINISHING_KEY = "@transport/finishing";
 
 const SPEED_LIMITS = { WALK: 2.2, BIKE: 8.5 };
-const GPS_ACCURACY_THRESHOLD_FG_BASE = 20; // WALK
+const GPS_ACCURACY_THRESHOLD_FG_BASE = 35; // [CHANGE] WALK 정확도 컷 완화(20 -> 35)
 const ARRIVAL_ACCURACY = 60;
 const ARRIVAL_RADIUS = 30;
 const ARRIVAL_STAY_MS = 3000;
@@ -63,7 +63,7 @@ const MAX_STEP_WALK_BASE = 35;
 const MAX_STEP_BIKE_BASE = 80;
 const STEP_SPEED_CAP = { WALK: 4.5, BIKE: 12, TRANSIT: 60 };
 
-const MIN_IDLE_DIST_WALK = 6;
+const MIN_IDLE_DIST_WALK = 4; // [CHANGE] 6 -> 4 (distanceInterval=5와 정렬)
 const MIN_IDLE_DIST_BIKE = 10;
 const MIN_IDLE_DIST_TRANSIT = 12;
 
@@ -118,17 +118,24 @@ function dynamicMinStep(prevAcc, currAcc, mode, speedForMotion = 0) {
       : mode === "BIKE"
         ? MIN_IDLE_DIST_BIKE
         : MIN_IDLE_DIST_TRANSIT;
+
   const moving =
     mode === "WALK"
       ? speedForMotion > 0.6
       : mode === "BIKE"
         ? speedForMotion > 1.5
         : true;
+
+  // [CHANGE] 이동 중 최소 스텝을 distanceInterval로 캡핑
+  const di = Number(LOCATION_OPTIONS?.distanceInterval ?? 0);
+  const diCap = di > 0 ? di : Infinity;
+
   const baseWhenMoving = Math.max(
     MIN_DISTANCE_UPDATE,
-    Math.min(idleBase, accBased)
+    Math.min(idleBase, accBased, diCap)
   );
   const baseWhenIdle = Math.max(idleBase, accBased);
+
   return moving ? baseWhenMoving : baseWhenIdle;
 }
 function getStepCap(mode, dtSec) {
@@ -510,12 +517,8 @@ export default function TransportMap() {
         drop("FG_stale", { ageMs: now - ts });
         return;
       }
-      const accThreshFG = accThreshFGByMode(mode);
-      if (!(typeof accuracy === "number") || accuracy > accThreshFG) {
-        drop("accuracyFG", { accuracy, accThreshFG });
-        return;
-      }
 
+      // [CHANGE] 정확도 컷을 '스무딩 이후'로 이동하기 위해 버퍼에 먼저 넣음
       coordBuffer.current.push({
         latitude,
         longitude,
@@ -524,8 +527,22 @@ export default function TransportMap() {
       });
       if (coordBuffer.current.length > COORD_BUFFER_SIZE)
         coordBuffer.current.shift();
+
       const smoothed = getSmoothedCoord(coordBuffer.current);
       if (!smoothed) return;
+
+      // [CHANGE] 스무딩된 정확도로 컷. 컷이어도 prev/last는 갱신해 dt 폭증 방지
+      const accThreshFG = accThreshFGByMode(mode);
+      const effAcc = Number.isFinite(smoothed.accuracy)
+        ? smoothed.accuracy
+        : accuracy;
+
+      if (!(typeof effAcc === "number") || effAcc > accThreshFG) {
+        drop("accuracyFG_afterSmooth", { effAcc, accThreshFG });
+        prevCoord.current = smoothed;
+        await writeLastCoord(smoothed);
+        return; // 누적만 스킵
+      }
 
       if (!prevCoord.current) {
         setStartCoord(smoothed);
@@ -564,6 +581,7 @@ export default function TransportMap() {
         mode,
         instV
       );
+
       if (d < minStep) {
         drop("smallStep", { d, minStep });
         prevCoord.current = smoothed;
