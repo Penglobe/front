@@ -24,6 +24,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { Image as ExpoImage } from "expo-image";
+import { StatusBar } from "expo-status-bar";
 
 export default function Home() {
   const router = useRouter();
@@ -172,6 +173,7 @@ export default function Home() {
 
   return (
     <View className="flex-1">
+      <StatusBar hidden />
       <BgComp
         width="100%"
         height="100%"
