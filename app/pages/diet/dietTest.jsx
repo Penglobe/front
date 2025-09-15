@@ -21,8 +21,52 @@ import { ResultStore } from "@utils/storage";
 import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/dietService";
 import Modal from "@components/Modal";
+import MainButton from "../../../components/MainButton";
 
 const { FoodLensModule } = NativeModules;
+
+// 긴 JSON을 알럿으로 보기 좋게(길면 자름)
+function alertJSON(title, data, max = 1000) {
+  try {
+    const s = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    const msg = s.length > max ? s.slice(0, max) + `\n… (총 ${s.length}자, 잘림)` : s;
+    Alert.alert(title, msg);
+  } catch (e) {
+    Alert.alert(title, String(data));
+  }
+}
+
+// === 글로벌 Promise 핸들러 ===
+let pendingResolver = null;
+let pendingRejecter = null;
+
+// === 리스너 세팅 (Android) ===
+function setupFoodLensEmitter(FoodLensModule) {
+  const emitter = new NativeEventEmitter(FoodLensModule);
+
+  emitter.addListener("FoodLensResult", (ev) => {
+    if (pendingResolver) {
+      try {
+        const parsed = JSON.parse(ev?.rawJson ?? "{}");
+        Alert.alert("📸 FoodLens Result", ev?.rawJson ?? "{}");
+        pendingResolver(parsed);
+      } catch (e) {
+        pendingRejecter?.(e);
+      }
+      pendingResolver = null;
+      pendingRejecter = null;
+    }
+  });
+
+  emitter.addListener("FoodLensError", (ev) => {
+    if (pendingRejecter) {
+      Alert.alert("❌ FoodLens Error", ev?.message || "예측 오류");
+      pendingRejecter(new Error(ev?.message || "예측 오류"));
+    }
+    pendingResolver = null;
+    pendingRejecter = null;
+  });
+}
 
 // === 플랫폼별 predict ===
 async function predictBase64Cross(base64) {
@@ -31,46 +75,26 @@ async function predictBase64Cross(base64) {
   // iOS (Promise API)
   if (Platform.OS === "ios" && typeof FoodLensModule.predictBase64 === "function") {
     const r = await FoodLensModule.predictBase64(base64);
-    return typeof r === "string" ? JSON.parse(r) : r;
+    const parsed = typeof r === "string" ? JSON.parse(r) : r;
+    alertJSON("📸 FoodLens Result (iOS)", parsed);
+    return parsed;
   }
 
   // Android (이벤트 API)
   if (Platform.OS === "android" && typeof FoodLensModule.predict === "function") {
-    const emitter = new NativeEventEmitter(FoodLensModule);
     return await new Promise((resolve, reject) => {
-      let timeoutId;
-      const cleanup = () => {
-        resultSub?.remove();
-        errorSub?.remove();
-        clearTimeout(timeoutId);
-      };
-
-      const onResult = (ev) => {
-        cleanup();
-        try {
-          Alert.alert("📸 FoodLens Result", ev?.rawJson ?? "{}");
-          resolve(JSON.parse(ev?.rawJson ?? "{}"));
-        } catch (err) {
-          reject(err);
-        }
-      };
-
-      const onError = (ev) => {
-        cleanup();
-        Alert.alert("❌ FoodLens Error", ev?.message || "예측 오류");
-        reject(new Error(ev?.message || "예측 오류"));
-      };
-
-      const resultSub = emitter.addListener("FoodLensResult", onResult);
-      const errorSub = emitter.addListener("FoodLensError", onError);
-
-      timeoutId = setTimeout(() => {
-        cleanup();
-        Alert.alert("⏰ Timeout", "예측 시간 초과");
-        reject(new Error("예측 시간 초과"));
-      }, 30000);
+      pendingResolver = resolve;
+      pendingRejecter = reject;
 
       FoodLensModule.predict(base64);
+
+      setTimeout(() => {
+        if (pendingResolver) {
+          reject(new Error("예측 시간 초과"));
+          pendingResolver = null;
+          pendingRejecter = null;
+        }
+      }, 30000);
     });
   }
 
@@ -88,6 +112,14 @@ export default function DietTest() {
   const [preview, setPreview] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // === Android 이벤트 리스너 등록 ===
+  useEffect(() => {
+    if (Platform.OS === "android" && FoodLensModule) {
+      setupFoodLensEmitter(FoodLensModule);
+    }
+  }, []);
+
+  
   // === 촬영 ===
   const takePhoto = async () => {
     if (!perm?.granted) {
@@ -98,12 +130,12 @@ export default function DietTest() {
       }
     }
     try {
-      const shot = await camRef.current.takePictureAsync({
+      const shot = await camRef.current?.takePictureAsync?.({
         base64: true,
         quality: 1,
         skipProcessing: false,
       });
-      Alert.alert("📷 촬영됨", `uri=${shot.uri}\nbase64=${shot.base64 ? "있음" : "없음"}`);
+      Alert.alert("📷 촬영됨", `uri=${shot?.uri}\nbase64=${shot?.base64 ? "있음" : "없음"}`);
       setPhoto(shot);
       setPreview(true);
     } catch (e) {
@@ -114,20 +146,38 @@ export default function DietTest() {
   // === 예측 실행 ===
   const confirmAndPredict = async (mealType) => {
     try {
-      Alert.alert("▶️ confirmAndPredict 시작", `mealType=${mealType}`);
-      if (!photo?.base64) return;
+      if (!photo?.base64) {
+        Alert.alert("사진 없음", "먼저 사진을 찍어주세요.");
+        return;
+      }
 
       setLoading(true);
+      Alert.alert("▶️ 시작", `mealType=${mealType}`);
 
+      // 1) FoodLens → result
       const result = await predictBase64Cross(photo.base64);
-      Alert.alert("📸 최종 Result", JSON.stringify(result));
+      alertJSON("📸 최종 Result", result);
 
-      const payload = { ...toCarbonRequestPayload(result, { merge: true }), mealType };
-      Alert.alert("📦 Payload 생성됨", JSON.stringify(payload));
+      // 2) payload 생성 (서버 enum 맞게 대문자)
+      const eatModeUpper = String(mealType).toUpperCase(); // HOME|DELIVERY|TAKEOUT|RESTAURANT
+      const payload = {
+        ...toCarbonRequestPayload(result, { merge: true }),
+        eatMode: eatModeUpper,
+      };
+      alertJSON("📦 Payload 생성됨", payload);
 
-      const carbon = await requestCarbon(payload).catch(() => ({ carbon: "dummy" }));
-      Alert.alert("🌍 Carbon 응답", JSON.stringify(carbon));
+      // 3) 안전 가드: items 유효성
+      if (!Array.isArray(payload.items) || payload.items.length === 0) {
+        Alert.alert("인식 실패", "음식을 찾지 못했어요. 사진을 다시 찍어주세요.");
+        setLoading(false);
+        return;
+      }
 
+      // 4) 서버 호출 (더미 catch 제거, Alert 디버그 켜기: requestCarbon에서 처리)
+      const carbon = await requestCarbon(payload, { debugAlert: true });
+      alertJSON("🌍 Carbon 응답(파싱 후)", carbon);
+
+      // 5) 결과 저장 & 이동
       ResultStore.data = result;
       ResultStore.photoUri = photo.uri;
       ResultStore.carbon = carbon;
@@ -137,7 +187,7 @@ export default function DietTest() {
       setModalVisible(false);
       router.push("/pages/diet/dietResult");
     } catch (e) {
-      Alert.alert("❌ confirmAndPredict 에러", e?.message || "Unknown error");
+      Alert.alert("❌ 탄소 계산 실패", String(e?.message || e));
     } finally {
       setLoading(false);
     }
@@ -161,6 +211,14 @@ export default function DietTest() {
     );
   }
 
+  // ✅ Eat 모드 키 상수 (서버 enum 대문자)
+  const EAT_MODE = {
+    HOME: "HOME",
+    DELIVERY: "DELIVERY",
+    TAKEOUT: "TAKEOUT",
+    RESTAURANT: "RESTAURANT",
+  };
+
   return (
     <View style={styles.container}>
       <CameraView ref={camRef} style={StyleSheet.absoluteFillObject} facing="back" />
@@ -174,31 +232,54 @@ export default function DietTest() {
       {preview && photo?.uri && (
         <View style={[StyleSheet.absoluteFillObject]}>
           <ExpoImage source={{ uri: photo.uri }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
-          <View style={styles.previewBar(insets.bottom)}>
-            <Pressable style={[styles.actionBtn, { backgroundColor: "#999" }]} onPress={() => setPreview(false)}>
-              <Text style={styles.actionText}>다시 찍기</Text>
+          <View className="flex-1 gap-2" style={styles.previewBar(insets.bottom)}>
+                        <Pressable
+              className="flex-1 rounded-xl items-center justify-center py-llg bg-gray2"
+              onPress={() => setPreview(false)}
+              disabled={loading}
+            >
+              <Text className="font-sf-md text-button text-s">다시 찍기</Text>
             </Pressable>
-            <Pressable style={[styles.actionBtn, { backgroundColor: "#22c55e" }]} onPress={() => setModalVisible(true)}>
-              <Text style={[styles.actionText, { fontWeight: "800" }]}>
-                {loading ? "분석 중…" : "계산하기"}
+            <Pressable
+              className="flex-1 rounded-xl items-center justify-center py-llg bg-green"
+              onPress={() => setModalVisible(true)}
+              disabled={loading}
+            >
+              <Text className="font-sf-md text-button text-white">
+                {loading ? "분석 중…" : "계산하러 가기"}
               </Text>
             </Pressable>
           </View>
         </View>
       )}
 
-      {/* ✅ 커스텀 Modal */}
+      {/* EAT_MODE Modal */}
       <Modal visible={modalVisible}>
-        <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 12 }}>어디서 드셨나요?</Text>
+        <Text className="font-sf-sb text-black text-h3 mb-sm">이번 식사는 어디서/어떻게 드셨나요?</Text>
+        <Text className="font-sf-sb mb-md text-darkGray">방식에 따라 추가 탄소 배출량이 달라져요!</Text>
+
         {[
-          { key: "home", label: "집에서" },
-          { key: "restaurant", label: "식당에서" },
-          { key: "delivery", label: "배달" },
+          { key: EAT_MODE.HOME, label: "집에서 직접 조리" },
+          { key: EAT_MODE.DELIVERY, label: "배달" },
+          { key: EAT_MODE.TAKEOUT, label: "포장(테이크아웃)" },
+          { key: EAT_MODE.RESTAURANT, label: "식당" },
         ].map((opt) => (
-          <Pressable key={opt.key} style={styles.sheetBtn} onPress={() => confirmAndPredict(opt.key)}>
-            <Text style={styles.sheetBtnText}>{opt.label}</Text>
+          <Pressable
+            key={opt.key}
+            className="w-full items-center rounded-xl py-lg bg-white overflow-hidden mb-xxs"
+            android_ripple={{ color: "rgba(0,0,0,0.08)" }}
+            disabled={loading}
+            style={({ pressed }) => [
+              { backgroundColor: pressed ? "#f4f4f5" : "#ffffff" },
+              { opacity: loading ? 0.6 : 1 },
+            ]}
+            onPress={() => confirmAndPredict(opt.key)}
+          >
+            <Text className="font-sf-sb text-body text-green">{opt.label}</Text>
           </Pressable>
         ))}
+
+        <MainButton onPress={() => setModalVisible(false)} label="취소" className="mt-4 bg-lightGray" disabled={loading} />
       </Modal>
     </View>
   );
@@ -224,19 +305,4 @@ const styles = {
     justifyContent: "space-between",
     backgroundColor: "rgba(0,0,0,0.35)",
   }),
-  actionBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginHorizontal: 6,
-    borderRadius: 10,
-  },
-  actionText: { color: "white", fontWeight: "600" },
-  sheetBtn: {
-    paddingVertical: 14,
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: "#ddd",
-  },
-  sheetBtnText: { fontSize: 16, fontWeight: "500" },
 };
