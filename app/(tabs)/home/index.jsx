@@ -256,7 +256,7 @@ export default function Home() {
       <Modal visible={att.visible}>
         <View className="flex-row items-center mb-3 justify-center relative">
           {/* 제목 */}
-          <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
+          <Text className="text-h1 font-sf-b">출석 보상</Text>
 
           {/* 닫기 버튼 (오른쪽 끝) */}
           {/* <Pressable

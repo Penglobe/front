@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, Image, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, Image, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
@@ -10,6 +10,7 @@ import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import Constants from "expo-constants";
 import { useAuth } from "../../../hooks/useAuth";
+import CustomAlert from "@components/CustomAlert";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
@@ -28,8 +29,15 @@ export default function ProductDetailPage() {
 
   const [item, setItem] = useState(null);
   const [qty, setQty] = useState(1);
-  const [confirmVisible, setConfirmVisible] = useState(false); //구매 확인 모달 상태
+  const [confirmVisible, setConfirmVisible] = useState(false); // 구매 확인 모달 상태
   const { user, refreshUser } = useAuth();
+
+  // 🔔 커스텀 알럿 상태
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertMode, setAlertMode] = useState(null);
+  // "loadError" | "purchaseSuccess" | "purchaseFail" | "deleteConfirm" | "deleteSuccess" | "deleteFail"
 
   const load = useCallback(async () => {
     if (!pid) return;
@@ -39,9 +47,10 @@ export default function ProductDetailPage() {
       if (!res.ok) throw new Error(json?.message || `조회 실패(${res.status})`);
       setItem(json?.data ?? json);
     } catch (e) {
-      Alert.alert("오류", e?.message ?? "상품 정보를 불러올 수 없습니다.", [
-        { text: "확인", onPress: () => router.back() },
-      ]);
+      setAlertTitle("오류");
+      setAlertMessage(e?.message ?? "상품 정보를 불러올 수 없습니다.");
+      setAlertMode("loadError");
+      setAlertVisible(true);
     }
   }, [pid, router]);
 
@@ -77,25 +86,45 @@ export default function ProductDetailPage() {
       if (!res.ok) throw new Error(json?.message || `구매 실패(${res.status})`);
       const data = json?.data ?? json;
 
-      setConfirmVisible(false); //모달 닫기
+      setConfirmVisible(false); // 모달 닫기
 
-      Alert.alert(
-        "구매 완료",
+      setAlertTitle("구매 완료");
+      setAlertMessage(
         `${item.name}\n사용한 얼음: ${
           data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-        }개`,
-        [
-          {
-            text: "사용 내역 보기",
-            onPress: () => router.push("/pages/shop/orderlist"),
-          },
-          { text: "확인", onPress: () => router.back() },
-        ]
+        }개`
       );
+      setAlertMode("purchaseSuccess");
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert("구매 실패", "잔액이 부족합니다.");
+      setAlertTitle("구매 실패");
+      setAlertMessage("잔액이 부족합니다.");
+      setAlertMode("purchaseFail");
+      setAlertVisible(true);
     }
   }, [item, qty, router]);
+
+  // 삭제 처리
+  const handleDelete = async () => {
+    try {
+      const res = await apiFetch(`/shop/products/${item.productId}`, {
+        method: "DELETE",
+      });
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) throw new Error(json?.message ?? "삭제 실패");
+
+      setAlertTitle("삭제 완료");
+      setAlertMessage("상품이 삭제되었습니다.");
+      setAlertMode("deleteSuccess");
+      setAlertVisible(true);
+    } catch (e) {
+      setAlertTitle("삭제 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertMode("deleteFail");
+      setAlertVisible(true);
+    }
+  };
 
   if (!item) {
     return (
@@ -106,8 +135,6 @@ export default function ProductDetailPage() {
   }
 
   const imgUri = toUri(item?.img);
-
-  // 플로팅 버튼 높이(+여백)만큼 스크롤 하단에 공간 확보
   const bottomGap = Math.max(insets.bottom, 16) + 76;
 
   return (
@@ -115,11 +142,10 @@ export default function ProductDetailPage() {
       <BgGradient />
       <HeaderBar title="관리자 페이지 > 상품 정보" />
 
-      {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
+      {/* 본문 */}
       <View className="flex-1 px-pageX pt-md">
         <View className="flex-row justify-between mt-xl mb-lg gap-5">
           {/* 수정 버튼 */}
-
           <Pressable
             className="flex-1 py-4 rounded-xl bg-blue items-center justify-center opacity-90"
             onPress={() =>
@@ -134,51 +160,11 @@ export default function ProductDetailPage() {
           {/* 삭제 버튼 */}
           <Pressable
             className="flex-1 y-4 rounded-xl bg-red-600 items-center justify-center opacity-90"
-            onPress={async () => {
-              const confirm = await new Promise((resolve) => {
-                Alert.alert(
-                  "삭제 확인",
-                  "정말 삭제하시겠습니까?",
-                  [
-                    {
-                      text: "취소",
-                      style: "cancel",
-                      onPress: () => resolve(false),
-                    },
-                    {
-                      text: "삭제",
-                      style: "destructive",
-                      onPress: () => resolve(true),
-                    },
-                  ],
-                  { cancelable: true }
-                );
-              });
-              if (!confirm) return;
-
-              try {
-                const res = await apiFetch(`/shop/products/${item.productId}`, {
-                  method: "DELETE",
-                });
-                const json = await res.json().catch(() => null);
-
-                if (!res.ok) {
-                  // 서버에서 내려준 메시지를 그대로 Alert로 보여주기
-                  throw new Error(json?.message ?? "삭제 실패");
-                }
-
-                Alert.alert("삭제 완료", "상품이 삭제되었습니다.", [
-                  {
-                    text: "확인",
-                    onPress: () => router.push("/pages/admin/adminMain"),
-                  },
-                ]);
-              } catch (e) {
-                Alert.alert(
-                  "삭제 실패",
-                  e.message ?? "잠시 후 다시 시도해주세요."
-                );
-              }
+            onPress={() => {
+              setAlertTitle("삭제 확인");
+              setAlertMessage("정말 삭제하시겠습니까?");
+              setAlertMode("deleteConfirm");
+              setAlertVisible(true);
             }}
           >
             <Text className="text-white font-sf-b text-h4 text-center">
@@ -186,10 +172,9 @@ export default function ProductDetailPage() {
             </Text>
           </Pressable>
         </View>
+
         <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
-          {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
           <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
-            {/* 이미지 */}
             <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
               {imgUri ? (
                 <Image
@@ -218,6 +203,40 @@ export default function ProductDetailPage() {
           </View>
         </ScrollView>
       </View>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        confirmText={
+          alertMode === "deleteConfirm"
+            ? "삭제"
+            : alertMode === "purchaseSuccess"
+              ? "사용 내역 보기"
+              : "확인"
+        }
+        cancelText={alertMode === "deleteConfirm" ? "취소" : undefined}
+        onConfirm={() => {
+          setAlertVisible(false);
+
+          if (alertMode === "loadError") {
+            router.back();
+          }
+          if (alertMode === "purchaseSuccess") {
+            router.push("/pages/shop/orderlist");
+          }
+          if (alertMode === "deleteConfirm") {
+            handleDelete();
+          }
+          if (alertMode === "deleteSuccess") {
+            router.push("/pages/admin/adminMain");
+          }
+        }}
+        onCancel={() => {
+          setAlertVisible(false);
+        }}
+      />
     </View>
   );
 }

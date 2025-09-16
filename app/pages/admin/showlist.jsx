@@ -1,4 +1,3 @@
-// app/(tabs)/store/index.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -8,7 +7,6 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -19,6 +17,7 @@ import { Images } from "@constants/Images";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import CustomAlert from "@components/CustomAlert";
 
 const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 function toUri(path) {
@@ -38,6 +37,11 @@ export default function StoreListPage() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  // 🔔 CustomAlert 상태
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
   const NUM_COLUMNS = 2;
   const TABBAR_H = 70; // 전역 탭바 높이에 맞게 조정
 
@@ -54,10 +58,9 @@ export default function StoreListPage() {
         throw new Error("상품 응답 형식이 예상과 다릅니다.");
       setItems(data);
     } catch (e) {
-      Alert.alert(
-        "상품목록 불러오기 실패",
-        e?.message ?? "잠시 후 다시 시도해주세요."
-      );
+      setAlertTitle("상품목록 불러오기 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -101,6 +104,7 @@ export default function StoreListPage() {
   };
 
   const clearQuery = () => setQuery("");
+
   const sortedItems = useMemo(() => {
     if (filterType !== "상품") return filtered; // 상품이 아니면 그냥 필터링된 데이터
 
@@ -169,7 +173,7 @@ export default function StoreListPage() {
 
         {/* 가격 배지: 우측 하단 고정 */}
         {!item.name?.startsWith("[기부]") && (
-          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
+          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full px-sm py-xs">
             <Text className="text-green font-sf-b mr-xs">
               {(item.price ?? 0).toLocaleString()}
             </Text>
@@ -204,17 +208,14 @@ export default function StoreListPage() {
                 : `전체 ${items.length}개`}
             </Text>
 
-            <View
-              className="flex-row items-center gap-2 mt-md
-            "
-            >
+            <View className="flex-row items-center gap-2 mt-md">
               {["전체", "기부", "상품"].map((type) => (
                 <Pressable
                   key={type}
                   onPress={() => setFilterType(type)}
                   className={`px-md py-xs rounded-xl  ${
                     filterType === type
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -237,7 +238,7 @@ export default function StoreListPage() {
                   onPress={() => setSortOrder("latest")}
                   className={`ml-2 px-3 py-1 rounded-xl ${
                     sortOrder === "latest"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -254,7 +255,7 @@ export default function StoreListPage() {
                   onPress={() => setSortOrder("asc")}
                   className={`ml-2 px-3 py-1 rounded-xl ${
                     sortOrder === "asc"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -271,7 +272,7 @@ export default function StoreListPage() {
                   onPress={() => setSortOrder("desc")}
                   className={`ml-2 px-3 py-1 rounded-xl ${
                     sortOrder === "desc"
-                      ? "bg-emerald-600 border-emerald-600"
+                      ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
@@ -312,7 +313,7 @@ export default function StoreListPage() {
         </View>
         <View className="flex-row px-pageX">
           <Pressable
-            className="bg-emerald-600 py-5 rounded-xl items-center justify-center flex-1 opacity-90"
+            className="bg-green py-5 rounded-xl items-center justify-center flex-1 opacity-90"
             onPress={() => router.push("/pages/admin/adminMain")}
           >
             <Text className="text-white font-sf-b text-h4 text-center">
@@ -321,6 +322,14 @@ export default function StoreListPage() {
           </Pressable>
         </View>
       </View>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }
