@@ -45,7 +45,8 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
       if (!id || isActive !== "1") {
         dlog("BG", { stop: "not_active_or_no_id" });
         try {
-          const started = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
+          const started =
+            await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
           if (started) await Location.stopLocationUpdatesAsync(TASK_NAME);
         } catch {}
         return;
@@ -60,11 +61,30 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
         return;
       }
 
-      const d = calculateDistance(prev.latitude, prev.longitude, latitude, longitude);
+      // 출발 후 2초 이내면 거리 무시
+      const startAt = await AsyncStorage.getItem(STORAGE.START);
+      if (startAt && now - Number(startAt) < 2000) {
+        dlog("BG", {
+          ignore: "startup_grace_period",
+          elapsed: now - Number(startAt),
+        });
+        return;
+      }
+
+      const d = calculateDistance(
+        prev.latitude,
+        prev.longitude,
+        latitude,
+        longitude
+      );
       const dt = (now - (prev.timestamp || now)) / 1000;
       const ignore = shouldIgnoreMove(d, dt);
       if (ignore.ignore) {
-        dlog("BG", { ignore: ignore.reason, d: Math.round(d), dt: Math.round(dt * 10) / 10 });
+        dlog("BG", {
+          ignore: ignore.reason,
+          d: Math.round(d),
+          dt: Math.round(dt * 10) / 10,
+        });
         return;
       }
 
@@ -79,7 +99,12 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
         const instSpeed = d / dt;
         const speed = checkSpeed(instSpeed, mode);
         if (speed.over) {
-          dlog("BG", { speedViolation: true, mode, speed: Math.round(speed.speed * 100) / 100, limit: speed.limit });
+          dlog("BG", {
+            speedViolation: true,
+            mode,
+            speed: Math.round(speed.speed * 100) / 100,
+            limit: speed.limit,
+          });
           await AsyncStorage.multiSet([
             [STORAGE.STOPPED, "1"],
             [STORAGE.STOP_KIND, "fail"],
@@ -87,7 +112,8 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
             [STORAGE.ACTIVE, "0"],
           ]);
           try {
-            const started = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
+            const started =
+              await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
             if (started) await Location.stopLocationUpdatesAsync(TASK_NAME);
           } catch {}
           return;
@@ -106,7 +132,8 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
         dlog("BG", { arrival: true, stopped: !!ar.stopped });
         // BG 업데이트 중지
         try {
-          const started = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
+          const started =
+            await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
           if (started) await Location.stopLocationUpdatesAsync(TASK_NAME);
         } catch {}
       }
