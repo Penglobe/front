@@ -11,7 +11,7 @@ export default function LoadingScreen({ message = "로딩 중..." }) {
     // 1초마다 이미지 토글
     const interval = setInterval(() => {
       setShowFirst((prev) => !prev);
-    }, 1000);
+    }, 500);
 
     // 0.5초 뒤에 서서히 나타남
     const timer = setTimeout(() => {
@@ -20,7 +20,7 @@ export default function LoadingScreen({ message = "로딩 중..." }) {
         duration: 300, // 0.3초 동안 서서히 보이게
         useNativeDriver: true,
       }).start();
-    }, 1000);
+    }, 500);
 
     return () => {
       clearInterval(interval);

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, ScrollView } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
 import { LinearGradient } from "expo-linear-gradient";
-import CustomAlert from "@components/CustomAlert"; // CustomAlert import
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
 // 아바타 관련 로직
 const AVATAR_MAP = {
@@ -98,48 +100,49 @@ export default function GlobalRanking() {
     setAlertVisible(true);
   };
 
-  useEffect(() => {
-    const fetchGlobalRanking = async () => {
-      try {
-        const userInfo = await me();
-        if (userInfo) {
-          setCurrentUserId(userInfo.userId);
-          setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
-        }
-
-        const response = await apiFetch("/rankings/global");
-        if (!response.ok) throw new Error(`전체 랭킹 에러: ${response.status}`);
-
-        const data = await response.json();
-        setRankingList(data.top10 || []); // API 응답의 'top10' 키 사용
-        setMyRank(data.myRank);
-
-        if (!data.myRank) {
-          setShowParticipationMessage(true);
-        } else {
-          setShowParticipationMessage(false);
-        }
-      } catch (error) {
-        showAlert({
-          title: "랭킹 불러오기 오류",
-          message: "전체 랭킹을 불러오는 중 오류가 발생했습니다.",
-        });
-      } finally {
-        setLoading(false);
+  const fetchGlobalRanking = useCallback(async () => {
+    setLoading(true); // Ensure loading is true when fetching starts
+    let apiResponse;
+    try {
+      const userInfo = await me();
+      if (userInfo) {
+        setCurrentUserId(userInfo.userId);
+        setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
       }
-    };
 
-    fetchGlobalRanking();
+      apiResponse = await apiFetch("/rankings/global");
+      if (!apiResponse.ok)
+        throw new Error(`전체 랭킹 에러: ${apiResponse.status}`);
+
+      const data = await apiResponse.json();
+      setRankingList(data.top10 || []); // API 응답의 'top10' 키 사용
+      setMyRank(data.myRank);
+
+      if (!data.myRank) {
+        setShowParticipationMessage(true);
+      } else {
+        setShowParticipationMessage(false);
+      }
+    } catch (error) {
+      showAlert({
+        title: "랭킹 불러오기 오류",
+        message: "전체 랭킹을 불러오는 중 오류가 발생했습니다.",
+      });
+    } finally {
+      // Ensure loading screen is shown for at least 0.7 seconds
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      setLoading(false);
+    }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchGlobalRanking();
+    }, [fetchGlobalRanking])
+  );
+
   if (loading) {
-    return (
-      <ActivityIndicator
-        size="large"
-        color="#0000ff"
-        style={{ flex: 1, justifyContent: "center" }}
-      />
-    );
+    return <LoadingScreen message="전체 랭킹을 불러오는 중..." />;
   }
 
   // 시상대 및 목록 데이터 처리
@@ -180,8 +183,8 @@ export default function GlobalRanking() {
           <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
             <Text className="font-bold">랭킹 참여 조건 미달</Text>
             <Text>
-              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! {"\n"}
-              활동을 통해 탄소 절감량을 늘리고 랭킹에 참여해보세요!
+              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! 활동을 통해
+              탄소 절감량을 늘리고 랭킹에 참여해보세요!
             </Text>
           </View>
         </View>
@@ -225,7 +228,7 @@ export default function GlobalRanking() {
                 className="text-center text-black text-bold text-body my-xs -mt-sm"
                 style={{ lineHeight: 18, fontWeight: "900" }}
               >
-                .{"\n"}.{"\n"}.
+                . . .
               </Text>
               <RankingCard
                 item={{
