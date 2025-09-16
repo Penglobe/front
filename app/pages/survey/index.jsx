@@ -162,20 +162,20 @@ export default function Survey() {
       <View className="px-pageX">
         <View>
           {/* 타이틀 */}
-          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
-            <Text className="text-black text-xl font-bold">
-              <Text className="text-red-500 text-lg">
+          <View className="px-sm bg-secondary rounded-xl self-start flex-row items-center">
+            <Text className="font-bold mr-10">
+              <Text className="text-red-500 py-lg">
                 {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
                 습관을 만들어봐요.
                 {"\n"}
               </Text>
               <View>
-                <Text className="text-sm">
+                <Text className="text-caption py-sm">
                   ※ 하루에 한 번만 가능합니다. {"\n"}
                 </Text>
               </View>
             </Text>
-            <Images.survey_ipa width={80} height={130} />
+            <Images.survey_ipa width={70} height={130} />
           </View>
 
           {/* 질문 카드 */}
