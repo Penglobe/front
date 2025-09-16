@@ -1,12 +1,13 @@
 // pages/transport/BookmarkDetail.jsx
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { deleteBookmark, updateBookmark } from "@services/transportService";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
+import CustomAlert from "@components/CustomAlert";
 
 export default function BookmarkDetail() {
   const { bookmarkId, bookmarkLabel, address, currentLat, currentLng } =
@@ -15,6 +16,39 @@ export default function BookmarkDetail() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [labelInput, setLabelInput] = useState(bookmarkLabel);
+
+  // ✅ Alert 상태
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "",
+    onConfirm: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    onCancel: undefined,
+  });
+
+  // ✅ Alert 오픈 헬퍼 함수
+  const openAlert = (config) =>
+    setAlertConfig({
+      visible: true,
+      title: config.title || "",
+      message: config.message || "",
+      confirmText: config.confirmText || "확인",
+      cancelText: config.cancelText, // 없으면 취소 버튼 안보임
+      onConfirm: () => {
+        // confirm 동작 실행
+        if (config.onConfirm) config.onConfirm();
+        // 닫기
+        setAlertConfig((prev) => ({ ...prev, visible: false }));
+      },
+      onCancel: config.onCancel
+        ? () => {
+            config.onCancel();
+            setAlertConfig((prev) => ({ ...prev, visible: false }));
+          }
+        : undefined,
+    });
 
   // ✅ 북마크 저장
   const handleSave = async () => {
@@ -26,33 +60,43 @@ export default function BookmarkDetail() {
         lng: currentLng,
       });
       setIsEditing(false);
-      Alert.alert("수정 완료", "북마크 이름이 변경되었습니다.");
+      openAlert({
+        title: "수정 완료",
+        message: "북마크 이름이 변경되었습니다.",
+      });
     } catch (err) {
       console.error("북마크 수정 실패:", err);
-      Alert.alert("수정 실패", "잠시 후 다시 시도해주세요.");
+      openAlert({
+        title: "수정 실패",
+        message: "잠시 후 다시 시도해주세요.",
+      });
     }
   };
 
   // ✅ 북마크 삭제
   const handleDelete = async () => {
-    try {
-      Alert.alert("북마크 삭제", "정말 삭제하시겠습니까?", [
-        { text: "취소", style: "cancel" },
-        {
-          text: "삭제",
-          style: "destructive",
-          onPress: async () => {
-            await deleteBookmark(bookmarkId);
-            Alert.alert("삭제 완료", "", [
-              { text: "확인", onPress: () => router.back() },
-            ]);
-          },
-        },
-      ]);
-    } catch (err) {
-      console.error("북마크 삭제 실패:", err);
-      Alert.alert("삭제 실패", "잠시 후 다시 시도해주세요.");
-    }
+    openAlert({
+      title: "북마크 삭제",
+      message: "정말 삭제하시겠습니까?",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await deleteBookmark(bookmarkId);
+          openAlert({
+            title: "삭제 완료",
+            onConfirm: () => router.back(),
+          });
+        } catch (err) {
+          console.error("북마크 삭제 실패:", err);
+          openAlert({
+            title: "삭제 실패",
+            message: "잠시 후 다시 시도해주세요.",
+          });
+        }
+      },
+      onCancel: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    });
   };
 
   return (
@@ -91,7 +135,7 @@ export default function BookmarkDetail() {
                   setIsEditing(true);
                 }
               }}
-              className="ml-2 p-1 shrink-0" // 👈 아이콘은 절대 줄어들지 않게
+              className="ml-2 p-1 shrink-0"
             >
               <Ionicons
                 name={isEditing ? "checkmark" : "create-outline"}
@@ -117,7 +161,8 @@ export default function BookmarkDetail() {
               {address}
             </Text>
           </View>
-          {/* ✅ 삭제 버튼 (Pressable + 아이콘) */}
+
+          {/* ✅ 삭제 버튼 */}
           <Pressable
             onPress={handleDelete}
             className="py-sm px-md flex-row items-end justify-end"
@@ -129,6 +174,9 @@ export default function BookmarkDetail() {
           </Pressable>
         </View>
       </View>
+
+      {/* ✅ 커스텀 Alert */}
+      <CustomAlert {...alertConfig} />
     </View>
   );
 }

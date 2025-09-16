@@ -48,7 +48,13 @@ async function seedPositionFast() {
 }
 
 export default function TransportMap() {
-  const { endLat, endLng, placeName, mode: rawMode, fresh } = useLocalSearchParams();
+  const {
+    endLat,
+    endLng,
+    placeName,
+    mode: rawMode,
+    fresh,
+  } = useLocalSearchParams();
   const router = useRouter();
 
   const mode = ["WALK", "BIKE", "TRANSIT"].includes(rawMode) ? rawMode : "WALK";
@@ -73,7 +79,8 @@ export default function TransportMap() {
     if (finishedRef.current) return;
     finishedRef.current = true;
     const reason =
-      (await AsyncStorage.getItem(STORAGE.STOP_REASON)) || "이동 중 문제가 발생했어요.";
+      (await AsyncStorage.getItem(STORAGE.STOP_REASON)) ||
+      "이동 중 문제가 발생했어요.";
     dlog("UI", { nav: "fail", reason });
     router.replace({
       pathname: "/pages/transport/transportFail",
@@ -132,12 +139,21 @@ export default function TransportMap() {
           return;
         }
 
-        const d = calculateDistance(prev.latitude, prev.longitude, latitude, longitude);
+        const d = calculateDistance(
+          prev.latitude,
+          prev.longitude,
+          latitude,
+          longitude
+        );
         const dt = (now - (prev.timestamp || now)) / 1000;
 
         const ignore = shouldIgnoreMove(d, dt);
         if (ignore.ignore) {
-          dlog("FG", { ignore: ignore.reason, d: Math.round(d), dt: Math.round(dt * 10) / 10 });
+          dlog("FG", {
+            ignore: ignore.reason,
+            d: Math.round(d),
+            dt: Math.round(dt * 10) / 10,
+          });
           return;
         }
 
@@ -147,7 +163,12 @@ export default function TransportMap() {
         setCurrentCoord({ latitude, longitude, timestamp: now });
         await writeJSON(STORAGE.LAST, { latitude, longitude, timestamp: now });
 
-        dlog("FG", { addDist: Math.round(d), total: Math.round(total), lat: latitude, lng: longitude });
+        dlog("FG", {
+          addDist: Math.round(d),
+          total: Math.round(total),
+          lat: latitude,
+          lng: longitude,
+        });
 
         // 속도 체크
         if (dt > 0) {
@@ -160,7 +181,12 @@ export default function TransportMap() {
               [STORAGE.STOP_REASON, "이동 속도가 너무 빠릅니다."],
               [STORAGE.ACTIVE, "0"],
             ]);
-            dlog("FG", { speedViolation: true, mode: modeCur, speed: Math.round(speed.speed * 100) / 100, limit: speed.limit });
+            dlog("FG", {
+              speedViolation: true,
+              mode: modeCur,
+              speed: Math.round(speed.speed * 100) / 100,
+              limit: speed.limit,
+            });
             await detachFgWatch();
             await stopBgSafely();
             return goFail();
@@ -182,7 +208,11 @@ export default function TransportMap() {
             await stopBgSafely();
             return goFinish();
           } else {
-            dlog("FG", { arrival: true, stopped: false, info: "will_retry_bg" });
+            dlog("FG", {
+              arrival: true,
+              stopped: false,
+              info: "will_retry_bg",
+            });
           }
         }
       }
@@ -220,7 +250,13 @@ export default function TransportMap() {
         setCurrentCoord(seed);
         setStartCoord(seed);
         await writeJSON(STORAGE.LAST, seed);
-        dlog("UI", { seedCoord: { lat: seed.latitude, lng: seed.longitude, acc: seed.accuracy } });
+        dlog("UI", {
+          seedCoord: {
+            lat: seed.latitude,
+            lng: seed.longitude,
+            acc: seed.accuracy,
+          },
+        });
       }
 
       // 서버에 이동 시작
@@ -254,7 +290,10 @@ export default function TransportMap() {
           Number(endLat),
           Number(endLng)
         );
-        dlog("UI", { initialDistToDest: Math.round(dist), radius: ARRIVAL_RADIUS_M });
+        dlog("UI", {
+          initialDistToDest: Math.round(dist),
+          radius: ARRIVAL_RADIUS_M,
+        });
 
         if (dist <= ARRIVAL_RADIUS_M) {
           const stop = await stopTransportSafely(id, 0, { source: "INIT" });
@@ -314,7 +353,10 @@ export default function TransportMap() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="이동 중" className="px-pageX absolute top-0 left-0 right-0 z-20" />
+      <HeaderBar
+        title="이동 중"
+        className="px-pageX absolute top-0 left-0 right-0 z-20"
+      />
 
       {currentCoord ? (
         <KakaoMapView
@@ -363,7 +405,9 @@ export default function TransportMap() {
             const id = await AsyncStorage.getItem(STORAGE.ID);
             if (!id) return;
 
-            const res = await stopTransportSafely(id, total, { source: "MANUAL" });
+            const res = await stopTransportSafely(id, total, {
+              source: "MANUAL",
+            });
             if (!res.ok) {
               dlog("UI", { manualStopFail: res.error });
               // 실패여도 화면 전환은 하되, BG에서 재시도/후속 처리

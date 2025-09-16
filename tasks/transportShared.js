@@ -22,10 +22,10 @@ export const STORAGE = {
 };
 
 export const SPEED_LIMITS = { WALK: 3.5, BIKE: 12, TRANSIT: Infinity };
-export const ARRIVAL_RADIUS_M = 60;       // 도착 판정 반경
-export const ACCURACY_MAX_M = 35;         // 정확도 상한(근처에선 조금 더 허용)
-export const IGNORE_MIN_MOVE_M = 1;       // 미세 이동 무시
-export const JUMP_THRESH_M = 120;         // 갑툭튀 무시 임계값
+export const ARRIVAL_RADIUS_M = 50; // 도착 판정 반경
+export const ACCURACY_MAX_M = 35; // 정확도 상한(근처에선 조금 더 허용)
+export const IGNORE_MIN_MOVE_M = 1; // 미세 이동 무시
+export const JUMP_THRESH_M = 120; // 갑툭튀 무시 임계값
 export const JUMP_TIME_S = 5;
 
 /** ====== 로깅 ====== */
@@ -59,14 +59,18 @@ export const readJSON = async (key) => {
     return null;
   }
 };
-export const writeJSON = (key, v) => AsyncStorage.setItem(key, JSON.stringify(v));
-export const readNumber = async (key, def = 0) => Number((await AsyncStorage.getItem(key)) || def);
-export const writeNumber = (key, v) => AsyncStorage.setItem(key, String(Math.round(v)));
+export const writeJSON = (key, v) =>
+  AsyncStorage.setItem(key, JSON.stringify(v));
+export const readNumber = async (key, def = 0) =>
+  Number((await AsyncStorage.getItem(key)) || def);
+export const writeNumber = (key, v) =>
+  AsyncStorage.setItem(key, String(Math.round(v)));
 
 /** 이동 무시 판단(드리프트/점프) */
 export function shouldIgnoreMove(d, dt) {
   if (d < IGNORE_MIN_MOVE_M) return { ignore: true, reason: "micro" };
-  if (d > JUMP_THRESH_M && dt < JUMP_TIME_S) return { ignore: true, reason: "jump" };
+  if (d > JUMP_THRESH_M && dt < JUMP_TIME_S)
+    return { ignore: true, reason: "jump" };
   return { ignore: false };
 }
 
@@ -80,7 +84,11 @@ export function checkSpeed(instSpeed, mode) {
 }
 
 /** stopTransport 안전 호출(락 & 재시도) */
-export async function stopTransportSafely(transportId, totalDistance, { source = "UNK", retries = 3 } = {}) {
+export async function stopTransportSafely(
+  transportId,
+  totalDistance,
+  { source = "UNK", retries = 3 } = {}
+) {
   const { STOPPING, FINISH_RESULT, STOPPED, STOP_KIND, ACTIVE } = STORAGE;
 
   // 중복 호출 방지
@@ -95,7 +103,10 @@ export async function stopTransportSafely(transportId, totalDistance, { source =
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       dlog("STOP", { source, attempt, transportId, totalDistance });
-      const result = await stopTransport(transportId, Math.round(totalDistance));
+      const result = await stopTransport(
+        transportId,
+        Math.round(totalDistance)
+      );
       await AsyncStorage.setItem(FINISH_RESULT, JSON.stringify(result || {}));
       await AsyncStorage.multiSet([
         [STOP_KIND, "finish"],
@@ -117,7 +128,12 @@ export async function stopTransportSafely(transportId, totalDistance, { source =
 }
 
 /** 도착 판정 + 자동 종료 트리거 */
-export async function checkArrivalAndStop({ latitude, longitude, totalDistance, source = "UNK" }) {
+export async function checkArrivalAndStop({
+  latitude,
+  longitude,
+  totalDistance,
+  source = "UNK",
+}) {
   const { DEST, ID, STOPPED, STOP_KIND } = STORAGE;
 
   const rawDest = await AsyncStorage.getItem(DEST);
@@ -128,7 +144,11 @@ export async function checkArrivalAndStop({ latitude, longitude, totalDistance, 
   const { endLat, endLng } = JSON.parse(rawDest);
   const dist = calculateDistance(latitude, longitude, endLat, endLng);
 
-  dlog("ARRIVAL", { source, distToDest: Math.round(dist), radius: ARRIVAL_RADIUS_M });
+  dlog("ARRIVAL", {
+    source,
+    distToDest: Math.round(dist),
+    radius: ARRIVAL_RADIUS_M,
+  });
 
   if (dist > ARRIVAL_RADIUS_M) return { arrived: false };
 

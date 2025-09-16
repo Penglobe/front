@@ -36,7 +36,6 @@ export default function TransportFinish() {
       } catch {}
     })();
   }, []);
-  
 
   // 불필요한 키 정리
   useEffect(() => {
@@ -120,7 +119,9 @@ export default function TransportFinish() {
           <View className="flex-row items-center mb-5 mt-5">
             {Number(points) > 0 ? (
               <View className="px-pageX flex-row items-center">
-                <Text className="text-h2 font-sf-b text-green-700">{points}</Text>
+                <Text className="text-h2 font-sf-b text-green-700">
+                  {points}
+                </Text>
                 <Ice width={40} height={40} />
                 <Text className="text-h2 font-sf-b text-green-700">
                   {" "}
@@ -170,11 +171,6 @@ export default function TransportFinish() {
             <Text className="text-sm mt-3 text-gray-600">
               🚗 자동차로 이동했다면 약 {carCo2} kg CO₂가 배출돼요.
             </Text>
-            {mode === "TRANSIT" && (
-              <Text className="text-xs mt-1 text-gray-500">
-                ※ 대중교통은 절감량의 50%만 인정됩니다.
-              </Text>
-            )}
           </View>
 
           <View className="items-center">
@@ -191,7 +187,9 @@ export default function TransportFinish() {
             <View className="bg-white rounded-xl p-5 w-4/5">
               <Text className="text-base font-sf-b mb-2">계산 기준</Text>
               <Text className="text-sm text-gray-600 leading-5">
-                • 자동차는 1km당 약 0.2kg CO₂ 배출 {"\n"}• 도보·자전거는 100% 절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100얼음 지급
+                • 자동차는 1km당 약 0.2kg CO₂ 배출 {"\n"}• 도보·자전거는 100%
+                절감 {"\n"}• 대중교통은 50%만 인정 {"\n"}• 절감 1kg당 100얼음
+                지급
               </Text>
               <TouchableOpacity
                 className="mt-4 self-end"

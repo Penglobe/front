@@ -1,6 +1,6 @@
 // TransportStart.jsx
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Text, Alert, ScrollView } from "react-native";
+import { View, ActivityIndicator, Text, ScrollView } from "react-native";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import BgGradient from "@components/BgGradient";
@@ -8,11 +8,43 @@ import MainButton from "@components/MainButton";
 import TransportButton from "@components/TransportButton";
 import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
+import CustomAlert from "@components/CustomAlert";
 
 export default function TransportStart() {
   const [location, setLocation] = useState(null);
   const [mode, setMode] = useState("TRANSIT");
   const router = useRouter();
+
+  // ✅ Alert 상태
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "",
+    onConfirm: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    onCancel: undefined,
+  });
+
+  // ✅ Alert 오픈 헬퍼 함수
+  const openAlert = (config) =>
+    setAlertConfig({
+      visible: true,
+      title: config.title || "",
+      message: config.message || "",
+      confirmText: config.confirmText || "확인",
+      cancelText: config.cancelText,
+      onConfirm: () => {
+        if (config.onConfirm) config.onConfirm();
+        setAlertConfig((prev) => ({ ...prev, visible: false }));
+      },
+      onCancel: config.onCancel
+        ? () => {
+            config.onCancel();
+            setAlertConfig((prev) => ({ ...prev, visible: false }));
+          }
+        : undefined,
+    });
 
   // ✅ 권한 요청 & 현재 위치 가져오기
   useEffect(() => {
@@ -20,14 +52,20 @@ export default function TransportStart() {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("위치 권한이 필요합니다.");
+          openAlert({
+            title: "권한 필요",
+            message: "위치 권한이 필요합니다.",
+          });
           return;
         }
         let loc = await Location.getCurrentPositionAsync({});
         setLocation(loc.coords);
       } catch (err) {
         console.error("위치 가져오기 실패:", err);
-        Alert.alert("현재 위치를 가져올 수 없습니다.");
+        openAlert({
+          title: "위치 실패",
+          message: "현재 위치를 가져올 수 없습니다.",
+        });
       }
     })();
   }, []);
@@ -39,6 +77,9 @@ export default function TransportStart() {
         <Text className="mt-3 text-xl SFPro-Medium">
           현재 위치를 불러오는 중...
         </Text>
+
+        {/* ✅ CustomAlert */}
+        <CustomAlert {...alertConfig} />
       </View>
     );
   }
@@ -127,6 +168,9 @@ export default function TransportStart() {
           </View>
         </ScrollView>
       </View>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert {...alertConfig} />
     </View>
   );
 }
