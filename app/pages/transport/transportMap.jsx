@@ -10,6 +10,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
+import LoadingScreen from "@components/LoadingScreen";
 
 import {
   TASK_NAME,
@@ -377,7 +378,7 @@ export default function TransportMap() {
         />
       ) : (
         <View className="flex-1 items-center justify-center bg-gray-100">
-          <Text>현재 위치를 찾는 중...</Text>
+          <LoadingScreen message="현재 위치를 찾는 중..." />
         </View>
       )}
 
