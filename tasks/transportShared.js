@@ -21,8 +21,8 @@ export const STORAGE = {
   STOPPING: "@transport/stopping",
 };
 
-export const SPEED_LIMITS = { WALK: 3.5, BIKE: 12, TRANSIT: Infinity };
-export const ARRIVAL_RADIUS_M = 50; // 도착 판정 반경
+export const SPEED_LIMITS = { WALK: 7, BIKE: 14, TRANSIT: Infinity };
+export const ARRIVAL_RADIUS_M = 40; // 도착 판정 반경
 export const ACCURACY_MAX_M = 35; // 정확도 상한(근처에선 조금 더 허용)
 export const IGNORE_MIN_MOVE_M = 1; // 미세 이동 무시
 export const JUMP_THRESH_M = 120; // 갑툭튀 무시 임계값
