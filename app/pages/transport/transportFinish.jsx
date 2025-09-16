@@ -113,10 +113,6 @@ export default function TransportFinish() {
     <View className="flex-1">
       <BgGradient />
       <HeaderBar title="이동 결과" showBack onBack={goHome} />
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 50 }}
-        showsVerticalScrollIndicator={false}
-      >
 
       <ScrollView contentContainerStyle={{ paddingBottom: 50 }}>
         <View className="flex-1 px-pageX">
@@ -155,7 +151,6 @@ export default function TransportFinish() {
             <Text className="font-sf-md text-lg">총 이동 시간</Text>
             <View className="items-end">
               <Text className="text-3xl font-sf-b text-[#318643] mt-1">
-                {durationM || 0} 분
                 {durationM} 분
               </Text>
             </View>
@@ -176,11 +171,6 @@ export default function TransportFinish() {
             <Text className="text-sm mt-3 text-gray-600">
               🚗 자동차로 이동했다면 약 {carCo2} kg CO₂가 배출돼요.
             </Text>
-            {mode === "TRANSIT" && (
-              <Text className="text-xs mt-1 text-gray-500">
-                ※ 대중교통은 절감량의 50%만 인정됩니다.
-              </Text>
-            )}
           </View>
 
           <View className="items-center">
