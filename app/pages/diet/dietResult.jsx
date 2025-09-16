@@ -54,7 +54,7 @@ export default function DietResult() {
     typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
 
   // 한 끼 식사 평균 배출량
-  const typicalMealKg = 4.8;
+  const typicalMealKg = 1.5;
   const savedKg = totalKg != null ? Math.max(0, typicalMealKg - totalKg) : null;
 
   // 날짜 문자열
@@ -71,8 +71,6 @@ export default function DietResult() {
     ? "저장 중..."
     : "얼음 받기";
 
-  const ICE_PER_KG = 100;
-
   const onRightPress = () => {
     if (saving || totalKg == null || savedKg == null) return;
 
@@ -87,8 +85,7 @@ export default function DietResult() {
     }
 
     // 소수 한 자리
-    const awardedKg = Number(savedKg.toFixed(1));
-    const ice = Math.max(0, Math.round(awardedKg * ICE_PER_KG));
+    const ice = savedKg * 100;
 
     Alert.alert("얼음 적립", `${ice} 얼음을 적립합니다.`, [
       { text: "받기", onPress: () => saveDietRecord() },
