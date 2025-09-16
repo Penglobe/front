@@ -5,6 +5,10 @@ import { Images } from "@constants/Images";
 const AVATAR_MAP = {
   ToriFace: Images.ToriFace,
   IpaFace: Images.IpaFace,
+  ProfileIce: Images.ProfileIce,
+  Fish: Images.Fish,
+  Polarbear: Images.Polarbear,
+  Polarbear2: Images.Polarbear2,
 };
 
 const getAvatarRenderComponent = (profileKey) => {
