@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ActivityIndicator, Alert, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch, me, logout as authLogout } from "@services/authService";
 import { Calendar, LocaleConfig } from "react-native-calendars";
-import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 
-// 한글 설정
+// 한국어 설정
 LocaleConfig.locales["ko"] = {
   monthNames: [
     "1월",
@@ -57,6 +58,10 @@ LocaleConfig.defaultLocale = "ko";
 const AVATARS = [
   { key: "ToriFace", label: "토리", Render: Images.ToriFace },
   { key: "IpaFace", label: "이파", Render: Images.IpaFace },
+  { key: "ProfileIce", label: "얼음", Render: Images.ProfileIce },
+  { key: "Fish", label: "물고기", Render: Images.Fish },
+  { key: "Polarbear", label: "북극곰", Render: Images.Polarbear },
+  { key: "Polarbear2", label: "북극곰2", Render: Images.Polarbear2 },
 ];
 
 const getAvatarRenderComponent = (profileKey) => {
@@ -80,15 +85,47 @@ export default function MyPage() {
   const [dailyLoading, setDailyLoading] = useState(false);
   const [attendanceDates, setAttendanceDates] = useState([]);
 
+  // CustomAlert state
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    onCancel: null,
+    confirmText: "확인",
+    cancelText: "취소",
+  });
+
+  const showAlert = (props) => {
+    setAlertProps({
+      ...props,
+      onConfirm: () => {
+        setAlertVisible(false);
+        props.onConfirm && props.onConfirm();
+      },
+      onCancel: props.onCancel
+        ? () => {
+            setAlertVisible(false);
+            props.onCancel && props.onCancel();
+          }
+        : null,
+    });
+    setAlertVisible(true);
+  };
+
   const fetchMyPageInfo = useCallback(async () => {
     setLoading(true);
     try {
       const userInfo = await me();
       setMyPageInfo(userInfo);
     } catch (error) {
-      console.error("Error fetching my page info:", error);
-      Alert.alert("오류", "마이페이지 정보를 불러오는 중 오류가 발생했습니다.");
+      showAlert({
+        title: "오류",
+        message: "마이페이지 정보를 불러오는 중 오류가 발생했습니다.",
+      });
     } finally {
+      // Ensure loading screen is shown for at least 0.7 seconds
+      await new Promise((resolve) => setTimeout(resolve, 700));
       setLoading(false);
     }
   }, []);
@@ -104,10 +141,9 @@ export default function MyPage() {
       if (apiResponse.status === 200) {
         setDailyReductionData(apiResponse.data);
       } else {
-        setDailyReductionData(null); // Clear data on error or non-200 status
+        setDailyReductionData(null); // 에러 또는 200이 아닌 상태에서는 데이터 비우기
       }
     } catch (error) {
-      console.error("Error fetching daily reduction info:", error);
       setDailyReductionData(null);
     } finally {
       setDailyLoading(false);
@@ -124,14 +160,17 @@ export default function MyPage() {
       if (apiResponse.status === 200) {
         setAttendanceDates(apiResponse.data);
       } else {
-        Alert.alert(
-          "오류",
-          apiResponse.message || "출석 날짜 정보를 가져오지 못했습니다."
-        );
+        showAlert({
+          title: "오류",
+          message:
+            apiResponse.message || "출석 날짜 정보를 가져오지 못했습니다.",
+        });
       }
     } catch (error) {
-      console.error("Error fetching attendance dates:", error);
-      Alert.alert("오류", "출석 날짜 정보를 불러오는 중 오류가 발생했습니다.");
+      showAlert({
+        title: "오류",
+        message: "출석 날짜 정보를 불러오는 중 오류가 발생했습니다.",
+      });
     }
   }, []);
 
@@ -141,50 +180,6 @@ export default function MyPage() {
       fetchAttendanceDates();
     }, [fetchMyPageInfo, fetchAttendanceDates])
   );
-
-  const handleResetAttendance = useCallback(async () => {
-    Alert.alert(
-      "초기화 확인",
-      "출석 데이터와 관련 활동 기록을 모두 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "초기화",
-          onPress: async () => {
-            try {
-              const response = await apiFetch("/users/me/reset-attendance", {
-                method: "POST",
-              });
-
-              if (!response.ok) {
-                throw new Error(`출석 데이터 초기화 에러: ${response.status}`);
-              }
-
-              const apiResponse = await response.json();
-              if (apiResponse.status === 200) {
-                Alert.alert(
-                  "성공",
-                  "출석 데이터가 성공적으로 초기화되었습니다."
-                );
-                // Refresh data after reset
-                fetchMyPageInfo();
-                fetchAttendanceDates();
-              } else {
-                Alert.alert(
-                  "오류",
-                  apiResponse.message || "출석 데이터 초기화에 실패했습니다."
-                );
-              }
-            } catch (error) {
-              console.error("Error resetting attendance data:", error);
-              Alert.alert("오류", "출석 데이터 초기화 중 오류가 발생했습니다.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  }, [fetchMyPageInfo, fetchAttendanceDates]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -210,10 +205,10 @@ export default function MyPage() {
       const dateString = day.toISOString().split("T")[0];
 
       if (dayOfWeek === 6) {
-        // Saturday
+        // 토요일
         marked[dateString] = { textStyle: { color: "blue" } };
       } else if (dayOfWeek === 0) {
-        // Sunday
+        // 일요일
         marked[dateString] = { textStyle: { color: "red" } };
       }
     }
@@ -257,7 +252,7 @@ export default function MyPage() {
       }
     }
 
-    // 3. 선택된 날짜의 스타일 재정의
+    // 선택된 날짜 스타일 재정의
     if (selectedDate) {
       const selectionColor =
         marked[selectedDate]?.color === "#b1e666" ? "green" : "green";
@@ -272,33 +267,32 @@ export default function MyPage() {
     return marked;
   }, [attendanceDates, selectedDate, currentMonth]);
 
-  const handleLogout = useCallback(async () => {
-    Alert.alert(
-      "로그아웃",
-      "정말 로그아웃 하시겠습니까?",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "로그아웃",
-          onPress: async () => {
-            try {
-              await authLogout();
-              router.replace("/"); // 로그인 화면으로 이동
-            } catch (error) {
-              console.error("Error logging out:", error);
-              Alert.alert("오류", "로그아웃 중 오류가 발생했습니다.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleLogout = useCallback(() => {
+    showAlert({
+      title: "로그아웃",
+      message: "정말 로그아웃 하시겠습니까?",
+      confirmText: "로그아웃",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await authLogout();
+          router.replace("/"); // 로그인 화면으로 이동
+        } catch (error) {
+          showAlert({
+            title: "오류",
+            message: "로그아웃 중 오류가 발생했습니다.",
+          });
+        }
+      },
+      onCancel: () => {},
+    });
   }, [router]);
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View className="flex-1">
+        <BgGradient />
+        <LoadingScreen message="마이페이지 정보를 불러오는 중..." />
       </View>
     );
   }
@@ -324,6 +318,7 @@ export default function MyPage() {
   return (
     <View className="flex-1">
       <BgGradient />
+      <CustomAlert visible={alertVisible} {...alertProps} />
       <View className="absolute inset-0 pb-[150px]">
         <HeaderBar title="마이페이지" />
 
@@ -380,9 +375,8 @@ export default function MyPage() {
                   보유 얼음
                 </Text>
                 <View className="flex-row justify-end items-end mt-1">
-                  <Text className="text-black font-sf-b text-body ml-1">
-                    10000
-                    {/*totalPoint.toLocaleString("ko-KR")*/}
+                  <Text className="text-black font-sf-b text-body ml-1 mb-1">
+                    {totalPoint.toLocaleString("ko-KR")}
                   </Text>
                   <Images.Ice width={30} height={30} />
                 </View>
@@ -399,21 +393,21 @@ export default function MyPage() {
               onMonthChange={(month) => {
                 setCurrentMonth(month.dateString);
               }}
-              maxDate={todayDateString} // Added this line
+              maxDate={todayDateString} // 오늘 이후 날짜 선택 비활성화
               theme={{
                 arrowColor: "black",
                 "stylesheet.calendar.header": {
                   dayTextAtIndex0: {
-                    color: "red", // Sunday
+                    color: "red", // 일요일
                   },
                   dayTextAtIndex6: {
-                    color: "blue", // Saturday
+                    color: "blue", // 토요일
                   },
                 },
               }}
               style={{
                 borderRadius: 10,
-                overflow: "hidden", // Ensures the background respects the border radius
+                overflow: "hidden", // 자식 요소가 부모의 경계를 넘지 않도록 설정
               }}
             />
           </View>
@@ -482,7 +476,7 @@ export default function MyPage() {
           </View>
 
           <View className="bg-white rounded-xl p-lg shadow mt-4">
-            {/* 주문 내역 항목 */}
+            {/* 주문 내역 */}
             <Pressable
               onPress={() => router.push("/pages/shop/orderlist")}
               className="flex-row items-center justify-between py-md"
@@ -494,7 +488,7 @@ export default function MyPage() {
                 </Text>
               </View>
             </Pressable>
-            {/* 주문 내역 항목 */}
+            {/* 도움말 */}
             <Pressable
               onPress={() => router.push("/pages/faq/faq")}
               className="flex-row items-center justify-between py-md"
@@ -506,8 +500,7 @@ export default function MyPage() {
                 </Text>
               </View>
             </Pressable>
-            {/* 로그아웃 항목 */}
-
+            {/* 로그아웃 */}
             <Pressable
               onPress={handleLogout}
               className="flex-row items-center justify-between py-md"
@@ -520,12 +513,6 @@ export default function MyPage() {
               </View>
             </Pressable>
           </View>
-          {/* 테스트 버튼 */}
-          <MainButton
-            label="출석 데이터 초기화 (테스트용)"
-            onPress={handleResetAttendance}
-            className="mt-4 bg-red-500"
-          />
         </ScrollView>
       </View>
     </View>

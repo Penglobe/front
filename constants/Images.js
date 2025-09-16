@@ -1,9 +1,9 @@
 // constants/images.js
 // 배경
-import BgHome1 from "@assets/images/bg/bg-home-1.svg";
-import BgHome2 from "@assets/images/bg/bg-home-2.svg";
-import BgHome3 from "@assets/images/bg/bg-home-3.svg";
-import BgHome4 from "@assets/images/bg/bg-home-4.svg";
+import BgHome1 from "@assets/images/bg/bg-home-1.2.svg";
+import BgHome2 from "@assets/images/bg/bg-home-2.2.svg";
+import BgHome3 from "@assets/images/bg/bg-home-3.2.svg";
+import BgHome4 from "@assets/images/bg/bg-home-4.2.svg";
 import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 
 // 캐릭터
@@ -27,6 +27,12 @@ import survey_ipa from "@assets/images/character/survey_ipa.svg";
 import Ipa_diet from "@assets/images/character/ipa-diet.svg";
 import Tori_diet from "@assets/images/character/tori-diet.svg";
 import Ipa_Tori_diet from "@assets/images/character/ipa-tori-diet.svg";
+import Fish from "@assets/images/character/fish.svg";
+import Polarbear from "@assets/images/character/polarbear.svg";
+import Polarbear2 from "@assets/images/character/polarbear2.svg";
+import ProfileIce from "@assets/images/character/profile-ice.svg";
+import IpaWalk from "@assets/images/character/ipa-walking.svg";
+import ToriWalk from "@assets/images/character/tori-walking.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -131,4 +137,10 @@ export const Images = {
   Takeout,
   Restaurant,
   Information,
+  Fish,
+  Polarbear,
+  Polarbear2,
+  ProfileIce,
+  IpaWalk,
+  ToriWalk,
 };

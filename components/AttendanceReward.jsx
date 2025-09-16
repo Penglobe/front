@@ -143,7 +143,7 @@ export default function AttendanceReward({
         >
           <Animated.View
             style={chestStyle}
-            className="items-center justify-center"
+            className="items-center justify-center mb-xs"
           >
             {loadingPreview ? (
               <View className="items-center">
@@ -153,8 +153,7 @@ export default function AttendanceReward({
                 </Text>
               </View>
             ) : (
-              // <Text className="text-[200px]">🎁</Text>
-              <Images.Box width={200} height={200} />
+              <Images.Box width={180} height={180} />
             )}
           </Animated.View>
         </Pressable>
@@ -165,12 +164,12 @@ export default function AttendanceReward({
         <>
           <Animated.View
             style={cardStyle}
-            className="w-64 h-56 bg-white items-center justify-center px-5 py-6 mb-4 mt-4"
+            className="w-64 h-56 bg-white items-center justify-center px-xs mb-xs"
           >
             {hasPreview ? (
               <>
                 <View className="flex-row items-center">
-                  <Text className="text-emerald-600 font-sf-b text-[90px]">
+                  <Text className="text-green font-sf-b text-h0">
                     {Number(previewPoints).toLocaleString("ko-KR")}
                   </Text>
                   <Images.Ice width={150} height={150} />
@@ -179,7 +178,7 @@ export default function AttendanceReward({
             ) : (
               <View className="items-center">
                 <ActivityIndicator />
-                <Text className="text-gray-600 mt-2">
+                <Text className="text-gray-600 mt-xxs">
                   보상 정보를 불러오는 중...
                 </Text>
               </View>

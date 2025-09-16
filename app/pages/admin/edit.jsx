@@ -5,7 +5,6 @@ import {
   TextInput,
   ScrollView,
   Pressable,
-  Alert,
   Image,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -15,6 +14,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { apiFetch } from "@services/authService";
 import Constants from "expo-constants";
+import CustomAlert from "@components/CustomAlert";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
@@ -38,6 +38,13 @@ export default function ProductEditPage() {
   const [image, setImage] = useState(null); // 로컬 이미지 객체
   const [imgUri, setImgUri] = useState(null); // 미리보기용
 
+  // 🔔 커스텀 알럿 상태
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertMode, setAlertMode] = useState(null);
+  // "loadError" | "saveSuccess" | "saveFail"
+
   const load = useCallback(async () => {
     if (!id) return;
     try {
@@ -46,16 +53,17 @@ export default function ProductEditPage() {
 
       if (!res.ok)
         throw new Error(result?.message || `조회 실패(${res.status})`);
-      const data = result?.data ?? json;
+      const data = result?.data ?? result;
       setItem(data);
       setName(data.name || "");
       setPrice(data.price?.toString() || "");
       setDescription(data.description || "");
       setImgUri(toUri(data.img));
     } catch (e) {
-      Alert.alert("오류", e?.message ?? "상품 정보를 불러올 수 없습니다.", [
-        { text: "확인", onPress: () => router.back() },
-      ]);
+      setAlertTitle("오류");
+      setAlertMessage(e?.message ?? "상품 정보를 불러올 수 없습니다.");
+      setAlertMode("loadError");
+      setAlertVisible(true);
     }
   }, [id, router]);
 
@@ -93,26 +101,39 @@ export default function ProductEditPage() {
       });
 
       if (!res.ok) {
-        // 204가 아니고 실패 상태인 경우만 json 읽기
         const json = await res.json().catch(() => null);
         throw new Error(json?.message || "수정 실패");
       }
 
-      // 204 No Content이면 json 없으므로 바로 성공 처리
-      Alert.alert("수정 완료", "상품 정보가 수정되었습니다.", [
-        {
-          text: "확인",
-          onPress: () => router.push(`/pages/admin/showlist`),
-        },
-      ]);
+      // 성공
+      setAlertTitle("수정 완료");
+      setAlertMessage("상품 정보가 수정되었습니다.");
+      setAlertMode("saveSuccess");
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert("수정 실패", e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertTitle("수정 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertMode("saveFail");
+      setAlertVisible(true);
     }
   };
+
   if (!item) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-gray-500">불러오는 중...</Text>
+        <CustomAlert
+          visible={alertVisible}
+          title={alertTitle}
+          message={alertMessage}
+          confirmText="확인"
+          onConfirm={() => {
+            setAlertVisible(false);
+            if (alertMode === "loadError") {
+              router.back();
+            }
+          }}
+        />
       </View>
     );
   }
@@ -156,8 +177,8 @@ export default function ProductEditPage() {
           <Text className="text-h3 font-sf-b mb-md">가격 (수정불가)</Text>
           <TextInput
             value={price?.toString()}
-            editable={false} // 수정 불가
-            selectTextOnFocus={false} // 선택도 막기
+            editable={false}
+            selectTextOnFocus={false}
             className="border border-gray-300 rounded-md p-2 mb-md bg-gray-100 text-gray-700"
           />
 
@@ -178,6 +199,23 @@ export default function ProductEditPage() {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        confirmText="확인"
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (alertMode === "loadError") {
+            router.back();
+          }
+          if (alertMode === "saveSuccess") {
+            router.push("/pages/admin/showlist");
+          }
+        }}
+      />
     </View>
   );
 }

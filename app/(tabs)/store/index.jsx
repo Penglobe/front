@@ -8,7 +8,6 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -17,8 +16,8 @@ import BgGradient from "@components/BgGradient";
 import { apiFetch } from "@services/authService";
 import { Images } from "@constants/Images";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import CustomAlert from "@components/CustomAlert";
 
 const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 function toUri(path) {
@@ -36,7 +35,10 @@ export default function StoreListPage() {
   const [filterType, setFilterType] = useState("전체"); // 필터 타입
   const [sortOrder, setSortOrder] = useState("default"); // "asc", "desc", "default"
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const NUM_COLUMNS = 2;
 
@@ -53,10 +55,9 @@ export default function StoreListPage() {
         throw new Error("상품 응답 형식이 예상과 다릅니다.");
       setItems(data);
     } catch (e) {
-      Alert.alert(
-        "상품목록 불러오기 실패",
-        e?.message ?? "잠시 후 다시 시도해주세요."
-      );
+      setAlertTitle("상품목록 불러오기 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,6 @@ export default function StoreListPage() {
     // 실시간 필터라 submit 시 별도 요청은 없음.
   };
 
-  const clearQuery = () => setQuery("");
   const sortedItems = useMemo(() => {
     if (filterType !== "상품") return filtered; // 상품이 아니면 그냥 필터링된 데이터
 
@@ -204,7 +204,7 @@ export default function StoreListPage() {
               className="mr-1"
             />
             <TextInput
-              placeholder="상품명을 검색하세요"
+              placeholder="상품명을 검색하세요."
               value={query}
               onChangeText={setQuery}
               className="flex-1 font-sf-md text-gray-800"
@@ -328,6 +328,12 @@ export default function StoreListPage() {
           />
         </View>
       </View>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

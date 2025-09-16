@@ -143,12 +143,8 @@ export default function Home() {
   const totalPoint = Number(user?.totalPoint ?? 0);
   const totalScore = Number(user?.totalScore ?? 0);
   const level = Number(totalScore) || 0;
-  const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
-
-  const IpaComp = Images[`Ipa${stage}`] ?? Images.Ipa1;
-  const ToriComp = Images[`Tori${stage}`] ?? Images.Tori1;
+  const stage = level >= 300 ? 4 : level >= 150 ? 3 : level >= 50 ? 2 : 1;
   const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
-
   const translateY = useSharedValue(0);
   useEffect(() => {
     translateY.value = withRepeat(
@@ -160,11 +156,6 @@ export default function Home() {
       true
     );
   }, []);
-
-  const { width } = Dimensions.get("window");
-  const TORI_W = Math.min(width * 0.42, 220);
-  const IPA_W = Math.min(width * 0.36, 200);
-  const IPA_H = IPA_W * 1.4;
 
   return (
     <View className="flex-1">
@@ -262,9 +253,10 @@ export default function Home() {
         <View className="flex-row items-center mb-3 justify-center relative">
           {/* 제목 */}
           <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
+          <Text className="text-h1 font-sf-b">출석 보상</Text>
         </View>
 
-        <Text className="text-center text-h4 text-black font-sf-md mb-xs">
+        <Text className="text-center text-h4 text-black font-sf-md mb-md">
           상자를 클릭하여 랜덤 보상을 확인해보세요.
         </Text>
 

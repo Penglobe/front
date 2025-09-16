@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, ScrollView } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
 import { LinearGradient } from "expo-linear-gradient";
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
-// --- Avatar-related logic ---
+// 아바타 관련 로직
 const AVATAR_MAP = {
   ToriFace: Images.ToriFace,
   IpaFace: Images.IpaFace,
+  ProfileIce: Images.ProfileIce,
+  Fish: Images.Fish,
+  Polarbear: Images.Polarbear,
+  Polarbear2: Images.Polarbear2,
 };
 
 const getAvatarRenderComponent = (profileKey) => {
   return AVATAR_MAP[profileKey] || null;
 };
 
-// --- Podium Item Component ---
+// 시상대 아이템 컴포넌트
 const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
   if (!ranker) return <View style={{ flex: 1 }} />;
 
@@ -23,19 +30,19 @@ const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
 
   return (
     <View className="flex-1 items-center justify-end">
-      {/* Profile Image */}
+      {/* 프로필 이미지 */}
       {AvatarComponent && (
         <View className="absolute w-16 h-16 -top-[28px] ml-llg">
           <AvatarComponent width="60%" height="60%" />
         </View>
       )}
 
-      {/* Nickname */}
+      {/* 닉네임 */}
       <Text className="font-sf-b text-label text-black mt-xxs">
         {ranker.nickname}
       </Text>
 
-      {/* Score */}
+      {/* 점수 */}
       <View
         className="px-xs py-xs rounded-md my-xxs"
         style={{ backgroundColor: "#318643" }}
@@ -45,7 +52,7 @@ const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
         </Text>
       </View>
 
-      {/* Podium Platform */}
+      {/* 시상대 */}
       <View
         className="w-full items-center justify-center rounded-t-lg pt-xxs"
         style={{ height: height, backgroundColor: podiumColor }}
@@ -63,57 +70,82 @@ export default function GlobalRanking() {
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [currentUserNickname, setCurrentUserNickname] = useState(null); // Re-add state for nickname
+  const [currentUserNickname, setCurrentUserNickname] = useState(null); // 닉네임 상태 다시 추가
   const [showParticipationMessage, setShowParticipationMessage] =
     useState(false);
 
-  useEffect(() => {
-    const fetchGlobalRanking = async () => {
-      try {
-        const userInfo = await me();
-        if (userInfo) {
-          setCurrentUserId(userInfo.userId);
-          setCurrentUserNickname(userInfo.nickname); // Re-add nickname setter
-        }
+  // CustomAlert state
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    onCancel: null,
+  });
 
-        const response = await apiFetch("/rankings/global");
-        if (!response.ok)
-          throw new Error(`Global ranking 에러: ${response.status}`);
+  const showAlert = (props) => {
+    setAlertProps({
+      ...props,
+      onConfirm: () => {
+        setAlertVisible(false);
+        props.onConfirm && props.onConfirm();
+      },
+      onCancel: props.onCancel
+        ? () => {
+            setAlertVisible(false);
+            props.onCancel && props.onCancel();
+          }
+        : null,
+    });
+    setAlertVisible(true);
+  };
 
-        const data = await response.json();
-        setRankingList(data.top10 || []); // Use 'top10' key from API response
-        setMyRank(data.myRank);
-
-        if (!data.myRank) {
-          setShowParticipationMessage(true);
-        } else {
-          setShowParticipationMessage(false);
-        }
-      } catch (error) {
-        console.error("Error fetching global ranking:", error);
-        Alert.alert(
-          "랭킹 불러오기 오류",
-          "전체 랭킹을 불러오는 중 오류가 발생했습니다."
-        );
-      } finally {
-        setLoading(false);
+  const fetchGlobalRanking = useCallback(async () => {
+    setLoading(true); // Ensure loading is true when fetching starts
+    let apiResponse;
+    try {
+      const userInfo = await me();
+      if (userInfo) {
+        setCurrentUserId(userInfo.userId);
+        setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
       }
-    };
 
-    fetchGlobalRanking();
+      apiResponse = await apiFetch("/rankings/global");
+      if (!apiResponse.ok)
+        throw new Error(`전체 랭킹 에러: ${apiResponse.status}`);
+
+      const data = await apiResponse.json();
+      setRankingList(data.top10 || []); // API 응답의 'top10' 키 사용
+      setMyRank(data.myRank);
+
+      if (!data.myRank) {
+        setShowParticipationMessage(true);
+      } else {
+        setShowParticipationMessage(false);
+      }
+    } catch (error) {
+      showAlert({
+        title: "랭킹 불러오기 오류",
+        message: "전체 랭킹을 불러오는 중 오류가 발생했습니다.",
+      });
+    } finally {
+      // Ensure loading screen is shown for at least 0.7 seconds
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      setLoading(false);
+    }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchGlobalRanking();
+    }, [fetchGlobalRanking])
+  );
+
   if (loading) {
-    return (
-      <ActivityIndicator
-        size="large"
-        color="#0000ff"
-        style={{ flex: 1, justifyContent: "center" }}
-      />
-    );
+    return <LoadingScreen message="전체 랭킹을 불러오는 중..." />;
   }
 
-  // --- Data Processing for Podium and List ---
+  // 시상대 및 목록 데이터 처리
   const ranker1 = rankingList.find((r) => r.rank === 1);
   const ranker2 = rankingList.find((r) => r.rank === 2);
   const ranker3 = rankingList.find((r) => r.rank === 3);
@@ -122,36 +154,37 @@ export default function GlobalRanking() {
 
   return (
     <View className="px-pageX" style={{ flex: 1 }}>
-      {/* --- Podium Section (Height Adjusted) --- */}
+      <CustomAlert visible={alertVisible} {...alertProps} />
+      {/* 시상대 섹션 (높이 조절) */}
       <View className="h-48 flex-row items-end p-sm mt-xs">
         <PodiumItem
           ranker={ranker2}
           height={70}
-          podiumColor="#DBDBDB" // 2nd place - Silver
+          podiumColor="#DBDBDB" // 2등 - 은색
           rankTextColor="text-black"
         />
         <PodiumItem
           ranker={ranker1}
           height={100}
-          podiumColor="#F9C332" // 1st place - Gold
+          podiumColor="#F9C332" // 1등 - 금색
           rankTextColor="text-white"
         />
         <PodiumItem
           ranker={ranker3}
           height={50}
-          podiumColor="#858494" // 3rd place - Bronze
+          podiumColor="#858494" // 3등 - 동색
           rankTextColor="text-white"
         />
       </View>
 
-      {/* --- Separator / Message --- */}
+      {/* 구분선 / 메시지 */}
       {showParticipationMessage ? (
         <View>
           <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
             <Text className="font-bold">랭킹 참여 조건 미달</Text>
             <Text>
-              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! {"\n"}
-              활동을 통해 탄소 절감량을 늘리고 랭킹에 참여해보세요!
+              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! 활동을 통해
+              탄소 절감량을 늘리고 랭킹에 참여해보세요!
             </Text>
           </View>
         </View>
@@ -174,7 +207,7 @@ export default function GlobalRanking() {
         </View>
       )}
 
-      {/* --- Rest of the Ranking List --- */}
+      {/* 나머지 랭킹 목록 */}
       <View className="flex-1 pb-md">
         <ScrollView style={{ flex: 1 }}>
           {others.map((item) => {
@@ -188,14 +221,14 @@ export default function GlobalRanking() {
             );
           })}
 
-          {/* Display user's rank if they exist but are not in the top list shown */}
+          {/* 사용자의 순위가 목록에 표시되지 않은 경우 표시 */}
           {myRank && !myRankInList && (
             <>
               <Text
                 className="text-center text-black text-bold text-body my-xs -mt-sm"
                 style={{ lineHeight: 18, fontWeight: "900" }}
               >
-                .{"\n"}.{"\n"}.
+                . . .
               </Text>
               <RankingCard
                 item={{

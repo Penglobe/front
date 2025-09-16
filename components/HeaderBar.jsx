@@ -4,22 +4,32 @@ import { useRouter } from "expo-router";
 import { Images } from "@constants/Images";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function HeaderBar({ title = "제목", showBack = true, rightComponent = null }) {
+export default function HeaderBar({
+  title = "제목",
+  showBack = true,
+  rightComponent = null,
+  onBack = null,
+}) {
   const router = useRouter();
 
   return (
-    <SafeAreaView edges={["top"]} className="bg-white" style={{
+    <SafeAreaView
+      edges={["top"]}
+      className="bg-white"
+      style={{
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.04,
-        shadowRadius: 2, 
-        elevation: 4, 
+        shadowRadius: 2,
+        elevation: 4,
       }}
-    
     >
       <View className="w-full flex-row items-center justify-between px-4 h-[58px]">
         {showBack ? (
-          <Pressable onPress={() => router.back()} className="p-2">
+          <Pressable
+            onPress={() => (onBack ? onBack() : router.back())}
+            className="p-2"
+          >
             <Images.Back width={24} height={24} />
           </Pressable>
         ) : (

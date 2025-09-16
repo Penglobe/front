@@ -13,6 +13,8 @@ import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen";
 
 export default function Survey() {
   const router = useRouter(); // 페이지 이동용
@@ -21,6 +23,11 @@ export default function Survey() {
   const [firstUnanswered, setFirstUnanswered] = useState(null); // 제출 시 답 안 한 문항 id
   const { user } = useAuth(); // 로그인 사용자 정보
   const [loading, setLoading] = useState(true); // 질문 가져오는 중
+
+  // 🔔 CustomAlert 상태
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   // 스크롤뷰 관련
   const scrollRef = useRef(null);
@@ -64,7 +71,10 @@ export default function Survey() {
         setLoading(false);
       } catch (error) {
         console.error("질문 불러오기 실패:", error);
-        alert("질문 불러오기 실패");
+        setAlertTitle("오류");
+        setAlertMessage("질문 불러오기 실패");
+        setAlertVisible(true);
+        setLoading(false);
       }
     }
 
@@ -73,12 +83,7 @@ export default function Survey() {
 
   //렌더링;
   if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <BgGradient />
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
+    return <LoadingScreen message="데이터를 불러오는 중입니다..." />;
   }
 
   /*제출하기*/
@@ -126,10 +131,11 @@ export default function Survey() {
       });
 
       if (!response.ok) {
-        const text = await response.text();
-
+        const text = await response.text().catch(() => "");
         console.error("서버 에러:", text);
-        alert("서버 요청 실패: " + response.status);
+        setAlertTitle("오류");
+        setAlertMessage("서버 요청 실패: " + response.status);
+        setAlertVisible(true);
         return;
       }
 
@@ -147,95 +153,104 @@ export default function Survey() {
       });
     } catch (error) {
       console.error("네트워크 에러:", error);
-      alert("서버 요청 실패");
+      setAlertTitle("오류");
+      setAlertMessage("서버 요청 실패");
+      setAlertVisible(true);
     }
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
-      {/* 배경 */}
-      <BgGradient />
+    <>
+      <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
+        <BgGradient />
+        <HeaderBar title="빙하 리포트" />
 
-      {/* 헤더 */}
-      <HeaderBar title="빙하 리포트" />
-
-      <View className="px-pageX">
-        <View>
-          {/* 타이틀 */}
-          <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
-            <Text className="text-black text-xl font-bold">
-              <Text className="text-red-500 text-lg">
-                {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
-                습관을 만들어봐요.
-                {"\n"}
-              </Text>
-              <View>
-                <Text className="text-sm">
-                  ※ 하루에 한 번만 가능합니다. {"\n"}
+        <View className="px-pageX">
+          <View>
+            {/* 타이틀 */}
+            <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
+              <Text className="text-black text-xl font-bold">
+                <Text className="text-red-500 text-lg">
+                  {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
+                  습관을 만들어봐요.
+                  {"\n"}
                 </Text>
-              </View>
-            </Text>
-            <Images.survey_ipa width={100} height={130} />
-          </View>
-
-          {/* 질문 카드 */}
-          {Array.isArray(questions) &&
-            questions.map((q) => {
-              const isUnanswered = firstUnanswered === q.itemId;
-
-              return (
-                <View
-                  key={q.itemId}
-                  onLayout={(e) => {
-                    itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
-                  }}
-                  className={`p-llg rounded-lg shadow-md mb-lg bg-white px-pageX ${
-                    isUnanswered ? "border-2 border-red-500" : ""
-                  }`}
-                >
-                  {/*질문 출력*/}
-                  <Text className="text-black text-lg font-sf-b mb-md">
-                    Q. {q.code}
+                <View>
+                  <Text className="text-sm">
+                    ※ 하루에 한 번만 가능합니다. {"\n"}
                   </Text>
-
-                  {/*보기 출력*/}
-                  {Array.isArray(q.options) &&
-                    q.options.map((opt) => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        className="flex-row items-center mb-md"
-                        onPress={() => {
-                          setAnswer((prev) => ({
-                            ...prev,
-                            [q.itemId]: opt.value,
-                          }));
-                          if (isUnanswered) {
-                            setFirstUnanswered(null);
-                          }
-                        }}
-                      >
-                        {/*커스텀 라디오 버튼 + 항목*/}
-                        <View className="h-5 w-5 border-2 border-black rounded-full mr-md items-center justify-center">
-                          {answer[q.itemId] === opt.value && (
-                            <View className="h-3 w-3 bg-black rounded-full" />
-                          )}
-                        </View>
-                        <Text className="text-black text-base font-sf-md">
-                          {opt.value}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
                 </View>
-              );
-            })}
+              </Text>
+              <Images.survey_ipa width={80} height={130} />
+            </View>
 
-          <MainButton
-            label="제출하기"
-            onPress={submitHandler}
-            className="mt-5 mb-5"
-          />
+            {/* 질문 카드 */}
+            {Array.isArray(questions) &&
+              questions.map((q) => {
+                const isUnanswered = firstUnanswered === q.itemId;
+
+                return (
+                  <View
+                    key={q.itemId}
+                    onLayout={(e) => {
+                      itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
+                    }}
+                    className={`p-llg rounded-lg shadow-md mb-lg bg-white px-pageX ${
+                      isUnanswered ? "border-2 border-red-500" : ""
+                    }`}
+                  >
+                    {/*질문 출력*/}
+                    <Text className="text-black text-lg font-sf-b mb-md">
+                      Q. {q.code}
+                    </Text>
+
+                    {/*보기 출력*/}
+                    {Array.isArray(q.options) &&
+                      q.options.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.value}
+                          className="flex-row items-center mb-md"
+                          onPress={() => {
+                            setAnswer((prev) => ({
+                              ...prev,
+                              [q.itemId]: opt.value,
+                            }));
+                            if (isUnanswered) {
+                              setFirstUnanswered(null);
+                            }
+                          }}
+                        >
+                          {/*커스텀 라디오 버튼 + 항목*/}
+                          <View className="h-5 w-5 border-2 border-black rounded-full mr-md items-center justify-center">
+                            {answer[q.itemId] === opt.value && (
+                              <View className="h-3 w-3 bg-black rounded-full" />
+                            )}
+                          </View>
+                          <Text className="text-black text-base font-sf-md">
+                            {opt.value}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                  </View>
+                );
+              })}
+
+            <MainButton
+              label="제출하기"
+              onPress={submitHandler}
+              className="mt-5 mb-10"
+            />
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
+    </>
   );
 }

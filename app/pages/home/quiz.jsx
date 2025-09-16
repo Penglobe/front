@@ -72,8 +72,8 @@ export default function QuizPage() {
     <View className="flex-1">
       {/* 정답/오답 모달 */}
       <Modal visible={open} onClose={() => setOpen(false)}>
-        <View className="items-center mb-llg">
-          <Text className="text-black text-h2 font-sf-b text-center mb-sm">
+        <View className="items-center">
+          <Text className="text-black text-h2 font-sf-b text-center">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
           <View
@@ -89,7 +89,7 @@ export default function QuizPage() {
             <Images.Ice width={40} height={40} />
             <Text className="text-black text-h2 font-sf-b">을 받았어요.</Text>
           </View>
-          <View className="items-center mb-llg">
+          <View className="items-center">
             {result ? <Images.Ipa2 /> : <Images.Ipa_sad />}
           </View>
         </View>
@@ -107,8 +107,8 @@ export default function QuizPage() {
         visible={submittedModalOpen}
         onClose={() => setSubmittedModalOpen(false)}
       >
-        <View className="items-center mb-llg">
-          <Text className="text-black text-h2 font-sf-b text-center mb-sm">
+        <View className="items-center">
+          <Text className="text-black text-h2 font-sf-b text-center">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
           <View
@@ -118,10 +118,10 @@ export default function QuizPage() {
               justifyContent: "center",
             }}
           ></View>
-          <Text className="text-black text-h3 font-sf-b">
-            (오늘 퀴즈는 이미 제출되었습니다.)
+          <Text className="text-black text-caption font-sf-b py-xs">
+            오늘 퀴즈로 더 받을 수 있는 얼음은 없어요
           </Text>
-          <View className="items-center mb-llg">
+          <View className="items-center">
             {result ? (
               <Images.Ipa2 width={200} height={200} />
             ) : (
@@ -151,11 +151,13 @@ export default function QuizPage() {
 
       <View className="px-pageX pt-2xl gap-2xl">
         {/* 날짜/설명 */}
-        <View className="bg-white rounded-xl p-4">
-          <Text className="text-green font-sf-b text-lg">{formattedDate}</Text>
-          <Text className="font-sf-b text-h4 mt-sm">
-            환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}하지만 얼음은 없어도 지식은
-            쌓을 수 있어요!
+        <View className="bg-white rounded-xl px-lg py-lg">
+          <Text className="text-green font-sf-b text-body">
+            {formattedDate}
+          </Text>
+          <Text className="font-sf-b text-body mt-sm">
+            환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}얼음은 없어도 지식은 쌓을 수
+            있어요!
           </Text>
         </View>
 
@@ -167,18 +169,21 @@ export default function QuizPage() {
 
           <View className="flex-row justify-around mt-3xl">
             <TouchableOpacity
-              className="bg-blue py-8 px-12 rounded-lg opacity-90"
+              className="bg-blue py-sm px-2xl rounded-lg opacity-90"
               onPress={() => handleSubmitAnswer("O")}
             >
               <Text className="text-white text-[60px] font-extrabold">O</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-red-400 py-8 px-12 rounded-lg opacity-90"
+              className="bg-red-400 py-sm px-2xl rounded-lg opacity-90"
               onPress={() => handleSubmitAnswer("X")}
             >
               <Text className="text-white text-[60px] font-extrabold">X</Text>
             </TouchableOpacity>
           </View>
+        </View>
+        <View className="items-center justify-center py-md">
+          <Images.IpaTori1 width={250} height={180} />
         </View>
       </View>
     </View>

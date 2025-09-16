@@ -6,11 +6,12 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { ActivityIndicator, Alert, View, Linking } from "react-native";
+import { ActivityIndicator, View, Linking } from "react-native";
 import { WebView } from "react-native-webview";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import * as LinkingExpo from "expo-linking";
 import { apiFetch } from "@services/authService";
+import CustomAlert from "@components/CustomAlert";
 
 export default function PointWebviewRoute() {
   const router = useRouter();
@@ -21,6 +22,11 @@ export default function PointWebviewRoute() {
   const [isLoading, setIsLoading] = useState(true);
   const processedRef = useRef(false); // 중복 처리 방지 플래그
 
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertNext, setAlertNext] = useState(null);
+
   // 결제 검증 공통 함수 (onMessage/딥링크 모두 여기로)
   const verifyAndClose = useCallback(
     async ({ imp_uid, merchant_uid }) => {
@@ -29,8 +35,10 @@ export default function PointWebviewRoute() {
 
       try {
         if (!imp_uid || !merchant_uid) {
-          Alert.alert("오류", "검증 정보가 올바르지 않습니다.");
-          router.replace("/pages/point/pointHistory");
+          setAlertTitle("오류");
+          setAlertMessage("검증 정보가 올바르지 않습니다.");
+          setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+          setAlertVisible(true);
           return;
         }
 
@@ -40,16 +48,21 @@ export default function PointWebviewRoute() {
         });
 
         if (res.ok) {
-          router.replace("/pages/point/pointHistory");
-          Alert.alert("결제 성공", "얼음 구매가 완료되었습니다.");
+          setAlertTitle("결제 성공");
+          setAlertMessage("얼음 구매가 완료되었습니다.");
+          setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+          setAlertVisible(true);
         } else {
-          const txt = await res.text().catch(() => "");
-          Alert.alert("결제 취소", "결제가 취소되었습니다.");
+          setAlertTitle("결제 취소");
+          setAlertMessage("결제가 취소되었습니다.");
+          setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+          setAlertVisible(true);
         }
       } catch (e) {
-        Alert.alert("오류", "결제 결과 처리 중 문제가 발생했습니다.");
-      } finally {
-        router.replace("/pages/point/pointHistory");
+        setAlertTitle("오류");
+        setAlertMessage("결제 결과 처리 중 문제가 발생했습니다.");
+        setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+        setAlertVisible(true);
       }
     },
     [router]
@@ -60,8 +73,10 @@ export default function PointWebviewRoute() {
     const prepare = async () => {
       try {
         if (!amount || Number.isNaN(amount) || amount <= 0) {
-          Alert.alert("결제 오류", "유효하지 않은 금액입니다.");
-          router.replace("/pages/point/pointHistory");
+          setAlertTitle("결제 오류");
+          setAlertMessage("유효하지 않은 금액입니다.");
+          setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+          setAlertVisible(true);
           return;
         }
 
@@ -74,8 +89,10 @@ export default function PointWebviewRoute() {
         const json = await res.json();
         setMerchantUid(json?.data); // 서버에서 발급한 merchant_uid
       } catch (e) {
-        Alert.alert("결제 준비 오류", e.message || "서버와 통신 실패");
-        router.replace("/pages/point/pointHistory");
+        setAlertTitle("결제 준비 오류");
+        setAlertMessage(e?.message || "서버와 통신 실패");
+        setAlertNext(() => () => router.replace("/pages/point/pointHistory"));
+        setAlertVisible(true);
       } finally {
         setIsLoading(false);
       }
@@ -117,11 +134,12 @@ export default function PointWebviewRoute() {
         } else {
           if (!processedRef.current) {
             processedRef.current = true;
-            Alert.alert(
-              "결제 취소",
-              data.error_msg || "결제가 취소되었습니다."
+            setAlertTitle("결제 취소");
+            setAlertMessage(data.error_msg || "결제가 취소되었습니다.");
+            setAlertNext(
+              () => () => router.replace("/pages/point/pointHistory")
             );
-            router.replace("/pages/point/pointHistory");
+            setAlertVisible(true);
           }
         }
       } catch {
@@ -249,6 +267,19 @@ export default function PointWebviewRoute() {
             console.warn("외부 앱 열기 실패:", e.message);
           }
           return false; // 웹뷰에서 처리 안 함
+        }}
+      />
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (typeof alertNext === "function") {
+            const go = alertNext;
+            setAlertNext(null);
+            go();
+          }
         }}
       />
     </>
