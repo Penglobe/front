@@ -25,8 +25,8 @@ export default function TabBar({ state, descriptors, navigation }) {
   const OFFSET = 30;
   const SIZE = 30;
   const center = state.routes.find((r) => isRoute(r.name, "calculator"));
-  const currentRoute = state.routes[state.index]?.name; //현재 탭
-  const isCalculatorFocused = currentRoute?.startsWith("calculator"); // calculator 및 하위 경로 전부 true
+  const currentRoute = state.routes[state.index]?.name;
+  const isCalculatorFocused = currentRoute?.startsWith("calculator");
 
   if (currentRoute?.startsWith("ranking")) {
     return null;
@@ -76,7 +76,6 @@ export default function TabBar({ state, descriptors, navigation }) {
   const leftRoutes = [findBy("home"), findBy("ranking")].filter(Boolean);
   const rightRoutes = [findBy("store"), findBy("mypage")].filter(Boolean);
 
-  // ✅ TabBar.jsx 내 CalculatorButton 교체: Hollow Halo Pulse (중앙 비움)
   function CalculatorButton({ onPress, children }) {
     const t = useRef(new Animated.Value(0)).current;
 
@@ -99,7 +98,6 @@ export default function TabBar({ state, descriptors, navigation }) {
       return () => loop.stop();
     }, [t]);
 
-    // 퍼짐 정도(스케일) & 투명도
     const ringScale = t.interpolate({
       inputRange: [0, 1],
       outputRange: [0.72, 0.88],
@@ -118,22 +116,20 @@ export default function TabBar({ state, descriptors, navigation }) {
         accessibilityRole="tab"
         accessibilityLabel="계산기"
       >
-        {/* 🟢 바깥 링(중앙 비움) */}
         <Animated.View
           pointerEvents="none"
           style={{
             position: "absolute",
-            width: 84, // 링 크기
+            width: 84,
             height: 84,
             borderRadius: 42,
-            borderWidth: 7, // 🔧 두께(굵기)
+            borderWidth: 7,
             borderColor: "green",
             opacity: ringOpacity,
             transform: [{ scale: ringScale }],
           }}
         />
 
-        {/* 중앙 버튼/아이콘(흰색 유지) */}
         {children}
       </TouchableOpacity>
     );
@@ -148,8 +144,8 @@ export default function TabBar({ state, descriptors, navigation }) {
       <TouchableOpacity
         key={route.key}
         onPress={() => {
-          navigation.navigate(route.name); // 항상 전환 (비활성화 X)
-          if (open) setOpen(false); // 다른 nav 누르면 닫힘
+          navigation.navigate(route.name);
+          if (open) setOpen(false);
         }}
         activeOpacity={0.85}
         className={`items-center justify-center ${open ? "opacity-40" : ""}`}

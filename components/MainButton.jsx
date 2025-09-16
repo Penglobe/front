@@ -2,7 +2,6 @@ import { useRouter } from "expo-router";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 
 export default function MainButton({
-  // 기본값 설정
   label = "뒤로가기",
   children,
   onPress,
@@ -18,7 +17,9 @@ export default function MainButton({
       <Pressable
         disabled={disabled}
         onPress={handlePress}
-        className={`w-full py-llg items-center justify-center rounded-xl bg-green active:bg-emerald-700 ${disabled ? "opacity-60" : ""} ${className}`}
+        className={`w-full py-llg items-center justify-center rounded-xl bg-green active:bg-emerald-700 ${
+          disabled ? "opacity-60" : ""
+        } ${className}`}
         style={[
           {
             shadowColor: "#318643",
