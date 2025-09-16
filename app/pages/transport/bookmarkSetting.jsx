@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert, ScrollView } from "react-native";
+import { View, Text, TextInput, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { createBookmark } from "@services/transportService";
@@ -7,6 +7,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
 import KakaoMapView from "@components/KakaoMapView";
+import CustomAlert from "@components/CustomAlert";
 import colors from "@constants/Colors.cjs";
 import Ipa from "@assets/images/character/ipa-face.svg";
 
@@ -25,13 +26,47 @@ export default function BookmarkSetting() {
   const router = useRouter();
 
   // ✅ 수정 관련 상태
-  const [isEditing, setIsEditing] = useState(true); // 처음엔 바로 입력 가능
+  const [isEditing, setIsEditing] = useState(true);
   const [labelInput, setLabelInput] = useState(placeName || "");
+
+  // ✅ Alert 상태
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "",
+    onConfirm: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    onCancel: undefined,
+  });
+
+  // ✅ Alert 오픈 헬퍼 함수
+  const openAlert = (config) =>
+    setAlertConfig({
+      visible: true,
+      title: config.title || "",
+      message: config.message || "",
+      confirmText: config.confirmText || "확인",
+      cancelText: config.cancelText,
+      onConfirm: () => {
+        if (config.onConfirm) config.onConfirm();
+        setAlertConfig((prev) => ({ ...prev, visible: false }));
+      },
+      onCancel: config.onCancel
+        ? () => {
+            config.onCancel();
+            setAlertConfig((prev) => ({ ...prev, visible: false }));
+          }
+        : undefined,
+    });
 
   // ✅ 북마크 저장
   const handleSave = async () => {
     if (!labelInput.trim()) {
-      Alert.alert("북마크 이름을 입력해주세요.");
+      openAlert({
+        title: "이름 필요",
+        message: "북마크 이름을 입력해주세요.",
+      });
       return;
     }
 
@@ -43,19 +78,20 @@ export default function BookmarkSetting() {
         lng,
       });
 
-      Alert.alert("북마크 등록 완료", "", [
-        {
-          text: "확인",
-          onPress: () =>
-            router.replace({
-              pathname: "/pages/transport/transportBookmark",
-              params: { startLat, startLng, mode },
-            }),
-        },
-      ]);
+      openAlert({
+        title: "북마크 등록 완료",
+        onConfirm: () =>
+          router.replace({
+            pathname: "/pages/transport/transportBookmark",
+            params: { startLat, startLng, mode },
+          }),
+      });
     } catch (err) {
       console.error("북마크 등록 실패:", err);
-      Alert.alert("북마크 등록 실패", "잠시 후 다시 시도해주세요.");
+      openAlert({
+        title: "등록 실패",
+        message: "잠시 후 다시 시도해주세요.",
+      });
     }
   };
 
@@ -78,7 +114,7 @@ export default function BookmarkSetting() {
           </View>
 
           <View className="bg-white rounded-2xl shadow-sm px-lg ">
-            {/* 이름 (인라인 수정 가능) */}
+            {/* 이름 입력 */}
             <View className="flex-row items-center border-b border-gray-200 py-sm ">
               {isEditing ? (
                 <TextInput
@@ -125,6 +161,9 @@ export default function BookmarkSetting() {
           </View>
         </View>
       </ScrollView>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert {...alertConfig} />
     </View>
   );
 }

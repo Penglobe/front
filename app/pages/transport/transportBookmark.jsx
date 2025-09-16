@@ -5,7 +5,6 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -17,6 +16,7 @@ import MainButton from "@components/MainButton";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "@constants/Colors.cjs";
 import PlaceCard from "@components/PlaceCard";
+import CustomAlert from "@components/CustomAlert";
 
 export default function TransportBookmark() {
   const { startLat, startLng, mode: rawMode } = useLocalSearchParams();
@@ -30,6 +30,37 @@ export default function TransportBookmark() {
   const [loading, setLoading] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
 
+  // ✅ Alert 상태
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "",
+    onConfirm: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    onCancel: undefined,
+  });
+
+  // ✅ Alert 오픈 헬퍼 함수
+  const openAlert = (config) =>
+    setAlertConfig({
+      visible: true,
+      title: config.title || "",
+      message: config.message || "",
+      confirmText: config.confirmText || "확인",
+      cancelText: config.cancelText,
+      onConfirm: () => {
+        if (config.onConfirm) config.onConfirm();
+        setAlertConfig((prev) => ({ ...prev, visible: false }));
+      },
+      onCancel: config.onCancel
+        ? () => {
+            config.onCancel();
+            setAlertConfig((prev) => ({ ...prev, visible: false }));
+          }
+        : undefined,
+    });
+
   // ✅ 북마크 불러오기
   const fetchBookmarks = useCallback(async () => {
     try {
@@ -37,7 +68,10 @@ export default function TransportBookmark() {
       setBookmarks(data);
     } catch (err) {
       console.error("북마크 조회 실패:", err);
-      Alert.alert("북마크 조회 실패", "잠시 후 다시 시도해주세요.");
+      openAlert({
+        title: "북마크 조회 실패",
+        message: "잠시 후 다시 시도해주세요.",
+      });
     }
   }, []);
 
@@ -56,7 +90,10 @@ export default function TransportBookmark() {
       setSearchResults(data.documents || []);
     } catch (err) {
       console.error("주소 검색 실패:", err);
-      Alert.alert("주소 검색 실패", "카카오 API 호출에 실패했습니다.");
+      openAlert({
+        title: "주소 검색 실패",
+        message: "카카오 API 호출에 실패했습니다.",
+      });
     } finally {
       setLoading(false);
     }
@@ -65,7 +102,10 @@ export default function TransportBookmark() {
   // ✅ 출발 버튼
   const handleConfirm = () => {
     if (!selectedPlace) {
-      Alert.alert("목적지를 선택해주세요.");
+      openAlert({
+        title: "목적지 필요",
+        message: "목적지를 선택해주세요.",
+      });
       return;
     }
 
@@ -82,7 +122,7 @@ export default function TransportBookmark() {
           ? selectedPlace.bookmarkLabel
           : selectedPlace.place_name,
         mode,
-        fresh: "1", 
+        fresh: "1",
       },
     });
   };
@@ -137,8 +177,8 @@ export default function TransportBookmark() {
             onChangeText={setQuery}
             className="flex-1 font-sf-md text-gray-800"
             style={{
-              paddingVertical: 0, // iOS 잘림 방지
-              textAlignVertical: "center", // Android 중앙 정렬
+              paddingVertical: 0,
+              textAlignVertical: "center",
             }}
             returnKeyType="search"
             onSubmitEditing={handleSearch}
@@ -217,6 +257,9 @@ export default function TransportBookmark() {
       <View className="px-pageX mb-10">
         <MainButton label="출발" onPress={handleConfirm} />
       </View>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert {...alertConfig} />
     </View>
   );
 }
