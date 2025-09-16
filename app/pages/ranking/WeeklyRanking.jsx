@@ -10,27 +10,27 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch } from "@services/authService";
-import { useAuth } from "@hooks/useAuth"; // Import useAuth hook
+import { useAuth } from "@hooks/useAuth"; // useAuth 훅 가져오기
 
 export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentUserNickname, setCurrentUserNickname] = useState(null);
-  const [userId, setUserId] = useState(null); // Declare userId state variable
+  const [userId, setUserId] = useState(null); // userId 상태 변수 선언
   const [showParticipationMessage, setShowParticipationMessage] =
-    useState(false); // New state for message visibility
+    useState(false); // 메시지 표시 여부 상태
 
   const { user, isLoading: isAuthLoading } = useAuth();
 
-  // --- Refactored Data Fetching Logic ---
+  // 리팩토링된 데이터 가져오기 로직
   const fetchRankingData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiFetch("/rankings/weekly");
 
       if (!response.ok) {
-        throw new Error(`Weekly ranking 에러: ${response.status}`);
+        throw new Error(`주간 랭킹 에러: ${response.status}`);
       }
 
       const data = await response.json();
@@ -38,12 +38,11 @@ export default function WeeklyRanking() {
       setMyRank(data.myRank || null);
 
       if (!data.myRank) {
-        setShowParticipationMessage(true); // Show message instead of alert
+        setShowParticipationMessage(true); // 경고 대신 메시지 표시
       } else {
-        setShowParticipationMessage(false); // Hide message if rank is found
+        setShowParticipationMessage(false); // 순위가 있으면 메시지 숨기기
       }
     } catch (error) {
-      console.error("Error fetching weekly ranking:", error);
       Alert.alert(
         "랭킹 불러오기 오류",
         "주간 랭킹을 불러오는 중 오류가 발생했습니다."
@@ -51,7 +50,7 @@ export default function WeeklyRanking() {
     } finally {
       setLoading(false);
     }
-  }, [userId]); // Add userId to dependency array
+  }, [userId]); // 의존성 배열에 userId 추가
 
   useEffect(() => {
     if (user && user.userId && user.nickname) {
@@ -64,25 +63,7 @@ export default function WeeklyRanking() {
     fetchRankingData();
   }, [fetchRankingData]);
 
-  // --- New API call for the test button ---
-  const handleAddDummyData = async () => {
-    try {
-      const response = await apiFetch("/users/me/add-dummy-data", {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add dummy data");
-      }
-
-      await fetchRankingData(); // Re-fetch data to show changes
-
-      Alert.alert("성공", "데이터가 추가되고 랭킹이 갱신되었습니다."); // Add a success alert
-    } catch (error) {
-      console.error("Error adding dummy data:", error);
-      Alert.alert("오류", "데이터 추가 중 오류가 발생했습니다.");
-    }
-  };
+  
 
   if (loading) {
     return (
@@ -95,7 +76,7 @@ export default function WeeklyRanking() {
   }
 
   const myRankingFromTop10 = rankingList.find(
-    (item) => item.userId === userId // Change to userId comparison
+    (item) => item.userId === userId // userId로 비교 변경
   );
 
   return (
@@ -140,10 +121,10 @@ export default function WeeklyRanking() {
         contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
       >
         {rankingList.map((item) => {
-          const isCurrentUser = item.userId === userId; // Change to userId comparison
+          const isCurrentUser = item.userId === userId; // userId로 비교 변경
           return (
             <RankingCard
-              key={item.rank + item.nickname} // Keep key as is, or change to item.userId if unique
+              key={item.rank + item.nickname} // 키는 그대로 두거나 고유한 item.userId로 변경
               item={{
                 rank: item.rank,
                 nickname: item.nickname,
@@ -164,7 +145,7 @@ export default function WeeklyRanking() {
                 rank: myRank.rank,
                 nickname: currentUserNickname,
                 score: myRank.score,
-                profile: myRank.profile, // Add profile to myRank card
+                profile: myRank.profile, // 내 순위 카드에 프로필 추가
               }}
               isProminent={true}
             />

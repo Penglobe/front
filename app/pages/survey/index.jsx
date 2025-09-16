@@ -232,7 +232,7 @@ export default function Survey() {
           <MainButton
             label="제출하기"
             onPress={submitHandler}
-            className="mt-md mb-3xl"
+            className="mt-5 mb-10"
           />
         </View>
       </View>

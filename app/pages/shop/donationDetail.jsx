@@ -167,12 +167,10 @@ export default function ProductDetailPage() {
                 }}
                 placeholder="기부금 입력 (최소 100얼음)"
                 keyboardType="numeric"
-                multiline={false} // ✅ 명시
-                scrollEnabled={false} // ✅ 스크롤 막기
-                textAlignVertical="center" // ✅ 세로 중앙
-                className="flex-1 text-black h-10 px-3 text-md font-sf-b rounded-3xl border"
+                className="flex-1 text-black h-2xl px-md text-md font-sf-b rounded-3xl border"
                 style={{
-                  paddingVertical: 1, // ✅ 위아래 여백 없애서 스크롤 방지
+                  paddingVertical: 0, // iOS 잘림 방지
+                  textAlignVertical: "center", // Android 중앙 정렬
                 }}
               />
             </View>
@@ -206,12 +204,12 @@ export default function ProductDetailPage() {
       {/* 구매 확인 모달 */}
       <Modal visible={confirmVisible}>
         <View className="mb-4">
-          <Text className="text-black text-h1 font-sf-b mb-4 text-center">
+          <Text className="text-black text-h1 font-sf-b mb-md text-center">
             기부 결제 확인
           </Text>
           <Pressable
             onPress={() => setConfirmVisible(false)}
-            style={{ position: "absolute", right: 10, top: 0, padding: 2 }}
+            className="absolute right-[10px] top-0 p-0.5"
           >
             <Text className="text-h1 text-gray-400">✕</Text>
           </Pressable>

@@ -19,8 +19,6 @@ export default function RegionRanking({
   const [mapLayout, setMapLayout] = useState(null);
 
   // 지도 데이터 계산
-
-  // 지도 데이터 계산
   const mapData = useMemo(() => {
     if (!mapLayout) return null;
 
@@ -148,7 +146,7 @@ export default function RegionRanking({
   }, [mapLayout]);
 
   const onScrollToIndexFailed = (info) => {
-    // Workaround for a common FlatList bug
+    // FlatList의 일반적인 버그에 대한 해결 방법
     const wait = new Promise((resolve) => setTimeout(resolve, 100));
     wait.then(() => {
       if (rankingData.length > info.index) {
@@ -164,26 +162,23 @@ export default function RegionRanking({
   // 카드로 스크롤
   const scrollToRegion = (regionName) => {
     if (!scrollViewRef.current) {
-      console.log("[scrollToRegion] ScrollView ref not ready yet.");
       return;
     }
 
-    const index = rankingData.findIndex((item) => item.regionName === regionName);
+    const index = rankingData.findIndex(
+      (item) => item.regionName === regionName
+    );
 
     if (index !== -1) {
-      console.log(`[scrollToRegion] Scrolling to index ${index}`);
       scrollViewRef.current.scrollToIndex({
         index,
         animated: true,
-        viewPosition: 0.5, // 0: top, 0.5: center, 1: bottom
+        viewPosition: 0.5, // 0: 상단, 0.5: 중앙, 1: 하단
       });
-    } else {
-      console.log(`[scrollToRegion] Could not find index for ${regionName}`);
     }
   };
 
   const handleRegionPress = (title) => {
-    console.log("handleRegionPress:", title);
     setSelectedRegion(title);
     scrollToRegion(title);
   };
@@ -194,7 +189,7 @@ export default function RegionRanking({
   }, [selectedRegion, rankingData]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="px-pageX" style={{ flex: 1 }}>
       {/* 지도 */}
       <View
         style={{ flex: 1 }}
@@ -227,8 +222,8 @@ export default function RegionRanking({
                         <Path
                           key={p_idx}
                           d={d}
-                          fill={isSelected ? "#4CAF50" : "#BDBDBD"}
-                          stroke="#333"
+                          fill={isSelected ? "green" : "white"}
+                          stroke="darkgray"
                           strokeWidth={0.5}
                           onPressIn={() => handleRegionPress(title)}
                         />
@@ -246,7 +241,7 @@ export default function RegionRanking({
                 y={mapData.insetRect.y}
                 width={mapData.insetRect.width}
                 height={mapData.insetRect.height}
-                fill="#f0f0f0"
+                fill="transparent"
                 stroke="#999"
                 strokeWidth={1}
               />
@@ -272,7 +267,7 @@ export default function RegionRanking({
                     <Path
                       key={p_idx}
                       d={d}
-                      fill={isSelected ? "#4CAF50" : "#BDBDBD"}
+                      fill={isSelected ? "green" : "white"}
                       stroke="#333"
                       strokeWidth={0.5}
                       onPressIn={() => handleRegionPress(title)}
@@ -307,7 +302,7 @@ export default function RegionRanking({
         <Text
           style={{
             textAlign: "center",
-            color: "#4CAF50",
+            color: "green",
             fontWeight: "bold",
             marginBottom: 8,
           }}
