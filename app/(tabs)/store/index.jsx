@@ -204,7 +204,7 @@ export default function StoreListPage() {
               className="mr-1"
             />
             <TextInput
-              placeholder="상품명을 검색하세요"
+              placeholder="상품명을 검색하세요."
               value={query}
               onChangeText={setQuery}
               className="flex-1 font-sf-md text-gray-800"

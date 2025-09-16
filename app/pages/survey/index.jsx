@@ -175,7 +175,7 @@ export default function Survey() {
                 </Text>
               </View>
             </Text>
-            <Images.survey_ipa width={100} height={130} />
+            <Images.survey_ipa width={80} height={130} />
           </View>
 
           {/* 질문 카드 */}
@@ -232,7 +232,7 @@ export default function Survey() {
           <MainButton
             label="제출하기"
             onPress={submitHandler}
-            className="mt-5 mb-5"
+            className="mt-5 mb-10"
           />
         </View>
       </View>

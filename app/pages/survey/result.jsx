@@ -1,18 +1,26 @@
-import { View, Text, TouchableOpacity, Modal, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  BackHandler,
+} from "react-native";
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Images } from "@constants/Images";
 import Co2Chart from "@pages/survey/Co2Chart";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 export default function SurveyResult() {
   const { userId, resultData } = useLocalSearchParams();
   const [showInfo, setShowInfo] = useState(false);
-  //console.log("결과페이지 도착");
-  //console.log("userId", userId);
+  const navigation = useNavigation();
+  const navigatingRef = useRef(false);
 
   let data = null;
   try {
@@ -20,6 +28,32 @@ export default function SurveyResult() {
   } catch (e) {
     console.error("resultData 파싱 실패:", e);
   }
+
+  // ✅ iOS 제스처 & 헤더 기본 back(pop) 가로채서 홈으로 replace
+  useFocusEffect(
+    useCallback(() => {
+      const sub = navigation.addListener("beforeRemove", (e) => {
+        if (navigatingRef.current) return;
+        e.preventDefault();
+        navigatingRef.current = true;
+        router.replace("/home");
+      });
+      return sub; // cleanup
+    }, [navigation, router])
+  );
+
+  // ✅ 안드로이드 하드웨어 뒤로가기 → 홈으로 replace
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+        if (navigatingRef.current) return true; // 이미 처리 중
+        navigatingRef.current = true;
+        router.replace("/home");
+        return true; // 이벤트 소비
+      });
+      return () => sub.remove();
+    }, [router])
+  );
 
   return (
     <View className="flex-1">
@@ -91,7 +125,7 @@ export default function SurveyResult() {
 
           <MainButton
             label="홈으로"
-            className="mt-5"
+            className="mt-5 mb-10"
             onPress={() => router.push("/(tabs)/home")}
           />
         </View>
