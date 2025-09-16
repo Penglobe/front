@@ -216,7 +216,10 @@ export default function PointHistory() {
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.white }}>
       <BgGradient />
-      <HeaderBar title="얼음 적립 내역" className="px-pageX" />
+      <HeaderBar
+        title="얼음 적립 내역"
+        onBack={() => router.replace("/(tabs)/home")}
+      />
 
       {/* 잔액 카드 */}
       <View className="px-pageX mt-5">

@@ -6,7 +6,6 @@ import {
   Pressable,
   Image,
   ScrollView,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";

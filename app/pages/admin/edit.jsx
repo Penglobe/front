@@ -122,6 +122,18 @@ export default function ProductEditPage() {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <Text className="text-gray-500">불러오는 중...</Text>
+        <CustomAlert
+          visible={alertVisible}
+          title={alertTitle}
+          message={alertMessage}
+          confirmText="확인"
+          onConfirm={() => {
+            setAlertVisible(false);
+            if (alertMode === "loadError") {
+              router.back();
+            }
+          }}
+        />
       </View>
     );
   }
