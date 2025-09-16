@@ -146,7 +146,7 @@ export default function Home() {
   const totalPoint = Number(user?.totalPoint ?? 0);
   const totalScore = Number(user?.totalScore ?? 0);
   const level = Number(totalScore) || 0;
-  const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
+  const stage = level >= 300 ? 4 : level >= 150 ? 3 : level >= 50 ? 2 : 1;
   const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
   const translateY = useSharedValue(0);
   useEffect(() => {
@@ -259,7 +259,7 @@ export default function Home() {
           <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
 
           {/* 닫기 버튼 (오른쪽 끝) */}
-          <Pressable
+          {/* <Pressable
             onPress={() => {
               setAtt({ visible: false, loading: false });
               setPreview(null);
@@ -269,7 +269,7 @@ export default function Home() {
             style={{ padding: 4 }}
           >
             <Text className="text-2xl text-gray-400">✕</Text>
-          </Pressable>
+          </Pressable> */}
         </View>
 
         <Text className="text-center text-h4 text-black font-sf-md mb-md">

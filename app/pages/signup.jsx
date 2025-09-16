@@ -25,6 +25,10 @@ const FONT = 16;
 const AVATARS = [
   { key: "ToriFace", label: "토리", Render: Images.ToriFace },
   { key: "IpaFace", label: "이파", Render: Images.IpaFace },
+  { key: "ProfileIce", label: "얼음", Render: Images.ProfileIce },
+  { key: "Fish", label: "물고기", Render: Images.Fish },
+  { key: "Polarbear", label: "북극곰", Render: Images.Polarbear },
+  { key: "Polarbear2", label: "북극곰2", Render: Images.Polarbear2 },
 ];
 
 export default function Signup() {
@@ -82,7 +86,7 @@ export default function Signup() {
         password: password.trim(),
         nickname: nickname.trim(),
         regionId: regionId ? Number(regionId) : null,
-        profile, // "ToriFace" | "IpaFace"
+        profile,
       });
       Alert.alert("성공", message || "회원가입 완료");
       router.replace(`/?email=${encodeURIComponent(email.trim())}`);
@@ -439,7 +443,7 @@ export default function Signup() {
                           }}
                           className={`items-center justify-center mr-3 rounded-2xl p-3 ${
                             selected
-                              ? "border-2 border-emerald-500 bg-white"
+                              ? "border-2 border-green bg-white"
                               : "border border-black/10 bg-white/90"
                           }`}
                           android_ripple={{ color: "#00000010" }}
@@ -448,7 +452,7 @@ export default function Signup() {
                           <Render width={72} height={72} />
                           <Text
                             className={`mt-2 font-sf-md ${
-                              selected ? "text-emerald-600" : "text-gray-700"
+                              selected ? "text-green" : "text-gray-700"
                             }`}
                           >
                             {label}
@@ -469,7 +473,7 @@ export default function Signup() {
                 styles.loginBtnShadow,
                 {
                   height: BTN_H,
-                  backgroundColor: canSubmit ? "#10B981" : "#E5E7EB",
+                  backgroundColor: canSubmit ? "green" : "#E5E7EB",
                   opacity: loading ? 0.7 : 1,
                 },
               ]}
