@@ -56,6 +56,7 @@ export default function Signup() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertNext, setAlertNext] = useState(null);
 
   // 포커스 이동용 ref
   const pwRef = useRef(null);
@@ -96,12 +97,15 @@ export default function Signup() {
       });
       setAlertTitle("성공");
       setAlertMessage(message || "회원가입 완료");
+      setAlertNext(
+        () => () =>
+          router.replace(`/?email=${encodeURIComponent(email.trim())}`)
+      );
       setAlertVisible(true);
-
-      router.replace(`/?email=${encodeURIComponent(email.trim())}`);
     } catch (e) {
       setAlertTitle("회원가입 실패");
       setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertNext(null);
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -296,6 +300,11 @@ export default function Signup() {
                 returnKeyType="next"
                 onSubmitEditing={() => nickRef.current?.focus()}
               />
+              {password2.length > 0 && password !== password2 && (
+                <Text className="mt-2 text-rose-600 font-sf-md">
+                  비밀번호가 일치하지 않습니다.
+                </Text>
+              )}
             </Labeled>
 
             <Labeled label="닉네임">
@@ -506,7 +515,14 @@ export default function Signup() {
         visible={alertVisible}
         title={alertTitle}
         message={alertMessage}
-        onConfirm={() => setAlertVisible(false)}
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (typeof alertNext === "function") {
+            const go = alertNext;
+            setAlertNext(null);
+            go(); // 알럿 확인 후 이동
+          }
+        }}
       />
     </View>
   );

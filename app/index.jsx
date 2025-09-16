@@ -7,6 +7,7 @@ import {
   Pressable,
   Platform,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { Images } from "@constants/Images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,6 +29,9 @@ export default function Index() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { loginWithKakao, isReady } = useKakaoLogin();
+
+  const { width: SCREEN_W } = Dimensions.get("window");
+  const LOGO_SIZE = Math.min(240, Math.max(160, SCREEN_W * 0.5));
 
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -102,18 +106,13 @@ export default function Index() {
       />
 
       {/* 로고 */}
-      <View
-        className="absolute left-0 right-0 items-center"
-        style={{ top: "18%" }}
-      >
-        <Images.Logo width={240} height={240} />
+      <View className="items-center mt-[40%] mb-[6%]">
+        <Images.Logo width={LOGO_SIZE} height={LOGO_SIZE} />
       </View>
 
       {/* 입력 + 버튼 영역 */}
       <KeyboardAwareScrollView
         contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "flex-end",
           paddingBottom: (insets?.bottom ?? 0) + BLOCK_BOTTOM,
         }}
         enableOnAndroid={true}
