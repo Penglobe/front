@@ -28,17 +28,21 @@ import {
   stopTransportSafely,
 } from "../../../tasks/transportShared";
 
+// ✅ 초기 위치 빠르게 잡기
 async function seedPositionFast() {
+  // 1. 마지막 위치 있으면 바로 반환
   const last = await Location.getLastKnownPositionAsync();
   if (last?.coords) {
     const { latitude, longitude, accuracy } = last.coords;
     return { latitude, longitude, timestamp: Date.now(), accuracy };
   }
+
+  // 2. 빠른 응답 우선 (낮은 정확도)
   try {
     const quick = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-      timeout: 3000,
-      maximumAge: 10000,
+      accuracy: Location.Accuracy.Low,
+      timeout: 2000,
+      maximumAge: 15000,
     });
     const { latitude, longitude, accuracy } = quick.coords;
     return { latitude, longitude, timestamp: Date.now(), accuracy };
@@ -245,6 +249,7 @@ export default function TransportMap() {
         dlog("UI", { reset: "fresh_start" });
       }
 
+      // ✅ 빠른 시드 위치 확보
       const seed = await seedPositionFast();
       if (seed && mounted) {
         setCurrentCoord(seed);
@@ -310,6 +315,7 @@ export default function TransportMap() {
         }
       }
 
+      // ✅ watchPositionAsync 즉시 시작 → 초기 위치도 빨리 확보 가능
       await startForegroundWatch();
 
       try {

@@ -15,6 +15,7 @@ import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Images } from "@constants/Images";
 import Co2Chart from "@pages/survey/Co2Chart";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome5"; // ✅ 벡터 아이콘 추가
 
 export default function SurveyResult() {
   const { userId, resultData } = useLocalSearchParams();
@@ -74,21 +75,21 @@ export default function SurveyResult() {
         <View className="px-pageX">
           {data ? (
             <>
-              <View className="bg-white rounded-2xl shadow-md px-2xl py-llg mb-llg">
-                <Text className="text-lg">
+              <View className="bg-white rounded-2xl shadow-md px-xl py-llg mb-llg">
+                <Text className="text-h4">
                   오늘의 탄소{" "}
-                  <Text className="text-red-500 text-lg font-bold">절감량</Text>
+                  <Text className="text-red-500 text-h3 font-bold">절감량</Text>
                 </Text>
                 <View className="items-end">
-                  <Text className="text-3xl font-sf-b text-[#318643] mt-xs">
+                  <Text className="text-h1 font-sf-b text-[#318643] mt-xs">
                     {data.totalCo2} kg CO₂
                   </Text>
                 </View>
               </View>
 
-              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
+              <View className="bg-white rounded-2xl px-xl py-llg mb-llg">
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="font-sf-md text-lg">
+                  <Text className="font-sf-md text-h4">
                     오늘의 탄소 절감 상위 TOP3
                   </Text>
                   {/* 안내 아이콘 */}
@@ -104,17 +105,23 @@ export default function SurveyResult() {
                   </View>
                 ))}
               </View>
-              <View className="bg-white rounded-2xl px-2xl py-llg mb-md">
+              <View className="bg-white rounded-2xl px-xl py-llg mb-md">
                 <Co2Chart />
               </View>
 
-              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
-                <Text className="font-sf-md text-lg pb-sm">피드백 </Text>
-
-                <Text className="font-sf-b text-base text-[#318643] mb-md">
-                  {data.feedback}
+              {/* ✅ 피드백 카드 개선 */}
+              <View className="bg-white rounded-2xl px-xl py-llg mb-llg">
+                <Text className="font-sf-md text-h3 pb-sm">
+                  피드백 <Icon name="leaf" size={15} color="#318643" />
                 </Text>
-                <Text className="font-sf-md text-sm">
+
+                <View className="flex-row items-center py-lg border-t border-gray-200">
+                  <Text className="ml-sm font-sf-b text-body text-[#318643] flex-1">
+                    {data.feedback}
+                  </Text>
+                </View>
+
+                <Text className="font-sf-md text-sm text-gray-600">
                   ※ AI 기반 환경 피드백입니다.
                 </Text>
               </View>
@@ -126,7 +133,6 @@ export default function SurveyResult() {
           <MainButton
             label="홈으로"
             className="mt-5 mb-10"
-
             onPress={() => router.push("/(tabs)/home")}
           />
         </View>
