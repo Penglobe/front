@@ -41,9 +41,6 @@ export default function adminMain() {
       {/* 배경 */}
       <BgGradient />
 
-      {/* 헤더 */}
-      <HeaderBar title="관리자페이지" />
-
       <View className="px-pageX flex-1">
         {/* 로그아웃 버튼 */}
         <Pressable
