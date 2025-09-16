@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ActivityIndicator, Alert, ScrollView } from "react-native";
+import { View, Text, ActivityIndicator, ScrollView } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch, me, logout as authLogout } from "@services/authService";
 import { Calendar, LocaleConfig } from "react-native-calendars";
-import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
+import CustomAlert from "@components/CustomAlert"; // CustomAlert import
 
 // 한국어 설정
 LocaleConfig.locales["ko"] = {
@@ -84,13 +84,44 @@ export default function MyPage() {
   const [dailyLoading, setDailyLoading] = useState(false);
   const [attendanceDates, setAttendanceDates] = useState([]);
 
+  // CustomAlert state
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    onCancel: null,
+    confirmText: "확인",
+    cancelText: "취소",
+  });
+
+  const showAlert = (props) => {
+    setAlertProps({
+      ...props,
+      onConfirm: () => {
+        setAlertVisible(false);
+        props.onConfirm && props.onConfirm();
+      },
+      onCancel: props.onCancel
+        ? () => {
+            setAlertVisible(false);
+            props.onCancel && props.onCancel();
+          }
+        : null,
+    });
+    setAlertVisible(true);
+  };
+
   const fetchMyPageInfo = useCallback(async () => {
     setLoading(true);
     try {
       const userInfo = await me();
       setMyPageInfo(userInfo);
     } catch (error) {
-      Alert.alert("오류", "마이페이지 정보를 불러오는 중 오류가 발생했습니다.");
+      showAlert({
+        title: "오류",
+        message: "마이페이지 정보를 불러오는 중 오류가 발생했습니다.",
+      });
     } finally {
       setLoading(false);
     }
@@ -126,13 +157,17 @@ export default function MyPage() {
       if (apiResponse.status === 200) {
         setAttendanceDates(apiResponse.data);
       } else {
-        Alert.alert(
-          "오류",
-          apiResponse.message || "출석 날짜 정보를 가져오지 못했습니다."
-        );
+        showAlert({
+          title: "오류",
+          message:
+            apiResponse.message || "출석 날짜 정보를 가져오지 못했습니다.",
+        });
       }
     } catch (error) {
-      Alert.alert("오류", "출석 날짜 정보를 불러오는 중 오류가 발생했습니다.");
+      showAlert({
+        title: "오류",
+        message: "출석 날짜 정보를 불러오는 중 오류가 발생했습니다.",
+      });
     }
   }, []);
 
@@ -229,26 +264,25 @@ export default function MyPage() {
     return marked;
   }, [attendanceDates, selectedDate, currentMonth]);
 
-  const handleLogout = useCallback(async () => {
-    Alert.alert(
-      "로그아웃",
-      "정말 로그아웃 하시겠습니까?",
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "로그아웃",
-          onPress: async () => {
-            try {
-              await authLogout();
-              router.replace("/"); // 로그인 화면으로 이동
-            } catch (error) {
-              Alert.alert("오류", "로그아웃 중 오류가 발생했습니다.");
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  const handleLogout = useCallback(() => {
+    showAlert({
+      title: "로그아웃",
+      message: "정말 로그아웃 하시겠습니까?",
+      confirmText: "로그아웃",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          await authLogout();
+          router.replace("/"); // 로그인 화면으로 이동
+        } catch (error) {
+          showAlert({
+            title: "오류",
+            message: "로그아웃 중 오류가 발생했습니다.",
+          });
+        }
+      },
+      onCancel: () => {},
+    });
   }, [router]);
 
   if (loading) {
@@ -280,6 +314,7 @@ export default function MyPage() {
   return (
     <View className="flex-1">
       <BgGradient />
+      <CustomAlert visible={alertVisible} {...alertProps} />
       <View className="absolute inset-0 pb-[150px]">
         <HeaderBar title="마이페이지" />
 
