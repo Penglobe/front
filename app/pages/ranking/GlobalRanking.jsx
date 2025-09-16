@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
 import { LinearGradient } from "expo-linear-gradient";
+import CustomAlert from "@components/CustomAlert"; // CustomAlert import
 
 // 아바타 관련 로직
 const AVATAR_MAP = {
   ToriFace: Images.ToriFace,
   IpaFace: Images.IpaFace,
+  ProfileIce: Images.ProfileIce,
+  Fish: Images.Fish,
+  Polarbear: Images.Polarbear,
+  Polarbear2: Images.Polarbear2,
 };
 
 const getAvatarRenderComponent = (profileKey) => {
@@ -64,9 +69,34 @@ export default function GlobalRanking() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [currentUserNickname, setCurrentUserNickname] = useState(null); // 닉네임 상태 다시 추가
-  const [showParticipationMessage,
-  setShowParticipationMessage] =
+  const [showParticipationMessage, setShowParticipationMessage] =
     useState(false);
+
+  // CustomAlert state
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    onCancel: null,
+  });
+
+  const showAlert = (props) => {
+    setAlertProps({
+      ...props,
+      onConfirm: () => {
+        setAlertVisible(false);
+        props.onConfirm && props.onConfirm();
+      },
+      onCancel: props.onCancel
+        ? () => {
+            setAlertVisible(false);
+            props.onCancel && props.onCancel();
+          }
+        : null,
+    });
+    setAlertVisible(true);
+  };
 
   useEffect(() => {
     const fetchGlobalRanking = async () => {
@@ -78,8 +108,7 @@ export default function GlobalRanking() {
         }
 
         const response = await apiFetch("/rankings/global");
-        if (!response.ok)
-          throw new Error(`전체 랭킹 에러: ${response.status}`);
+        if (!response.ok) throw new Error(`전체 랭킹 에러: ${response.status}`);
 
         const data = await response.json();
         setRankingList(data.top10 || []); // API 응답의 'top10' 키 사용
@@ -91,10 +120,10 @@ export default function GlobalRanking() {
           setShowParticipationMessage(false);
         }
       } catch (error) {
-        Alert.alert(
-          "랭킹 불러오기 오류",
-          "전체 랭킹을 불러오는 중 오류가 발생했습니다."
-        );
+        showAlert({
+          title: "랭킹 불러오기 오류",
+          message: "전체 랭킹을 불러오는 중 오류가 발생했습니다.",
+        });
       } finally {
         setLoading(false);
       }
@@ -122,6 +151,7 @@ export default function GlobalRanking() {
 
   return (
     <View className="px-pageX" style={{ flex: 1 }}>
+      <CustomAlert visible={alertVisible} {...alertProps} />
       {/* 시상대 섹션 (높이 조절) */}
       <View className="h-48 flex-row items-end p-sm mt-xs">
         <PodiumItem
