@@ -32,9 +32,7 @@
             }
           }
         },
-        "UIBackgroundModes": [
-          "location"
-        ],
+        "UIBackgroundModes": ["location"],
         "LSApplicationQueriesSchemes": [
           "kakaotalk",
           "kakaopay",
@@ -69,9 +67,7 @@
       ],
       "package": "com.penglobe9.app"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
