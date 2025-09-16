@@ -302,7 +302,6 @@ export default function ProductDetailPage() {
           setAlertVisible(false);
         }}
       />
-      ;
     </View>
   );
 }

@@ -130,7 +130,7 @@ export default function TransportStart() {
           {/* 타이틀 */}
           <View className="px-pageX py-llg">
             <Text className="text-xl" style={{ fontFamily: "SFPro-Bold" }}>
-              이동 수단을 선택해 주세요
+              이동 수단을 선택해 주세요.
             </Text>
           </View>
 

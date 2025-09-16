@@ -129,7 +129,7 @@ export default function ProductNew() {
           />
         </L>
 
-        <L label="가격(포인트)">
+        <L label="가격(얼음)">
           <TextInput
             value={price}
             onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}

@@ -163,7 +163,7 @@ export default function ProductDetailPage() {
               </View>
             )}
             <Text className="font-sf-b text-h3 mb-sm text-green">
-              기부금 (포인트){" "}
+              기부금 (얼음){" "}
             </Text>
 
             <View className="flex-row">
