@@ -5,12 +5,12 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch } from "@services/authService";
 import { useAuth } from "@hooks/useAuth"; // useAuth 훅 가져오기
+import CustomAlert from "@components/CustomAlert"; // CustomAlert import
 
 export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -22,6 +22,32 @@ export default function WeeklyRanking() {
     useState(false); // 메시지 표시 여부 상태
 
   const { user, isLoading: isAuthLoading } = useAuth();
+
+  // CustomAlert state
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertProps, setAlertProps] = useState({
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    onCancel: null,
+  });
+
+  const showAlert = (props) => {
+    setAlertProps({
+      ...props,
+      onConfirm: () => {
+        setAlertVisible(false);
+        props.onConfirm && props.onConfirm();
+      },
+      onCancel: props.onCancel
+        ? () => {
+            setAlertVisible(false);
+            props.onCancel && props.onCancel();
+          }
+        : null,
+    });
+    setAlertVisible(true);
+  };
 
   // 리팩토링된 데이터 가져오기 로직
   const fetchRankingData = useCallback(async () => {
@@ -43,10 +69,10 @@ export default function WeeklyRanking() {
         setShowParticipationMessage(false); // 순위가 있으면 메시지 숨기기
       }
     } catch (error) {
-      Alert.alert(
-        "랭킹 불러오기 오류",
-        "주간 랭킹을 불러오는 중 오류가 발생했습니다."
-      );
+      showAlert({
+        title: "랭킹 불러오기 오류",
+        message: "주간 랭킹을 불러오는 중 오류가 발생했습니다.",
+      });
     } finally {
       setLoading(false);
     }
@@ -62,8 +88,6 @@ export default function WeeklyRanking() {
   useEffect(() => {
     fetchRankingData();
   }, [fetchRankingData]);
-
-  
 
   if (loading) {
     return (
@@ -81,6 +105,7 @@ export default function WeeklyRanking() {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
+      <CustomAlert visible={alertVisible} {...alertProps} />
       {/* 상단 박스 (사용자 순위 정보) */}
       {myRank && (
         <LinearGradient
