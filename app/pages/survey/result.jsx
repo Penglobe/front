@@ -66,7 +66,7 @@ export default function SurveyResult() {
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View className="px-pageX flex-row items-center mb-llg mt-llg">
           <Images.ToriFace width={40} height={40} />
-          <Text className="text-2xl font-sf-md text-green-700 ml-sm">
+          <Text className="text-xl font-sf-md text-green-700 ml-sm">
             오늘의 설문 결과를 확인해볼까요?
           </Text>
         </View>
@@ -104,19 +104,19 @@ export default function SurveyResult() {
                   </View>
                 ))}
               </View>
-
-              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
-                <Text className="font-sf-md text-lg">피드백 </Text>
-                <Text className="font-sf-md text-sm mb-md">
-                  ※ AI 기반 환경 피드백입니다.
-                </Text>
-                <Text className="font-sf-b text-base text-[#318643]">
-                  {data.feedback}
-                </Text>
-              </View>
-
               <View className="bg-white rounded-2xl px-2xl py-llg mb-md">
                 <Co2Chart />
+              </View>
+
+              <View className="bg-white rounded-2xl px-2xl py-llg mb-llg">
+                <Text className="font-sf-md text-lg pb-sm">피드백 </Text>
+
+                <Text className="font-sf-b text-base text-[#318643] mb-md">
+                  {data.feedback}
+                </Text>
+                <Text className="font-sf-md text-sm">
+                  ※ AI 기반 환경 피드백입니다.
+                </Text>
               </View>
             </>
           ) : (
@@ -126,6 +126,7 @@ export default function SurveyResult() {
           <MainButton
             label="홈으로"
             className="mt-5 mb-10"
+
             onPress={() => router.push("/(tabs)/home")}
           />
         </View>

@@ -1,9 +1,9 @@
 // constants/images.js
 // 배경
-import BgHome1 from "@assets/images/bg/bg-home-1.svg";
-import BgHome2 from "@assets/images/bg/bg-home-2.svg";
-import BgHome3 from "@assets/images/bg/bg-home-3.svg";
-import BgHome4 from "@assets/images/bg/bg-home-4.svg";
+import BgHome1 from "@assets/images/bg/bg-home-1.2.svg";
+import BgHome2 from "@assets/images/bg/bg-home-2.2.svg";
+import BgHome3 from "@assets/images/bg/bg-home-3.2.svg";
+import BgHome4 from "@assets/images/bg/bg-home-4.2.svg";
 import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 
 // 캐릭터

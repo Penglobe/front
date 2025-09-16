@@ -23,7 +23,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { Image as ExpoImage } from "expo-image";
 
 export default function Home() {
   const router = useRouter();
@@ -148,11 +147,7 @@ export default function Home() {
   const totalScore = Number(user?.totalScore ?? 0);
   const level = Number(totalScore) || 0;
   const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
-
-  const IpaComp = Images[`Ipa${stage}`] ?? Images.Ipa1;
-  const ToriComp = Images[`Tori${stage}`] ?? Images.Tori1;
   const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
-
   const translateY = useSharedValue(0);
   useEffect(() => {
     translateY.value = withRepeat(
@@ -164,11 +159,6 @@ export default function Home() {
       true
     );
   }, []);
-
-  const { width } = Dimensions.get("window");
-  const TORI_W = Math.min(width * 0.42, 220);
-  const IPA_W = Math.min(width * 0.36, 200);
-  const IPA_H = IPA_W * 1.4;
 
   return (
     <View className="flex-1">
@@ -269,7 +259,7 @@ export default function Home() {
           <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
 
           {/* 닫기 버튼 (오른쪽 끝) */}
-          {/* <Pressable
+          <Pressable
             onPress={() => {
               setAtt({ visible: false, loading: false });
               setPreview(null);
@@ -279,10 +269,10 @@ export default function Home() {
             style={{ padding: 4 }}
           >
             <Text className="text-2xl text-gray-400">✕</Text>
-          </Pressable> */}
+          </Pressable>
         </View>
 
-        <Text className="text-center text-h4 text-black font-sf-md mb-xs">
+        <Text className="text-center text-h4 text-black font-sf-md mb-md">
           상자를 클릭하여 랜덤 보상을 확인해보세요.
         </Text>
 
