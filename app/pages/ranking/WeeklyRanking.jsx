@@ -7,6 +7,7 @@ import { useAuth } from "@hooks/useAuth"; // useAuth 훅 가져오기
 import CustomAlert from "@components/CustomAlert"; // CustomAlert import
 import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+import { Images } from "@constants/Images";
 
 export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -16,6 +17,7 @@ export default function WeeklyRanking() {
   const [userId, setUserId] = useState(null); // userId 상태 변수 선언
   const [showParticipationMessage, setShowParticipationMessage] =
     useState(false); // 메시지 표시 여부 상태
+  const [showNoDataImage, setShowNoDataImage] = useState(false); // 이미지 표시 여부 상태 추가
 
   const { user, isLoading: isAuthLoading } = useAuth();
 
@@ -58,6 +60,13 @@ export default function WeeklyRanking() {
       const data = await response.json();
       setRankingList(data.top10 || []);
       setMyRank(data.myRank || null);
+
+      // 랭킹 데이터가 없으면 이미지 표시
+      if (data.top10 && data.top10.length === 0 && !data.myRank) {
+        setShowNoDataImage(true);
+      } else {
+        setShowNoDataImage(false);
+      }
 
       if (!data.myRank) {
         setShowParticipationMessage(true); // 경고 대신 메시지 표시
@@ -125,52 +134,56 @@ export default function WeeklyRanking() {
 
       {/* 랭킹 참여 조건 미달 메시지 */}
       {showParticipationMessage && (
-        <View className="bg-deactivateButton border-l-4 border-500 p-lg mb-sm rounded-lg">
+        <View className="bg-deactivateButton p-lg mb-sm rounded-lg">
           <Text className="font-bold">랭킹 참여 조건 미달</Text>
-          <Text>
-            주간 랭킹에 참여하려면 지난 주에 출석을 완료했었어야 해요! {"\n"}
-            이번 주에 출석을 완료하고 다음 주에 다시 도전해보세요!
-          </Text>
+          <Text>지난 주에 출석해야 이번 주 주간 랭킹에 참여할 수 있어요!</Text>
         </View>
       )}
 
       {/* 랭킹 리스트 (카드 형식) */}
-      <ScrollView
-        className="flex-1 bg-white rounded-xl p-lg shadow"
-        contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
-      >
-        {rankingList.map((item) => {
-          const isCurrentUser = item.userId === userId; // userId로 비교 변경
-          return (
-            <RankingCard
-              key={item.rank + item.nickname} // 키는 그대로 두거나 고유한 item.userId로 변경
-              item={{
-                rank: item.rank,
-                nickname: item.nickname,
-                score: item.score,
-                profile: item.profile,
-              }}
-              isProminent={isCurrentUser}
-            />
-          );
-        })}
+      {showNoDataImage ? (
+        <View className="flex-1 justify-center items-center pb-md">
+          <Images.IpaToriNoData width={300} height={300} />
+          {/* NoData 이미지 컴포넌트 */}
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 bg-white rounded-xl p-lg shadow"
+          contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
+        >
+          {rankingList.map((item) => {
+            const isCurrentUser = item.userId === userId; // userId로 비교 변경
+            return (
+              <RankingCard
+                key={item.rank + item.nickname} // 키는 그대로 두거나 고유한 item.userId로 변경
+                item={{
+                  rank: item.rank,
+                  nickname: item.nickname,
+                  score: item.score,
+                  profile: item.profile,
+                }}
+                isProminent={isCurrentUser}
+              />
+            );
+          })}
 
-        {/* 10위 밖에 있을 경우 ... 및 사용자 카드 표시 */}
-        {myRank && !myRankingFromTop10 && (
-          <>
-            <Text className="text-center text-gray-600 my-2">...</Text>
-            <RankingCard
-              item={{
-                rank: myRank.rank,
-                nickname: currentUserNickname,
-                score: myRank.score,
-                profile: myRank.profile, // 내 순위 카드에 프로필 추가
-              }}
-              isProminent={true}
-            />
-          </>
-        )}
-      </ScrollView>
+          {/* 10위 밖에 있을 경우 ... 및 사용자 카드 표시 */}
+          {myRank && !myRankingFromTop10 && (
+            <>
+              <Text className="text-center text-gray-600 my-2">...</Text>
+              <RankingCard
+                item={{
+                  rank: myRank.rank,
+                  nickname: currentUserNickname,
+                  score: myRank.score,
+                  profile: myRank.profile, // 내 순위 카드에 프로필 추가
+                }}
+                isProminent={true}
+              />
+            </>
+          )}
+        </ScrollView>
+      )}
     </View>
   );
 }
