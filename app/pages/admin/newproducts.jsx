@@ -5,10 +5,8 @@ import {
   Text,
   TextInput,
   Pressable,
-  Alert,
   Image,
   ScrollView,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -17,6 +15,7 @@ import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
+import CustomAlert from "@components/CustomAlert";
 
 export default function ProductNew() {
   const router = useRouter();
@@ -33,10 +32,19 @@ export default function ProductNew() {
     !Number.isNaN(Number(price)) &&
     asset;
 
+  // 🔔 CustomAlert 상태
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertMode, setAlertMode] = useState(null); // "perm", "input", "success", "fail"
+
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert("권한 필요", "갤러리 접근 권한을 허용해주세요.");
+      setAlertTitle("권한 필요");
+      setAlertMessage("갤러리 접근 권한을 허용해주세요.");
+      setAlertMode("perm");
+      setAlertVisible(true);
       return;
     }
     const r = await ImagePicker.launchImageLibraryAsync({
@@ -48,7 +56,13 @@ export default function ProductNew() {
 
   const onSubmit = async () => {
     try {
-      if (!canSave) return Alert.alert("확인", "필수 항목을 입력/선택하세요.");
+      if (!canSave) {
+        setAlertTitle("확인");
+        setAlertMessage("필수 항목을 입력/선택하세요.");
+        setAlertMode("input");
+        setAlertVisible(true);
+        return;
+      }
 
       setLoading(true);
       const fd = new FormData();
@@ -69,10 +83,15 @@ export default function ProductNew() {
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.message || "상품 생성 실패");
 
-      Alert.alert("완료", "상품이 생성되었습니다.");
-      router.replace("/pages/admin/showlist");
+      setAlertTitle("완료");
+      setAlertMessage("상품이 생성되었습니다.");
+      setAlertMode("success");
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert("오류", e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertTitle("오류");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertMode("fail");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -161,6 +180,20 @@ export default function ProductNew() {
           </Pressable>
         )}
       </ScrollView>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        confirmText="확인"
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (alertMode === "success") {
+            router.replace("/pages/admin/showlist");
+          }
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }

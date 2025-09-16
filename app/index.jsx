@@ -7,7 +7,6 @@ import {
   Pressable,
   Platform,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { Images } from "@constants/Images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,6 +15,7 @@ import { login, getAccessToken } from "@services/authService";
 import { useAuth } from "@hooks/useAuth";
 import { useKakaoLogin } from "@hooks/useKakaoLogin";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import CustomAlert from "@components/CustomAlert";
 
 const INPUT_H = 56; // 입력칸 높이
 const BTN_H = 56; // 버튼 높이
@@ -32,6 +32,9 @@ export default function Index() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const canLogin = email.trim().length > 0 && pw.trim().length > 7;
 
@@ -60,7 +63,9 @@ export default function Index() {
         router.replace("/(tabs)/home"); // 일반 유저 홈
       }
     } catch (e) {
-      Alert.alert("로그인 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("로그인 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -69,7 +74,9 @@ export default function Index() {
   const onKakaoLogin = async () => {
     try {
       if (!isReady) {
-        Alert.alert("잠시만요", "로그인 준비중입니다. 1초 후 다시 눌러주세요.");
+        setAlertTitle("잠시만요");
+        setAlertMessage("로그인 준비중입니다. 1초 후 다시 눌러주세요.");
+        setAlertVisible(true);
         return;
       }
       const result = await loginWithKakao();
@@ -78,7 +85,9 @@ export default function Index() {
 
       router.replace("/(tabs)/home");
     } catch (e) {
-      Alert.alert("카카오 로그인 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("카카오 로그인 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요");
+      setAlertVisible(true);
     }
   };
 
@@ -199,6 +208,13 @@ export default function Index() {
           </Pressable>
         </View>
       </KeyboardAwareScrollView>
+
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

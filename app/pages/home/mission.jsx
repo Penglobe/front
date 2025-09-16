@@ -5,9 +5,7 @@ import {
   Text,
   ScrollView,
   RefreshControl,
-  Alert,
   StyleSheet,
-  Pressable,
 } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
@@ -15,6 +13,7 @@ import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
 import { useRouter } from "expo-router";
 import { apiFetch, logout } from "@services/authService";
+import CustomAlert from "@components/CustomAlert";
 
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
@@ -23,6 +22,10 @@ export default function MissionScreen() {
 
   const [open, setOpen] = useState(false);
   const [claimInfo, setClaimInfo] = useState(null);
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -33,7 +36,9 @@ export default function MissionScreen() {
       if (res.ok && json?.data) setWindows(json.data);
       else throw new Error(json?.message || "로드 실패");
     } catch (e) {
-      Alert.alert("불러오기 실패", e.message);
+      setAlertTitle("불러오기 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -63,17 +68,9 @@ export default function MissionScreen() {
       await load();
       setOpen(true);
     } catch (e) {
-      Alert.alert("수령 실패", e.message);
-    }
-  };
-
-  //임시용 나중에 지워야댐
-  const onLogout = async () => {
-    try {
-      await logout(); // 👉 clearTokens() 대신 여기서 logout() 호출
-      router.replace("/"); // 로그인 화면으로 이동
-    } catch (e) {
-      Alert.alert("로그아웃 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("수령 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요.");
+      setAlertVisible(true);
     }
   };
 
@@ -190,6 +187,12 @@ export default function MissionScreen() {
           bottom: 16,
         }}
       ></View>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

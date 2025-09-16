@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, Image, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, Image, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
@@ -9,7 +9,8 @@ import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import Constants from "expo-constants";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
+import CustomAlert from "@components/CustomAlert";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
@@ -31,6 +32,10 @@ export default function ProductDetailPage() {
   const [confirmVisible, setConfirmVisible] = useState(false); //구매 확인 모달 상태
   const { user, refreshUser } = useAuth();
 
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
   const load = useCallback(async () => {
     if (!pid) return;
     try {
@@ -39,9 +44,9 @@ export default function ProductDetailPage() {
       if (!res.ok) throw new Error(json?.message || `조회 실패(${res.status})`);
       setItem(json?.data ?? json);
     } catch (e) {
-      Alert.alert("오류", e?.message ?? "상품 정보를 불러올 수 없습니다.", [
-        { text: "확인", onPress: () => router.back() },
-      ]);
+      setAlertTitle("오류");
+      setAlertMessage(e?.message ?? "상품 정보를 불러올 수 없습니다.");
+      setAlertVisible(true);
     }
   }, [pid, router]);
 
@@ -80,21 +85,17 @@ export default function ProductDetailPage() {
 
       setConfirmVisible(false); //모달 닫기
 
-      Alert.alert(
-        "구매 완료",
+      setAlertTitle("구매 완료");
+      setAlertMessage(
         `${item.name}\n사용한 얼음: ${
           data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-        }개`,
-        [
-          {
-            text: "사용 내역 보기",
-            onPress: () => router.push("/pages/shop/orderlist"),
-          },
-          { text: "확인", onPress: () => router.back() },
-        ]
+        }개`
       );
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert("구매 실패", "잔액이 부족합니다.");
+      setAlertTitle("구매 실패");
+      setAlertMessage("잔액이 부족합니다.");
+      setAlertVisible(true);
     }
   }, [item, qty, router]);
 
@@ -115,7 +116,6 @@ export default function ProductDetailPage() {
     <View className="flex-1">
       <BgGradient />
       <HeaderBar title="상품 정보" />
-
       {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
       <View className="flex-1 px-pageX pt-md">
         <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
@@ -204,7 +204,6 @@ export default function ProductDetailPage() {
           </MainButton>
         </View>
       </View>
-
       {/* 구매 확인 모달 */}
       <Modal visible={confirmVisible}>
         <View className="mb-4">
@@ -295,6 +294,15 @@ export default function ProductDetailPage() {
           </View>
         </MainButton>
       </Modal>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => {
+          setAlertVisible(false);
+        }}
+      />
+      ;
     </View>
   );
 }
