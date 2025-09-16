@@ -9,6 +9,7 @@ import TransportButton from "@components/TransportButton";
 import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
 import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen";
 
 export default function TransportStart() {
   const [location, setLocation] = useState(null);
@@ -46,7 +47,7 @@ export default function TransportStart() {
         : undefined,
     });
 
-  // ✅ 권한 요청 & 현재 위치 가져오기
+  // ✅ 권한 요청 & 현재 위치 가져오기 (빠르게 + 보완)
   useEffect(() => {
     (async () => {
       try {
@@ -58,8 +59,23 @@ export default function TransportStart() {
           });
           return;
         }
-        let loc = await Location.getCurrentPositionAsync({});
-        setLocation(loc.coords);
+
+        // 🔹 1단계: 캐싱된 위치 먼저 가져오기 (빠른 응답)
+        let lastLoc = await Location.getLastKnownPositionAsync();
+        if (lastLoc) {
+          setLocation(lastLoc.coords);
+        }
+
+        // 🔹 2단계: watchPositionAsync로 지속 업데이트 (정확도 보완)
+        await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced, // 적당한 정확도 & 속도 균형
+            distanceInterval: 10, // 10m 이동 시 업데이트
+          },
+          (loc) => {
+            setLocation(loc.coords);
+          }
+        );
       } catch (err) {
         console.error("위치 가져오기 실패:", err);
         openAlert({
@@ -74,10 +90,7 @@ export default function TransportStart() {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" />
-        <Text className="mt-3 text-xl SFPro-Medium">
-          현재 위치를 불러오는 중...
-        </Text>
-
+        <LoadingScreen message="현재 위치를 찾는 중..." />
         {/* ✅ CustomAlert */}
         <CustomAlert {...alertConfig} />
       </View>

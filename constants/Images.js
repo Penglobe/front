@@ -30,6 +30,8 @@ import Fish from "@assets/images/character/fish.svg";
 import Polarbear from "@assets/images/character/polarbear.svg";
 import Polarbear2 from "@assets/images/character/polarbear2.svg";
 import ProfileIce from "@assets/images/character/profile-ice.svg";
+import IpaWalk from "@assets/images/character/ipa-walking.svg";
+import ToriWalk from "@assets/images/character/tori-walking.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -127,4 +129,6 @@ export const Images = {
   Polarbear,
   Polarbear2,
   ProfileIce,
+  IpaWalk,
+  ToriWalk,
 };
