@@ -8,7 +8,8 @@ import { Images } from "@constants/Images";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Pressable } from "react-native";
-import CustomAlert from "@components/CustomAlert"; // CustomAlert import
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 
 // 한국어 설정
 LocaleConfig.locales["ko"] = {
@@ -123,6 +124,8 @@ export default function MyPage() {
         message: "마이페이지 정보를 불러오는 중 오류가 발생했습니다.",
       });
     } finally {
+      // Ensure loading screen is shown for at least 0.7 seconds
+      await new Promise((resolve) => setTimeout(resolve, 700));
       setLoading(false);
     }
   }, []);
@@ -287,8 +290,9 @@ export default function MyPage() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View className="flex-1">
+        <BgGradient />
+        <LoadingScreen message="마이페이지 정보를 불러오는 중..." />
       </View>
     );
   }

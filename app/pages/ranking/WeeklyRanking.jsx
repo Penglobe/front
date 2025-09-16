@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch } from "@services/authService";
 import { useAuth } from "@hooks/useAuth"; // useAuth 훅 가져오기
 import CustomAlert from "@components/CustomAlert"; // CustomAlert import
+import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
+import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
 export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -74,6 +70,8 @@ export default function WeeklyRanking() {
         message: "주간 랭킹을 불러오는 중 오류가 발생했습니다.",
       });
     } finally {
+      // Ensure loading screen is shown for at least 0.7 seconds
+      await new Promise((resolve) => setTimeout(resolve, 700));
       setLoading(false);
     }
   }, [userId]); // 의존성 배열에 userId 추가
@@ -85,18 +83,14 @@ export default function WeeklyRanking() {
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchRankingData();
-  }, [fetchRankingData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchRankingData();
+    }, [fetchRankingData])
+  );
 
   if (loading) {
-    return (
-      <ActivityIndicator
-        size="large"
-        color="#blue"
-        style={{ flex: 1, justifyContent: "center" }}
-      />
-    );
+    return <LoadingScreen message="주간 랭킹을 불러오는 중..." />;
   }
 
   const myRankingFromTop10 = rankingList.find(
