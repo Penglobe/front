@@ -32,9 +32,7 @@
             }
           }
         },
-        "UIBackgroundModes": [
-          "location"
-        ],
+        "UIBackgroundModes": ["location"],
         "LSApplicationQueriesSchemes": [
           "kakaotalk",
           "kakaopay",
@@ -69,9 +67,7 @@
       ],
       "package": "com.penglobe9.app"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "web": {
       "favicon": "./assets/images/logo/logo.png"
     },
@@ -93,7 +89,7 @@
       "router": {},
       "SERVER_URL": "https://penglobe.shinhanacademy.co.kr",
       "eas": {
-        "projectId": "315ea738-4d43-4580-9823-38af233c0afb"
+        "projectId": "63934cda-fdb2-4f4b-bf3e-9a77877deba3"
       }
     }
   }

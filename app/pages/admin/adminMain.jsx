@@ -25,7 +25,7 @@ export default function AdminMain() {
       {/* 배경 */}
       <BgGradient />
 
-      <View className="px-pageX flex-1">
+      <View className="px-pageX flex-1 mt-2xl">
         {/* 로그아웃 버튼 */}
         <Pressable
           onPress={handleLogout}
@@ -43,7 +43,7 @@ export default function AdminMain() {
         <View className="px-xl py-xl bg-white rounded-xl items-start shadow-md mb-lg">
           <Text className="text-black text-body font-sf-md">
             안녕하세요, 관리자님!{"\n\n"}오늘도 환경을 위한 상품과 기부를
-            관리하고,{"\n"}더 나은 지구를 만들어봐요.
+            관리하고, 더 나은 지구를 만들어봐요.
           </Text>
         </View>
 

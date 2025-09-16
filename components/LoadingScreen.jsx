@@ -2,13 +2,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, Animated } from "react-native";
 import { Images } from "@constants/Images";
+import BgGradient from "@components/BgGradient";
 
 export default function LoadingScreen({ message = "로딩 중..." }) {
   const [showFirst, setShowFirst] = useState(true);
   const [fadeAnim] = useState(new Animated.Value(0)); // 시작은 투명
 
   useEffect(() => {
-    // 1초마다 이미지 토글
+    // 0.5초마다 이미지 토글
     const interval = setInterval(() => {
       setShowFirst((prev) => !prev);
     }, 500);
@@ -29,19 +30,22 @@ export default function LoadingScreen({ message = "로딩 중..." }) {
   }, []);
 
   return (
-    <Animated.View
-      style={{ opacity: fadeAnim }}
-      className="flex-1 items-center justify-center bg-gray-100"
-    >
-      <ActivityIndicator size="large" color="#318643" />
+    <View className="flex-1">
+      <BgGradient className="absolute inset-0" />
+      <Animated.View
+        style={{ opacity: fadeAnim, backgroundColor: "transparent" }}
+        className="flex-1 items-center justify-center"
+      >
+        <ActivityIndicator size="large" color="#318643" />
 
-      {showFirst ? (
-        <Images.IpaWalk width={150} height={150} />
-      ) : (
-        <Images.ToriWalk width={150} height={150} />
-      )}
+        {showFirst ? (
+          <Images.IpaWalk width={150} height={150} />
+        ) : (
+          <Images.ToriWalk width={150} height={150} />
+        )}
 
-      <Text className="mt-3 text-gray-700 font-sf-md">{message}</Text>
-    </Animated.View>
+        <Text className="mt-3 text-gray-700 font-sf-md">{message}</Text>
+      </Animated.View>
+    </View>
   );
 }

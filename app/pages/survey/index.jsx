@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
 import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen";
 
 export default function Survey() {
   const router = useRouter(); // 페이지 이동용
@@ -78,17 +79,11 @@ export default function Survey() {
     }
 
     fetchQuestion();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //렌더링;
   if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <BgGradient />
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
+    return <LoadingScreen message="데이터를 불러오는 중입니다..." />;
   }
 
   /*제출하기*/
@@ -167,10 +162,7 @@ export default function Survey() {
   return (
     <>
       <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
-        {/* 배경 */}
         <BgGradient />
-
-        {/* 헤더 */}
         <HeaderBar title="빙하 리포트" />
 
         <View className="px-pageX">
