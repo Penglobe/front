@@ -180,7 +180,7 @@ export default function GlobalRanking() {
       {/* 구분선 / 메시지 */}
       {showParticipationMessage ? (
         <View>
-          <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
+          <View className="bg-deactivateButton p-lg my-md rounded-lg">
             <Text className="font-bold">랭킹 참여 조건 미달</Text>
             <Text>
               전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! 활동을 통해
