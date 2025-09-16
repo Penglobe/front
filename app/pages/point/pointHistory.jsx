@@ -155,7 +155,7 @@ export default function PointHistory() {
           <View className="w-[40px]" />
 
           <Text className="text-h2 font-sf-b text-center flex-1 text-green">
-            얼음 구매
+            얼음 충전
           </Text>
 
           <Pressable
@@ -241,7 +241,7 @@ export default function PointHistory() {
               >
                 {balance.toLocaleString("ko-KR")}
               </Text>
-              <Images.Ice width={50} height={50} />
+              <Images.Ice width={40} height={40} />
             </View>
           </View>
 

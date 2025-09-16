@@ -26,6 +26,7 @@ import ToriObstacle from "@assets/images/character/tori-obstacle.svg";
 import survey_ipa from "@assets/images/character/survey_ipa.svg";
 import Ipa_diet from "@assets/images/character/ipa-diet.svg";
 import Tori_diet from "@assets/images/character/tori-diet.svg";
+import Ipa_Tori_diet from "@assets/images/character/ipa-tori-diet.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -45,6 +46,11 @@ import LogOut from "@assets/icons/logout.svg";
 import Order from "@assets/icons/order.svg";
 import Survey from "@assets/icons/survey.svg";
 import Faq from "@assets/icons/faq.svg";
+import House from "@assets/icons/house.svg";
+import Delivery from "@assets/icons/delivery.svg";
+import Takeout from "@assets/icons/takeout.svg";
+import Restaurant from "@assets/icons/restaurant.svg";
+import Information from "@assets/icons/information.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -119,4 +125,10 @@ export const Images = {
   Ipa_diet,
   Tori_diet,
   Faq,
+  Ipa_Tori_diet,
+  House,
+  Delivery,
+  Takeout,
+  Restaurant,
+  Information,
 };

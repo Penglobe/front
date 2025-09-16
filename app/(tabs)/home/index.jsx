@@ -1,4 +1,3 @@
-// app/(tabs)/home/index.jsx
 import {
   View,
   StyleSheet,
@@ -31,16 +30,16 @@ export default function Home() {
   const { user, refreshUser } = useAuth();
 
   const [att, setAtt] = useState({ visible: false, loading: false });
-  const [preview, setPreview] = useState(null); // 미리보기 포인트
+  const [preview, setPreview] = useState(null);
   const [loadingPrev, setLoadingPrev] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [chestClicked, setChestClicked] = useState(false); // 상자 클릭 여부
+  const [chestClicked, setChestClicked] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        () => true // 아무 동작 안 함
+        () => true
       );
       return () => subscription.remove();
     }, [])
@@ -60,7 +59,6 @@ export default function Home() {
         loading: false,
       });
       if (res.ok && json?.data?.show === true) {
-        // 모달 뜰 때 선조회(선택)
         setLoadingPrev(true);
         const pRes = await apiFetch("/attendance/preview");
         const pt = await pRes.text();
@@ -80,7 +78,6 @@ export default function Home() {
     }
   }, []);
 
-  // 상자 터치 시(미리보기 없으면 요청)
   const onChestReveal = useCallback(async () => {
     setChestClicked(true);
     if (preview != null) return;
@@ -98,7 +95,6 @@ export default function Home() {
     }
   }, [preview]);
 
-  // 보상 받기(실제 지급)
   const claimAttendance = useCallback(async () => {
     try {
       setClaiming(true);
@@ -113,7 +109,6 @@ export default function Home() {
 
       const reward = Number(json?.data?.rewardPoints ?? preview ?? 0);
 
-      // 모달 닫고 한 틱 뒤 알럿(안드로이드 RNModal 겹침 회피)
       setAtt({ visible: false, loading: false });
       setPreview(null);
       setChestClicked(false);
@@ -182,11 +177,10 @@ export default function Home() {
         pointerEvents="none"
       />
 
-      {/* 상단 카드들 */}
       <View className="mt-6xl px-pageX flex-row justify-between">
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
-          className="flex-row items-center justify-between bg-blue rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-blue rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
@@ -203,7 +197,7 @@ export default function Home() {
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
-          className="flex-row items-center justify-between bg-green rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="flex-row items-center justify-between bg-green rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },
@@ -264,24 +258,10 @@ export default function Home() {
         </Pressable>
       </Animated.View>
 
-      {/* ✅ 출석 보상 모달: 상자 + 보상받기 */}
       <Modal visible={att.visible}>
         <View className="flex-row items-center mb-3 justify-center relative">
           {/* 제목 */}
           <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
-
-          {/* 닫기 버튼 (오른쪽 끝) */}
-          {/* <Pressable
-            onPress={() => {
-              setAtt({ visible: false, loading: false });
-              setPreview(null);
-              setChestClicked(false);
-            }}
-            className="absolute right-0"
-            style={{ padding: 4 }}
-          >
-            <Text className="text-2xl text-gray-400">✕</Text>
-          </Pressable> */}
         </View>
 
         <Text className="text-center text-h4 text-black font-sf-md mb-xs">

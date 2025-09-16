@@ -1,20 +1,5 @@
 // app/_layout.jsx
-
-if (__DEV__ && !global.__FETCH_WRAPPED__) {
-  const _fetch = global.fetch;
-  global.fetch = async (...args) => {
-    try {
-      const [input, init] = args;
-      const url = typeof input === "string" ? input : input?.url;
-      const method = init?.method || "GET";
-      console.log("[FETCH]", method, url);
-    } catch {}
-    return _fetch(...args);
-  };
-  global.__FETCH_WRAPPED__ = true;
-}
-
-import "../styles/global.css";
+import "@styles/global.css";
 import { SplashScreen, Stack, useRouter } from "expo-router";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
@@ -24,12 +9,12 @@ import { setLogoutHandler } from "@services/authService";
 import { AuthProvider } from "@hooks/useAuth";
 import * as WebBrowser from "expo-web-browser";
 
-// ✅ 앱 시작 시 딱 1번만
 WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const router = useRouter();
 
+  // 처음 렌더링 때 폰트 불러오기
   const [fontsLoaded, fontError] = useFonts({
     SFPro: Fonts.SFPro.regular,
     "SFPro-Medium": Fonts.SFPro.medium,
@@ -48,10 +33,10 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  // 🔐 전역 로그아웃 핸들러 등록
+  // 전역 로그아웃 핸들러
   useEffect(() => {
     setLogoutHandler(() => {
-      router.replace("/"); // 로그인 화면(index.jsx)으로 이동
+      router.replace("/"); // 로그인 화면으로 이동
     });
   }, [router]);
 

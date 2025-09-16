@@ -1,5 +1,3 @@
-// transformFoodlens.js  (예: features/diet/transformFoodlens.js)
-
 function pickBestCandidate(candidates = []) {
   const score = (c) => {
     const v = (x) => (x != null && x !== -1 ? 1 : 0);
@@ -79,8 +77,5 @@ export function toCarbonRequestPayload(
   return { userId: opts.userId, items: finalItems };
 }
 
-// 필요하면 헬퍼도 같이 export
 export { pickBestCandidate, mergeSameItems };
-
-// 기본(default) export도 제공
 export default toCarbonRequestPayload;

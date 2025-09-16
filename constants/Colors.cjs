@@ -11,6 +11,7 @@ module.exports = {
     yellow: "#F9C332",
     deactivateButton: "#DDEBE0",
     bgblack: "rgba(0,0,0,0.4)",
+    red: "#B91C1C",
   },
   Gradients: {
     background: ["#B1E666", "#A9DDFD"],
