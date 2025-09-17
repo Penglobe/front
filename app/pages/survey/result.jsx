@@ -68,7 +68,7 @@ export default function SurveyResult() {
         <View className="px-pageX flex-row items-center mb-llg mt-llg">
           <Images.ToriFace width={40} height={40} />
           <Text className="text-xl font-sf-md text-green-700 ml-sm">
-            오늘의 설문 결과를 확인해볼까요?
+            오늘의 리포트 결과를 확인해볼까요?
           </Text>
         </View>
 

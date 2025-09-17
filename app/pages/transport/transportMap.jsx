@@ -355,7 +355,8 @@ export default function TransportMap() {
           width="100%"
         />
       ) : (
-        <View className="flex-1 items-center justify-center bg-gray-100">
+        <View className="flex-1 justify-center items-center">
+          <BgGradient />
           <LoadingScreen message="현재 위치를 찾는 중..." />
         </View>
       )}

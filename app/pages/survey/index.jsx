@@ -83,7 +83,12 @@ export default function Survey() {
 
   //렌더링;
   if (loading) {
-    return <LoadingScreen message="데이터를 불러오는 중입니다..." />;
+    return (
+      <View className="flex-1 items-center justify-center">
+        <BgGradient />
+        <LoadingScreen message="리포트 결과를 불러오는 중입니다..." />
+      </View>
+    );
   }
 
   /*제출하기*/

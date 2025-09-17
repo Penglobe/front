@@ -89,7 +89,7 @@ export default function TransportStart() {
   if (!location) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
+        <BgGradient />
         <LoadingScreen message="현재 위치를 찾는 중..." />
         {/* ✅ CustomAlert */}
         <CustomAlert {...alertConfig} />
