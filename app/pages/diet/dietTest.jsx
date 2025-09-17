@@ -22,6 +22,7 @@ import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/dietService";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
+import CustomAlert from "@components/CustomAlert";
 
 const { FoodLensModule } = NativeModules;
 
@@ -131,7 +132,7 @@ export default function DietTest() {
     // 거부 상태: 재요청 가능
     if (perm.canAskAgain) {
       alertedRef.current = true;
-      Alert.alert(
+      CustomAlert.alert(
         "카메라 권한 필요",
         "사진 촬영 기능을 사용하려면 권한을 허용해주세요.",
         [
@@ -155,7 +156,7 @@ export default function DietTest() {
 
     // 영구 거부: 설정 열기
     alertedRef.current = true;
-    Alert.alert(
+    CustomAlert.alert(
       "권한이 비활성화되어 있어요",
       "설정 > 앱 권한에서 카메라를 허용해 주세요.",
       [
@@ -190,7 +191,7 @@ export default function DietTest() {
       const r = await requestPerm();
       return !!r?.granted;
     }
-    Alert.alert(
+    CustomAlert.alert(
       "권한이 비활성화되어 있어요",
       "설정 > 앱 권한에서 카메라를 허용해 주세요.",
       [
@@ -220,11 +221,11 @@ export default function DietTest() {
   const confirmAndPredict = async (mealType) => {
     try {
       if (!photo?.base64) {
-        Alert.alert("사진 없음", "먼저 사진을 찍어주세요.");
+        CustomAlert.alert("사진 없음", "먼저 사진을 찍어주세요.");
         return;
       }
       if (!mealType) {
-        Alert.alert("방식 선택", "어디서 드셨는지 먼저 선택해 주세요.");
+        CustomAlert.alert("방식 선택", "어디서 드셨는지 먼저 선택해 주세요.");
         return;
       }
 
@@ -238,10 +239,14 @@ export default function DietTest() {
 
       if (!Array.isArray(payload.items) || payload.items.length === 0) {
         setLoading(false);
-        Alert.alert("인식 실패", "음식을 인식하지 못했어요. 다시 찍어주세요.", [
-          { text: "취소", style: "cancel" },
-          { text: "다시 찍기", onPress: retake },
-        ]);
+        CustomAlert.alert(
+          "인식 실패",
+          "음식을 인식하지 못했어요. 다시 찍어주세요.",
+          [
+            { text: "취소", style: "cancel" },
+            { text: "다시 찍기", onPress: retake },
+          ]
+        );
         return;
       }
 
@@ -257,7 +262,7 @@ export default function DietTest() {
       router.push("/pages/diet/dietResult");
     } catch (e) {
       setLoading(false);
-      Alert.alert("오류", "계산 중 문제가 발생했어요. 다시 찍어볼까요?", [
+      CustomAlert.alert("오류", "계산 중 문제가 발생했어요. 다시 찍어볼까요?", [
         { text: "취소", style: "cancel" },
         { text: "다시 찍기", onPress: retake },
       ]);

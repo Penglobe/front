@@ -6,7 +6,6 @@ import {
   View,
   Text,
   ScrollView,
-  Alert,
   Pressable,
   TouchableOpacity,
 } from "react-native";
@@ -17,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
 import Modal from "@components/Modal";
+import CustomAlert from "@components/CustomAlert";
 
 // 날짜
 function formatDate(dateObj) {
@@ -31,7 +31,7 @@ function formatDate(dateObj) {
   }
 }
 
-const fmt = (n, digits = 1) => (n == null ? "-" : Number(n).toFixed(digits));
+const fmt = (n, digits = 2) => (n == null ? "-" : Number(n).toFixed(digits));
 
 export default function DietResult() {
   const router = useRouter();
@@ -74,9 +74,9 @@ export default function DietResult() {
   const onRightPress = () => {
     if (saving || totalKg == null || savedKg == null) return;
 
-    // 0얼음 케이스
+    // 0얼음
     if (isZeroPoint) {
-      Alert.alert(
+      CustomAlert.alert(
         "얼음 적립",
         "이번 식사는 평균보다 배출량이 높아 0얼음 입니다.",
         [{ text: "홈으로", onPress: () => router.push("/(tabs)/home") }]
@@ -84,34 +84,36 @@ export default function DietResult() {
       return;
     }
 
-    // 소수 한 자리
-    const ice = savedKg * 100;
+    // 100g → 10얼음 = 1kg → 100얼음
+    const ice = Math.round(Number(savedKg?.toFixed(2)) * 100);
 
-    Alert.alert("얼음 적립", `${ice} 얼음을 적립합니다.`, [
-      { text: "받기", onPress: () => saveDietRecord() },
-    ]);
+    CustomAlert.alert(
+      "얼음 적립",
+      `절감량 ${fmt(savedKg)} kg CO₂ → ${ice} 얼음 적립합니다.`,
+      [{ text: "받기", onPress: () => saveDietRecord() }]
+    );
   };
 
   const saveDietRecord = async () => {
     try {
       if (!userId) {
-        Alert.alert(
+        CustomAlert.alert(
           "로그인 필요",
           "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
         );
         return;
       }
       if (savedKg == null) {
-        Alert.alert("저장 불가", "절감량을 먼저 계산해 주세요.");
+        CustomAlert.alert("저장 불가", "절감량을 먼저 계산해 주세요.");
         return;
       }
       if (savedKg <= 0) {
-        Alert.alert("저장 불가", "절감한 탄소가 0kg CO₂ 입니다.");
+        CustomAlert.alert("저장 불가", "절감한 탄소가 0kg CO₂ 입니다.");
         return;
       }
 
       setSaving(true);
-      const body = { co2Kg: Number(savedKg.toFixed(1)) };
+      const body = { co2Kg: Number(savedKg.toFixed(2)) };
 
       const res = await apiFetch("/diet/ingest/save", {
         method: "POST",
@@ -126,11 +128,11 @@ export default function DietResult() {
       // 유저 정보 갱신
       await refreshUser?.();
 
-      Alert.alert("저장 완료", "절감한 탄소량이 기록되었습니다.", [
+      CustomAlert.alert("저장 완료", "절감한 탄소량이 기록되었습니다.", [
         { text: "확인", onPress: () => router.push("/(tabs)/home") },
       ]);
     } catch (e) {
-      Alert.alert("저장 실패", String(e?.message || e));
+      CustomAlert.alert("저장 실패", String(e?.message || e));
     } finally {
       setSaving(false);
     }
@@ -184,7 +186,7 @@ export default function DietResult() {
                 </View>
                 <View className="items-end">
                   <Text className="text-3xl font-sf-b text-[#318643] mt-1">
-                    {fmt(savedKg, 2)} kg CO₂
+                    {fmt(savedKg)} kg CO₂
                   </Text>
                 </View>
                 {isZeroPoint && (
@@ -215,9 +217,7 @@ export default function DietResult() {
                           <Text className="font-sf-b">
                             {it.name ?? "이름 없음"}
                           </Text>
-                          <Text>
-                            {kg != null ? `${fmt(kg, 1)} kg CO₂` : "—"}
-                          </Text>
+                          <Text>{kg != null ? `${fmt(kg)} kg CO₂` : "—"}</Text>
                         </View>
                       );
                     })}
@@ -243,7 +243,7 @@ export default function DietResult() {
 
                 {/* 포인트/0포인트 */}
                 <Pressable
-                  className={`flex-1 rounded-xl items-center justify-center py-llg bg-green`}
+                  className="flex-1 rounded-xl items-center justify-center py-llg bg-green"
                   onPress={onRightPress}
                   disabled={saving || totalKg == null || savedKg == null}
                   style={({ pressed }) => [
@@ -251,7 +251,7 @@ export default function DietResult() {
                     !isZeroPoint && pressed && { backgroundColor: "#318643" },
                   ]}
                 >
-                  <Text className={`font-sf-md text-button text-white`}>
+                  <Text className="font-sf-md text-button text-white">
                     {rightLabel}
                   </Text>
                 </Pressable>

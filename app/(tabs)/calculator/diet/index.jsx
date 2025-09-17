@@ -20,7 +20,7 @@ export default function Diet() {
         uid = (typeof user === "object" && user?.userId) || uid;
       }
       if (!uid) {
-        Alert.alert(
+        CustomAlert.alert(
           "로그인 필요",
           "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
         );
@@ -30,7 +30,7 @@ export default function Diet() {
       // 2) 일일 횟수 제한 확인
       const count = await fetchTodayCount(uid);
       if (count >= 3) {
-        Alert.alert(
+        CustomAlert.alert(
           "알림",
           "오늘은 이미 3번 기록했습니다. 내일 다시 시도해 주세요."
         );
@@ -40,7 +40,10 @@ export default function Diet() {
       // 3) 촬영 화면으로 이동
       router.push("/pages/diet/dietTest");
     } catch (e) {
-      Alert.alert("오류", "식단 횟수 조회에 실패했습니다. 다시 시도해 주세요.");
+      CustomAlert.alert(
+        "오류",
+        "식단 횟수 조회에 실패했습니다. 다시 시도해 주세요."
+      );
       console.error(e);
     }
   };
