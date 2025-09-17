@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Pressable, Modal } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
-import { LinearGradient } from "expo-linear-gradient";
 import CustomAlert from "@components/CustomAlert";
+
 import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 
@@ -73,6 +73,7 @@ export default function GlobalRanking() {
   const [currentUserNickname, setCurrentUserNickname] = useState(null); // 닉네임 상태 다시 추가
   const [showParticipationMessage, setShowParticipationMessage] =
     useState(false);
+  const [isInfoModalVisible, setInfoModalVisible] = useState(false);
 
   // CustomAlert state
   const [alertVisible, setAlertVisible] = useState(false);
@@ -153,8 +154,16 @@ export default function GlobalRanking() {
   const myRankInList = rankingList.find((r) => r.userId === currentUserId);
 
   return (
-    <View className="px-pageX" style={{ flex: 1 }}>
+    <View className="flex-1 px-pageX">
       <CustomAlert visible={alertVisible} {...alertProps} />
+
+      {/* 정보 버튼 */}
+      <View className="items-end my-sm">
+        <Pressable onPress={() => setInfoModalVisible(true)}>
+          <Text className="text-black font-bold text-h2">ⓘ</Text>
+        </Pressable>
+      </View>
+
       {/* 시상대 섹션 (높이 조절) */}
       <View className="h-48 flex-row items-end p-sm mt-xs">
         <PodiumItem
@@ -167,13 +176,13 @@ export default function GlobalRanking() {
           ranker={ranker1}
           height={100}
           podiumColor="#F9C332" // 1등 - 금색
-          rankTextColor="text-white"
+          rankTextColor="text-black"
         />
         <PodiumItem
           ranker={ranker3}
           height={50}
           podiumColor="#858494" // 3등 - 동색
-          rankTextColor="text-white"
+          rankTextColor="text-black"
         />
       </View>
 
@@ -188,24 +197,7 @@ export default function GlobalRanking() {
             </Text>
           </View>
         </View>
-      ) : (
-        <View className="flex-col items-center">
-          <LinearGradient
-            colors={["#58BE84", "#0C7B7E"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            className="p-lg mb-md shadow"
-            style={{ borderRadius: 8 }}
-          >
-            <Text className="text-center font-sf-b text-bodySm text-white">
-              전체 랭킹
-            </Text>
-            <Text className="text-center font-sf-b text-cpation text-white -mt-xs">
-              현재까지의 누적 탄소 절감량을 기준으로 랭킹을 매겨요!
-            </Text>
-          </LinearGradient>
-        </View>
-      )}
+      ) : null}
 
       {/* 나머지 랭킹 목록 */}
       <View className="flex-1 pb-md">
@@ -228,7 +220,7 @@ export default function GlobalRanking() {
                 className="text-center text-black text-bold text-body my-xs -mt-sm"
                 style={{ lineHeight: 18, fontWeight: "900" }}
               >
-                . . .
+                .{"\n"}.{"\n"}.
               </Text>
               <RankingCard
                 item={{
@@ -243,6 +235,24 @@ export default function GlobalRanking() {
           )}
         </ScrollView>
       </View>
+
+      <Modal visible={isInfoModalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-2xl p-6 w-4/5 max-w-md">
+            <Text className="text-lg font-bold mb-4">전체 랭킹 안내</Text>
+            <Text className="mb-4 ">
+              전체 랭킹은 Penglobe를 사용하는 모든 사용자의 누적 탄소 절감량을
+              기준으로 합니다.
+            </Text>
+            <Pressable
+              onPress={() => setInfoModalVisible(false)}
+              className="bg-blue-500 p-3 rounded-md items-center"
+            >
+              <Text className="text-green font-bold">닫기</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
