@@ -52,7 +52,7 @@ export default function WeeklyRanking() {
   const fetchRankingData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await apiFetch("/rankings/weekly");
+      const response = await apiFetch("/rankings/weekly"); // 업데이트된 데이터 조회
 
       if (!response.ok) {
         throw new Error(`주간 랭킹 에러: ${response.status}`);
