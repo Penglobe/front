@@ -30,22 +30,19 @@ export default function LoadingScreen({ message = "로딩 중..." }) {
   }, []);
 
   return (
-    <View className="flex-1">
-      <BgGradient className="absolute inset-0" />
-      <Animated.View
-        style={{ opacity: fadeAnim, backgroundColor: "transparent" }}
-        className="flex-1 items-center justify-center"
-      >
-        <ActivityIndicator size="large" color="#318643" />
+    <Animated.View
+      style={{ opacity: fadeAnim }}
+      className="flex-1 items-center justify-center"
+    >
+      <ActivityIndicator size="large" color="#318643" />
 
-        {showFirst ? (
-          <Images.IpaWalk width={150} height={150} />
-        ) : (
-          <Images.ToriWalk width={150} height={150} />
-        )}
+      {showFirst ? (
+        <Images.IpaWalk width={170} height={170} />
+      ) : (
+        <Images.ToriWalk width={170} height={170} />
+      )}
 
-        <Text className="mt-3 text-gray-700 font-sf-md">{message}</Text>
-      </Animated.View>
-    </View>
+      <Text className="mt-3 text-gray-700 font-sf-md">{message}</Text>
+    </Animated.View>
   );
 }

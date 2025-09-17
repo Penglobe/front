@@ -83,7 +83,12 @@ export default function Survey() {
 
   //렌더링;
   if (loading) {
-    return <LoadingScreen message="데이터를 불러오는 중입니다..." />;
+    return (
+      <View className="flex-1 items-center justify-center">
+        <BgGradient />
+        <LoadingScreen message="리포트 결과를 불러오는 중입니다..." />
+      </View>
+    );
   }
 
   /*제출하기*/
@@ -168,9 +173,9 @@ export default function Survey() {
         <View className="px-pageX">
           <View>
             {/* 타이틀 */}
-            <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
-              <Text className="text-black text-xl font-bold">
-                <Text className="text-red-500 text-lg">
+            <View className="px-sm self-start flex-row">
+              <Text className="font-bold">
+                <Text className="text-red text-h4">
                   {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
                   습관을 만들어봐요.
                   {"\n"}
@@ -181,7 +186,7 @@ export default function Survey() {
                   </Text>
                 </View>
               </Text>
-              <Images.survey_ipa width={80} height={130} />
+              <Images.survey_ipa width={80} height={150} />
             </View>
 
             {/* 질문 카드 */}
@@ -196,7 +201,7 @@ export default function Survey() {
                       itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
                     }}
                     className={`p-llg rounded-lg shadow-md mb-lg bg-white px-pageX ${
-                      isUnanswered ? "border-2 border-red-500" : ""
+                      isUnanswered ? "border-2 border-red" : ""
                     }`}
                   >
                     {/*질문 출력*/}

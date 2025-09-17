@@ -68,7 +68,7 @@ export default function SurveyResult() {
         <View className="px-pageX flex-row items-center mb-llg mt-llg">
           <Images.ToriFace width={40} height={40} />
           <Text className="text-xl font-sf-md text-green-700 ml-sm">
-            오늘의 설문 결과를 확인해볼까요?
+            오늘의 리포트 결과를 확인해볼까요?
           </Text>
         </View>
 
@@ -78,7 +78,7 @@ export default function SurveyResult() {
               <View className="bg-white rounded-2xl shadow-md px-xl py-llg mb-llg">
                 <Text className="text-h4">
                   오늘의 탄소{" "}
-                  <Text className="text-red-500 text-h3 font-bold">절감량</Text>
+                  <Text className="text-red text-h3 font-bold">절감량</Text>
                 </Text>
                 <View className="items-end">
                   <Text className="text-h1 font-sf-b text-[#318643] mt-xs">

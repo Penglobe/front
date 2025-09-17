@@ -66,6 +66,16 @@ export default function TransportBookmark() {
     try {
       const data = await listBookmarks();
       setBookmarks(data);
+
+      // ✅ 선택된 북마크가 삭제된 경우 초기화
+      if (selectedPlace?.bookmarkId) {
+        const exists = data.some(
+          (b) => b.bookmarkId === selectedPlace.bookmarkId
+        );
+        if (!exists) {
+          setSelectedPlace(null);
+        }
+      }
     } catch (err) {
       console.error("북마크 조회 실패:", err);
       openAlert({
@@ -73,7 +83,7 @@ export default function TransportBookmark() {
         message: "잠시 후 다시 시도해주세요.",
       });
     }
-  }, []);
+  }, [selectedPlace]);
 
   useFocusEffect(
     useCallback(() => {
@@ -106,6 +116,19 @@ export default function TransportBookmark() {
         title: "목적지 필요",
         message: "목적지를 선택해주세요.",
       });
+      return;
+    }
+
+    // ✅ 삭제된 북마크 방어 처리
+    if (
+      selectedPlace.bookmarkId &&
+      !bookmarks.some((b) => b.bookmarkId === selectedPlace.bookmarkId)
+    ) {
+      openAlert({
+        title: "유효하지 않은 북마크",
+        message: "삭제된 북마크입니다. 다시 선택해주세요.",
+      });
+      setSelectedPlace(null);
       return;
     }
 

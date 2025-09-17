@@ -21,7 +21,9 @@ export default function QuizPage() {
   const [result, setResult] = useState(null);
 
   const today = new Date();
-  const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const formattedDate = `${today.getFullYear()}년 ${
+    today.getMonth() + 1
+  }월 ${today.getDate()}일`;
 
   // 퀴즈 가져오기
   useEffect(() => {
@@ -110,7 +112,7 @@ export default function QuizPage() {
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
           <Text className="text-black text-h2 font-sf-b">
-            (오늘 퀴즈는 이미 제출되었습니다.)
+            오늘 퀴즈로 더 받을 수 있는 얼음은 없어요
           </Text>
           <View className="items-center my-3">
             {result ? (
@@ -142,9 +144,11 @@ export default function QuizPage() {
 
       <View className="px-pageX pt-2xl gap-2xl">
         {/* 날짜/설명 */}
-        <View className="bg-white rounded-xl p-sm">
-          <Text className="text-green font-sf-b text-lg">{formattedDate}</Text>
-          <Text className="font-sf-b text-h4 mt-sm">
+        <View className="bg-white rounded-xl px-lg py-lg">
+          <Text className="text-green font-sf-b text-body">
+            {formattedDate}
+          </Text>
+          <Text className="font-sf-b text-body mt-sm">
             환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}얼음은 없어도 지식은 쌓을 수
             있어요!
           </Text>
@@ -164,17 +168,15 @@ export default function QuizPage() {
               <Text className="text-white text-[60px] font-extrabold">O</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-red-400 py-sm px-2xl rounded-lg opacity-90"
+              className="bg-red py-sm px-2xl rounded-lg opacity-90"
               onPress={() => handleSubmitAnswer("X")}
             >
               <Text className="text-white text-[60px] font-extrabold">X</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <View className="flex-1 items-center justify-center pt-6xl">
-          {/* 화면 중앙보다 살짝 위로 이동: -20px 정도 */}
-
-          <Images.IpaTori1 width={250} height={250} />
+        <View className="items-center justify-center py-md">
+          <Images.IpaTori1 width={250} height={180} />
         </View>
       </View>
     </View>

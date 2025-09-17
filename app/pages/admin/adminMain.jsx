@@ -4,7 +4,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import { router } from "expo-router";
-import { authLogout } from "@services/authService";
+import { logout as authLogout } from "@services/authService";
 import CustomAlert from "@components/CustomAlert";
 
 export default function AdminMain() {
@@ -98,9 +98,9 @@ export default function AdminMain() {
         onConfirm={async () => {
           if (alertMode === "logoutConfirm") {
             try {
-              await authLogout();
+              const res = await authLogout();
               setAlertVisible(false);
-              router.replace("/"); // 로그인 화면으로 이동
+              router.replace("/");
             } catch (error) {
               setAlertTitle("오류");
               setAlertMessage("로그아웃 중 오류가 발생했습니다.");

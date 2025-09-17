@@ -61,9 +61,9 @@ if (!global.__TRANSPORT_TASK_DEFINED__) {
         return;
       }
 
-      // 출발 후 2초 이내면 거리 무시
+      // 출발 후 5초 이내면 거리 무시
       const startAt = await AsyncStorage.getItem(STORAGE.START);
-      if (startAt && now - Number(startAt) < 2000) {
+      if (startAt && now - Number(startAt) < 5000) {
         dlog("BG", {
           ignore: "startup_grace_period",
           elapsed: now - Number(startAt),

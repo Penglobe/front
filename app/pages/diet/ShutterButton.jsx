@@ -1,4 +1,3 @@
-// components/ShutterButton.jsx   (권장 위치: app/ 밖 혹은 _components/ 폴더)
 import React from "react";
 import { Pressable, View } from "react-native";
 import Animated, {
@@ -48,7 +47,7 @@ const ShutterButton = ({ onPress, disabled, loading }) => {
   };
 
   return (
-    <View className="items-center mb-16">
+    <View className="items-center mb-lg">
       <Pressable
         onPress={onPress}
         disabled={disabled}
@@ -69,7 +68,7 @@ const ShutterButton = ({ onPress, disabled, loading }) => {
             disabled ? "opacity-60" : ""
           }`}
         >
-          {/* 바깥 흰색 링 */}
+          {/* 바깥 흰색 */}
           <Animated.View
             style={ringStyle}
             className="w-[82px] h-[82px] rounded-full border-4 border-white bg-green/85 items-center justify-center"
@@ -87,5 +86,5 @@ const ShutterButton = ({ onPress, disabled, loading }) => {
   );
 };
 
-export default ShutterButton; // ✅ default export
-export { ShutterButton }; // (원하면 named export도 함께)
+export default ShutterButton;
+export { ShutterButton };
