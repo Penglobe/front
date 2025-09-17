@@ -1,9 +1,9 @@
-// pages/transport/TransportMap.jsx
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { View, Text, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo"; // ✅ 추가
 import { startTransport } from "@services/transportService";
 import MainButton from "@components/MainButton";
 import BgGradient from "@components/BgGradient";
@@ -29,16 +29,35 @@ import {
   stopTransportSafely,
 } from "../../../tasks/transportShared";
 
+// ✅ pendingStop 재시도 함수
+async function retryPendingStop() {
+  const pendingRaw = await AsyncStorage.getItem("@transport/pendingStop");
+  if (!pendingRaw) return;
+
+  const pending = JSON.parse(pendingRaw);
+  dlog("STOP", { retry: true, pending });
+
+  const res = await stopTransportSafely(
+    pending.transportId,
+    pending.totalDistance,
+    { source: "RETRY" }
+  );
+
+  if (res.ok) {
+    await AsyncStorage.removeItem("@transport/pendingStop");
+    dlog("STOP", { retry: "success" });
+  } else {
+    dlog("STOP", { retry: "fail", error: res.error });
+  }
+}
+
 // ✅ 초기 위치 빠르게 잡기
 async function seedPositionFast() {
-  // 1. 마지막 위치 있으면 바로 반환
   const last = await Location.getLastKnownPositionAsync();
   if (last?.coords) {
     const { latitude, longitude, accuracy } = last.coords;
     return { latitude, longitude, timestamp: Date.now(), accuracy };
   }
-
-  // 2. 빠른 응답 우선 (낮은 정확도)
   try {
     const quick = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Low,
@@ -175,7 +194,6 @@ export default function TransportMap() {
           lng: longitude,
         });
 
-        // 속도 체크
         if (dt > 0) {
           const modeCur = (await AsyncStorage.getItem(STORAGE.MODE)) || "WALK";
           const speed = checkSpeed(d / dt, modeCur);
@@ -198,7 +216,6 @@ export default function TransportMap() {
           }
         }
 
-        // ✅ 도착 판정 (포그라운드에서도 수행)
         const ar = await checkArrivalAndStop({
           latitude,
           longitude,
@@ -229,6 +246,9 @@ export default function TransportMap() {
     (async () => {
       dlog("UI", { init: true, isFreshStart, mode });
 
+      // ✅ 앱 켜질 때 pendingStop 재시도
+      await retryPendingStop();
+
       await Location.requestForegroundPermissionsAsync();
       await Location.requestBackgroundPermissionsAsync();
 
@@ -250,7 +270,6 @@ export default function TransportMap() {
         dlog("UI", { reset: "fresh_start" });
       }
 
-      // ✅ 빠른 시드 위치 확보
       const seed = await seedPositionFast();
       if (seed && mounted) {
         setCurrentCoord(seed);
@@ -265,7 +284,6 @@ export default function TransportMap() {
         });
       }
 
-      // 서버에 이동 시작
       const res = await startTransport(mode);
       const id = res?.transportId ?? res?.id;
       if (!id) {
@@ -288,7 +306,6 @@ export default function TransportMap() {
       setTransportId(id);
       dlog("UI", { started: true, id, mode });
 
-      // ✅ 초기 위치가 도착 반경 안일 경우 즉시 종료 처리
       if (seed && endLat && endLng) {
         const dist = calculateDistance(
           seed.latitude,
@@ -316,7 +333,6 @@ export default function TransportMap() {
         }
       }
 
-      // ✅ watchPositionAsync 즉시 시작 → 초기 위치도 빨리 확보 가능
       await startForegroundWatch();
 
       try {
@@ -336,15 +352,22 @@ export default function TransportMap() {
       } catch (e) {
         dlog("BG", { startFail: String(e) });
       }
-    })();
 
-    return () => {
-      mounted = false;
-      detachFgWatch();
-    };
+      // ✅ 네트워크 복구 시 pendingStop 재시도
+      const unsubNet = NetInfo.addEventListener((state) => {
+        if (state.isConnected) {
+          retryPendingStop();
+        }
+      });
+
+      return () => {
+        mounted = false;
+        detachFgWatch();
+        unsubNet();
+      };
+    })();
   }, []);
 
-  // ✅ Fallback: STOPPED_KEY 폴링
   useEffect(() => {
     const interval = setInterval(async () => {
       const stopped = await AsyncStorage.getItem(STORAGE.STOPPED);
@@ -382,7 +405,6 @@ export default function TransportMap() {
         </View>
       )}
 
-      {/* ✅ 이동거리 카드 */}
       <View className="absolute left-0 right-0 px-xl py-md top-[120px]">
         <View className="bg-white rounded-2xl shadow-sm px-xl py-lg">
           <View className="flex-row items-center mb-3">
@@ -417,7 +439,6 @@ export default function TransportMap() {
             });
             if (!res.ok) {
               dlog("UI", { manualStopFail: res.error });
-              // 실패여도 화면 전환은 하되, BG에서 재시도/후속 처리
             }
 
             await detachFgWatch();
@@ -430,7 +451,7 @@ export default function TransportMap() {
             goFinish();
           }}
           disabled={!transportId}
-          className={`mb-md ${transportId ? "bg-red" : "bg-gray-400"}`}
+          className={`mb-md ${transportId ? "bg-red-500" : "bg-gray-400"}`}
         />
       </View>
     </View>
