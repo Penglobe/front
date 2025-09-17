@@ -294,6 +294,34 @@ export default function TransportMap() {
       ]);
       setTransportId(id);
 
+      // ✅ 초기 위치가 도착 반경 안일 경우 즉시 종료 처리
+      if (seed && endLat && endLng) {
+        const dist = calculateDistance(
+          seed.latitude,
+          seed.longitude,
+          Number(endLat),
+          Number(endLng)
+        );
+        dlog("UI", {
+          initialDistToDest: Math.round(dist),
+          radius: ARRIVAL_RADIUS_M,
+        });
+
+        if (dist <= ARRIVAL_RADIUS_M) {
+          const stop = await stopTransportSafely(id, 0, { source: "INIT" });
+          if (stop.ok) {
+            await AsyncStorage.multiSet([
+              [STORAGE.STOPPED, "1"],
+              [STORAGE.STOP_KIND, "finish"],
+              [STORAGE.ACTIVE, "0"],
+            ]);
+            return goFinish();
+          } else {
+            dlog("UI", { initialStopFail: stop.error });
+          }
+        }
+      }
+
       await startForegroundWatch();
 
       try {
