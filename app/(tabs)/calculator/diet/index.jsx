@@ -1,15 +1,35 @@
 import React from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { Images } from "@constants/Images";
 import { useRouter } from "expo-router";
 import { fetchTodayCount } from "@services/dietService";
 import { useAuth } from "@hooks/useAuth";
+import CustomAlert from "@components/CustomAlert";
 
 export default function Diet() {
   const router = useRouter();
   const { user, refreshUser } = useAuth();
+
+  const [alertState, setAlertState] = React.useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: undefined,
+    onConfirm: undefined,
+    onCancel: undefined,
+  });
+  const openAlert = (opts) =>
+    setAlertState((s) => ({ ...s, visible: true, ...opts }));
+  const closeAlert = () =>
+    setAlertState((s) => ({
+      ...s,
+      visible: false,
+      onConfirm: undefined,
+      onCancel: undefined,
+    }));
 
   const handlePress = async () => {
     try {
@@ -20,30 +40,30 @@ export default function Diet() {
         uid = (typeof user === "object" && user?.userId) || uid;
       }
       if (!uid) {
-        CustomAlert.alert(
-          "로그인 필요",
-          "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
-        );
+        openAlert({
+          title: "로그인 필요",
+          message: "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.",
+        });
         return;
       }
 
       // 2) 일일 횟수 제한 확인
       const count = await fetchTodayCount(uid);
       if (count >= 3) {
-        CustomAlert.alert(
-          "알림",
-          "오늘은 이미 3번 기록했습니다. 내일 다시 시도해 주세요."
-        );
+        openAlert({
+          title: "알림",
+          message: "오늘은 이미 3번 기록했습니다. \n내일 다시 시도해 주세요.",
+        });
         return;
       }
 
       // 3) 촬영 화면으로 이동
       router.push("/pages/diet/dietTest");
     } catch (e) {
-      CustomAlert.alert(
-        "오류",
-        "식단 횟수 조회에 실패했습니다. 다시 시도해 주세요."
-      );
+      openAlert({
+        title: "오류",
+        message: "식단 횟수 조회에 실패했습니다. 다시 시도해 주세요.",
+      });
       console.error(e);
     }
   };
@@ -70,6 +90,26 @@ export default function Diet() {
           <Images.Ipa_Tori_diet className="mb-sm" width={320} height={260} />
         </View>
       </View>
+
+      <CustomAlert
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        cancelText={alertState.cancelText}
+        onConfirm={() => {
+          closeAlert();
+          alertState.onConfirm?.();
+        }}
+        onCancel={
+          alertState.onCancel
+            ? () => {
+                closeAlert();
+                alertState.onCancel?.();
+              }
+            : undefined
+        }
+      />
     </View>
   );
 }
