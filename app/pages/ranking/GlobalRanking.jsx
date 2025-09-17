@@ -130,7 +130,7 @@ export default function GlobalRanking() {
         setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
       }
 
-      apiResponse = await apiFetch("/rankings/global");
+              apiResponse = await apiFetch("/rankings/global"); // 업데이트된 데이터 조회
       if (!apiResponse.ok)
         throw new Error(`전체 랭킹 에러: ${apiResponse.status}`);
 
