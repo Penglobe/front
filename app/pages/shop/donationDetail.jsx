@@ -3,11 +3,9 @@ import {
   View,
   Text,
   Image,
+  ScrollView,
   Pressable,
   TextInput,
-  Keyboard,
-  TouchableWithoutFeedback,
-  ScrollView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,7 +16,7 @@ import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import Constants from "expo-constants";
-import { useAuth } from "@hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import CustomAlert from "@components/CustomAlert";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
@@ -38,10 +36,9 @@ export default function ProductDetailPage() {
 
   const [item, setItem] = useState(null);
   const [qty, setQty] = useState(0);
-  const [confirmVisible, setConfirmVisible] = useState(false); // 구매 확인 모달 상태
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const { user, refreshUser } = useAuth();
 
-  // 🔔 CustomAlert 상태
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -61,7 +58,7 @@ export default function ProductDetailPage() {
       setAlertMode("loadError");
       setAlertVisible(true);
     }
-  }, [pid, router]);
+  }, [pid]);
 
   useEffect(() => {
     load();
@@ -69,7 +66,9 @@ export default function ProductDetailPage() {
 
   // 모달 열릴 때 보유 포인트 최신화
   useEffect(() => {
-    if (confirmVisible) refreshUser();
+    if (confirmVisible && typeof refreshUser === "function") {
+      refreshUser();
+    }
   }, [confirmVisible, refreshUser]);
 
   const totalPoint = Number(user?.totalPoint ?? 0);
@@ -113,7 +112,7 @@ export default function ProductDetailPage() {
       setAlertMode("donateFail");
       setAlertVisible(true);
     }
-  }, [item, qty, router]);
+  }, [item, qty]);
 
   if (!item) {
     return (
@@ -129,190 +128,168 @@ export default function ProductDetailPage() {
   const bottomGap = Math.max(insets.bottom, 16) + 76;
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View className="flex-1">
-        <BgGradient />
-        <HeaderBar title="기부 정보" />
+    <View className="flex-1">
+      <BgGradient />
+      <HeaderBar title="기부 정보" />
 
-        {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
-        <View className="flex-1 px-pageX pt-md">
-          <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
-            {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
-            <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
-              {/* 이미지 */}
-              <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
-                {imgUri ? (
-                  <Image
-                    source={{ uri: imgUri }}
-                    className="w-full h-full"
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <Text className="text-gray-400">이미지 없음</Text>
-                )}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: bottomGap }}
+      >
+        {/* 본문 */}
+        <View className="flex-1 pt-md px-pageX">
+          <View className="bg-white rounded-2xl pt-md pb-llg px-md">
+            {/* 이미지 */}
+            <View className="w-full h-[220px] rounded-2xl bg-gray items-center justify-center overflow-hidden">
+              {imgUri ? (
+                <Image
+                  source={{ uri: imgUri }}
+                  className="w-full h-full"
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text className="text-gray-400">이미지 없음</Text>
+              )}
+            </View>
+
+            <View className="py-sm">
+              <Text className="font-sf-b text-h3 text-green">기부명</Text>
+              <Text className="text-h2 font-sf-b">{item.name}</Text>
+
+              {!!item.description && (
+                <Text className="text-body text-gray-700">
+                  {item.description}
+                </Text>
+              )}
+
+              <Text className="font-sf-b text-h3 text-green">
+                기부금 (얼음)
+              </Text>
+
+              <View className="flex-row">
+                <TextInput
+                  value={qty > 0 ? String(qty) : ""}
+                  onChangeText={(text) => {
+                    const numText = text.replace(/[^0-9]/g, "");
+                    if (!numText) {
+                      setQty(0);
+                      return;
+                    }
+                    setQty(parseInt(numText, 10));
+                  }}
+                  placeholder="기부금 입력 (최소 100얼음)"
+                  keyboardType="numeric"
+                  className="flex-1 text-black py-md px-md text-md font-sf-b rounded-xl border border-gray"
+                  style={{
+                    paddingVertical: 0, // iOS 잘림 방지
+                    textAlignVertical: "center", // Android 중앙 정렬
+                  }}
+                />
               </View>
 
-              <View className="px-sm py-sm">
-                <Text className="font-sf-b text-h3 mb-sm text-green">
-                  기부명
-                </Text>
-                <Text className="text-h2 font-sf-b">{item.name}</Text>
-                {!!item.description && (
-                  <View className="mt-md mb-3xl">
-                    <Text className="text-body text-gray-700">
-                      {item.description}
-                    </Text>
-                  </View>
-                )}
-                <Text className="font-sf-b text-h3 mb-sm text-green">
-                  기부금 (얼음){" "}
-                </Text>
-
-                <View className="flex-row">
-                  <TextInput
-                    value={qty > 0 ? qty.toString() : ""}
-                    onChangeText={(text) => {
-                      const numText = text.replace(/[^0-9]/g, "");
-                      if (!numText) {
-                        setQty(0);
-                        return;
-                      }
-                      setQty(parseInt(numText, 10));
-                    }}
-                    placeholder="기부금 입력 (최소 100얼음)"
-                    keyboardType="numeric"
-                    className="flex-1 text-black h-2xl px-md text-md font-sf-b rounded-xl border border-darkGray"
-                    style={{
-                      paddingVertical: 0, // iOS 잘림 방지
-                      textAlignVertical: "center", // Android 중앙 정렬
-                    }}
-                  />
-                </View>
-                <View className="flex-row items-center mt-llg self-end">
-                  <Text className="text-green font-sf-b text-h1">{qty}</Text>
-                  <Images.Ice width={35} height={35} />
-                </View>
+              <View className="flex-row items-center self-end">
+                <Text className="text-green font-sf-b text-h1">{qty}</Text>
+                <Images.Ice width={35} height={35} />
               </View>
             </View>
-          </ScrollView>
+            <MainButton label="다음" onPress={openConfirm} />
+          </View>
+        </View>
+      </ScrollView>
 
-          {/* 플로팅 결제 버튼 (배경 바 없음) */}
-          <View
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              bottom: insets.bottom ? insets.bottom : 12,
-            }}
-            className="px-pageX pb-md"
+      {/* 구매 확인 모달 */}
+      <Modal visible={confirmVisible}>
+        <View className="mb-4">
+          <Text className="text-black text-h1 font-sf-b mb-md text-center">
+            기부 결제 확인
+          </Text>
+          <Pressable
+            onPress={() => setConfirmVisible(false)}
+            className="absolute right-[10px] top-0 p-0.5"
           >
-            <MainButton onPress={openConfirm} className="w-full">
-              <View className="flex-row items-center">
-                <Text className="text-white font-sf-b ml-sm text-h4">
-                  기부하기
-                </Text>
-              </View>
-            </MainButton>
+            <Text className="text-h1 text-gray-400">✕</Text>
+          </Pressable>
+        </View>
+
+        {/* 구매 상품 */}
+        <View className="flex-row items-center mb-lg min-h-[28px]">
+          <Text className="w-[112px] text-black font-sf-sb text-h3">
+            기부명
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text
+              className="text-h3 font-sf-b text-green leading-[22px]"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.name}
+            </Text>
           </View>
         </View>
 
-        {/* 구매 확인 모달 */}
-        <Modal visible={confirmVisible}>
-          <View className="mb-4">
-            <Text className="text-black text-h1 font-sf-b mb-md text-center">
-              기부 결제 확인
+        {/* 기부 포인트 */}
+        <View className="flex-row items-center mb-5 min-h-[28px]">
+          <Text className="w-[112px] text-black font-sf-sb text-h3">
+            기부금(포인트)
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text className="text-h3 font-sf-b text-green leading-[22px]">
+              {qty}
             </Text>
-            <Pressable
-              onPress={() => setConfirmVisible(false)}
-              className="absolute right-[10px] top-0 p-0.5"
-            >
-              <Text className="text-h1 text-gray-400">✕</Text>
-            </Pressable>
+            <Images.Ice width={22} height={22} />
           </View>
+        </View>
 
-          {/* 구매 상품 */}
-          <View className="flex-row items-center mb-lg min-h-[28px]">
-            <Text className="w-[112px] text-black font-sf-sb text-h3">
-              기부명
+        {/* 현재 보유 얼음 */}
+        <View
+          className={`flex-row items-center ${
+            totalPoint < qty ? "mb-1" : "mb-5"
+          }`}
+        >
+          <Text className="w-[112px] text-black font-sf-sb text-h3">
+            현재 보유 얼음
+          </Text>
+          <View className="flex-1 flex-row items-center justify-end">
+            <Text className="text-h3 font-sf-b text-green leading-[22px]">
+              {totalPoint.toLocaleString()}
             </Text>
-            <View className="flex-1 flex-row items-center justify-end">
-              <Text
-                className="text-h3 font-sf-b text-green leading-[22px]"
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {item.name}
-              </Text>
-            </View>
+            <Images.Ice width={22} height={22} />
           </View>
+        </View>
 
-          {/* 구매 수량 */}
-          <View className="flex-row items-center mb-5 min-h-[28px]">
-            <Text className="w-[112px] text-black font-sf-sb text-h3">
-              기부금(포인트)
-            </Text>
-            <View className="flex-1 flex-row items-center justify-end">
-              <Text className="text-h3 font-sf-b text-green leading-[22px]">
-                {qty}
-              </Text>
-              <Images.Ice width={22} height={22} />
-            </View>
+        {totalPoint < qty && (
+          <Text className="text-rose-600 w-full text-right mb-md">
+            잔액이 부족합니다.
+          </Text>
+        )}
+
+        <MainButton
+          onPress={handleBuy}
+          disabled={totalPoint < qty}
+          className={totalPoint < qty ? "opacity-60" : ""}
+        >
+          <View className="flex-row items-center">
+            <Text className="text-white font-sf-b ml-2 text-h4">결제하기</Text>
           </View>
+        </MainButton>
+      </Modal>
 
-          {/* 현재 보유 얼음 */}
-          <View
-            className={`flex-row items-center ${
-              totalPoint < qty ? "mb-1" : "mb-5"
-            }`}
-          >
-            <Text className="w-[112px] text-black font-sf-sb text-h3">
-              현재 보유 얼음
-            </Text>
-            <View className="flex-1 flex-row items-center justify-end">
-              <Text className="text-h3 font-sf-b text-green leading-[22px]">
-                {totalPoint.toLocaleString()}
-              </Text>
-              <Images.Ice width={22} height={22} />
-            </View>
-          </View>
-
-          {totalPoint < qty && (
-            <Text className="text-rose-600 w-full text-right mb-md">
-              잔액이 부족합니다.
-            </Text>
-          )}
-
-          <MainButton
-            onPress={handleBuy}
-            disabled={totalPoint < qty}
-            className={totalPoint < qty ? "opacity-60" : ""}
-          >
-            <View className="flex-row items-center">
-              <Text className="text-white font-sf-b ml-2 text-h4">
-                결제하기
-              </Text>
-            </View>
-          </MainButton>
-        </Modal>
-
-        {/* ✅ CustomAlert */}
-        <CustomAlert
-          visible={alertVisible}
-          title={alertTitle}
-          message={alertMessage}
-          confirmText="확인"
-          onConfirm={() => {
-            setAlertVisible(false);
-            if (alertMode === "loadError") {
-              router.back();
-            }
-            if (alertMode === "donateSuccess") {
-              router.back();
-            }
-            // minAmount / donateFail 은 닫기만
-          }}
-        />
-      </View>
-    </TouchableWithoutFeedback>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        confirmText="확인"
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (alertMode === "loadError") {
+            router.back();
+          }
+          if (alertMode === "donateSuccess") {
+            router.back();
+          }
+        }}
+      />
+    </View>
   );
 }
