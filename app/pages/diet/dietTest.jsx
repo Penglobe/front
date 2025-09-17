@@ -274,6 +274,23 @@ export default function DietTest() {
       setLoading(true);
 
       const result = await predictBase64Cross(photo.base64);
+      const noFoods =
+        !result ||
+        ((!Array.isArray(result?.foods) || result.foods.length === 0) &&
+          (!Array.isArray(result?.items) || result.items.length === 0));
+      if (noFoods) {
+        setLoading(false);
+        setModalVisible(false);
+        setTimeout(() => {
+          openAlert({
+            title: "인식 실패",
+            message: "음식을 인식하지 못했어요. \n다시 찍어주세요.",
+            confirmText: "다시 찍기",
+            onConfirm: retake,
+          });
+        }, 0);
+        return;
+      }
       const payload = {
         ...toCarbonRequestPayload(result, { merge: true }),
         eatMode: String(mealType).toUpperCase(),
@@ -412,23 +429,20 @@ export default function DietTest() {
           return (
             <Pressable
               key={key}
-              className={`w-full rounded-xl py-llg px-md bg-white overflow-hidden mb-xxs ${
-                selected ? "bg-green/30" : ""
-              }`}
-              android_ripple={{ color: "rgba(0,0,0,0.08)" }}
               disabled={loading}
-              style={({ pressed }) => [
-                { backgroundColor: pressed ? "#f4f4f5" : "#ffffff" },
-                { opacity: loading ? 0.6 : 1 },
-              ]}
               onPress={() => setSelectedMode(key)}
+              className={`w-full rounded-xl overflow-hidden mb-xxs px-md py-llg
+    ${selected ? "bg-green/20" : "bg-white"}`}
+              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
             >
               <View className="flex-row items-center gap-2">
                 {Icon ? <Icon width={20} height={20} /> : null}
                 <Text
-                  className={`font-sf-sb text-body ${
-                    selected ? "text-green" : "text-black"
-                  }`}
+                  className={
+                    selected
+                      ? "font-sf-b text-body text-green"
+                      : "font-sf-sb text-body text-black"
+                  }
                 >
                   {label}
                 </Text>

@@ -309,40 +309,72 @@ export default function DietResult() {
               </View>
               <View className="gap-2">
                 <Text className="font-sf-b text-bodySm text-green">
-                  절감량 = 표준 한 끼(1.5 kg CO₂) − 이번 식단의 총 배출량
+                  절감량 = 표준 한 끼 − 이번 식단의 총 배출량
+                </Text>
+                <Text className="text-caption text-green">
+                  ※ 한국인 표준 한 끼는 1.5 kg CO₂ 입니다.
                 </Text>
                 <Text className="text-caption text-gray-600">
                   ※ ‘총 배출량’은 음식 자체 + (집/배달/포장/식당) 가감 포함이며,
-                  {"\n"}표시는 소수 둘째 자리까지 반올림합니다.
+                  표시는 소수 둘째 자리까지 반올림합니다.
                 </Text>
                 <View className="gap-4 mt-sm mb-lg">
-                  <View className="flex-row items-center gap-1">
-                    <Images.Home width={20} height={20} />
-                    <Text className="text-black font-sf text-label">
-                      집: 가정 조리(한 끼당 1.19㎏) + 음식 자체 배출량
-                    </Text>
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Home width={16} height={16} className="mt-[2px]" />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">집</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 가정 조리(한 끼당 1.19kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
                   </View>
 
-                  <View className="flex-row items-center gap-1">
-                    <Images.Delivery width={20} height={20} />
-                    <Text className="text-black font-sf text-label">
-                      배달: 오토바이(0.137kg/km × 4km) + 일회용기(0.050kg) +
-                      음식 자체 배출량
-                    </Text>
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Delivery
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">배달</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 오토바이 (0.137kg/km × 4km){"\n"}· 일회용기 (0.050kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
                   </View>
 
-                  <View className="flex-row items-center gap-1">
-                    <Images.Takeout width={20} height={20} />
-                    <Text className="text-black font-sf text-label">
-                      포장(테이크아웃): 일회용기(0.050kg) + 음식 자체 배출량
-                    </Text>
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Takeout
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">
+                        포장(테이크아웃)
+                      </Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 일회용기(0.050kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
                   </View>
 
-                  <View className="flex-row items-center gap-1">
-                    <Images.Restaurant width={20} height={20} />
-                    <Text className="text-black font-sf text-label">
-                      식당: 시설·운영(한 끼당 3.43kg) + 음식 자체 배출량
-                    </Text>
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Restaurant
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">식당</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 시설·운영(한 끼당 3.43kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
