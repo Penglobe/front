@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import BgGradient from "@components/BgGradient";
 import { useEffect, useRef, useState } from "react";
 import HeaderBar from "@components/HeaderBar";
@@ -15,6 +9,7 @@ import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
 import CustomAlert from "@components/CustomAlert";
 import LoadingScreen from "@components/LoadingScreen";
+import { Stack } from "expo-router";
 
 export default function Survey() {
   const router = useRouter(); // 페이지 이동용
@@ -166,27 +161,34 @@ export default function Survey() {
 
   return (
     <>
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
+      <BgGradient />
+      <HeaderBar
+        title="빙하 리포트"
+        onBack={() => router.replace("/(tabs)/home")}
+      />
       <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
-        <BgGradient />
-        <HeaderBar title="빙하 리포트" />
-
         <View className="px-pageX">
           <View>
             {/* 타이틀 */}
-            <View className="px-sm self-start flex-row">
-              <Text className="font-bold">
-                <Text className="text-red text-h4">
-                  {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
-                  습관을 만들어봐요.
-                  {"\n"}
+            <View className="px-sm w-full flex-row items-start justify-between">
+              {/* 왼쪽 텍스트 블록 */}
+              <View className="flex-1 pr-sm pt-llg">
+                <Text className="text-red text-h4 font-sf-b">
+                  내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은 습관을
+                  만들어봐요.
                 </Text>
-                <View>
-                  <Text className="text-sm">
-                    ※ 하루에 한 번만 가능합니다. {"\n"}
-                  </Text>
-                </View>
-              </Text>
-              <Images.survey_ipa width={80} height={150} />
+                <Text className="text-sm mt-xxs">
+                  ※ 하루에 한 번만 가능합니다.
+                </Text>
+              </View>
+
+              {/* 오른쪽 이미지 (줄어들지 않게) */}
+              <View className="shrink-0">
+                <Images.survey_ipa width={80} height={100} />
+              </View>
             </View>
 
             {/* 질문 카드 */}

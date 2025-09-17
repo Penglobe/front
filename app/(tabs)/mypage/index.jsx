@@ -61,7 +61,6 @@ const AVATARS = [
   { key: "ProfileIce", label: "얼음", Render: Images.ProfileIce },
   { key: "Fish", label: "물고기", Render: Images.Fish },
   { key: "Polarbear", label: "북극곰", Render: Images.Polarbear },
-  { key: "Polarbear2", label: "북극곰2", Render: Images.Polarbear2 },
 ];
 
 const getAvatarRenderComponent = (profileKey) => {
