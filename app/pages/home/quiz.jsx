@@ -21,7 +21,9 @@ export default function QuizPage() {
   const [result, setResult] = useState(null);
 
   const today = new Date();
-  const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const formattedDate = `${today.getFullYear()}년 ${
+    today.getMonth() + 1
+  }월 ${today.getDate()}일`;
 
   // 퀴즈 가져오기
   useEffect(() => {
@@ -175,7 +177,7 @@ export default function QuizPage() {
               <Text className="text-white text-[60px] font-extrabold">O</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-red-400 py-sm px-2xl rounded-lg opacity-90"
+              className="bg-red py-sm px-2xl rounded-lg opacity-90"
               onPress={() => handleSubmitAnswer("X")}
             >
               <Text className="text-white text-[60px] font-extrabold">X</Text>

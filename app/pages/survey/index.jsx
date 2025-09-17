@@ -170,7 +170,7 @@ export default function Survey() {
             {/* 타이틀 */}
             <View className="px-pageX bg-secondary rounded-xl px-pageX self-start flex-row items-center gap-lg">
               <Text className="text-black text-xl font-bold">
-                <Text className="text-red-500 text-lg">
+                <Text className="text-red text-lg">
                   {"\n\n"}내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은
                   습관을 만들어봐요.
                   {"\n"}
@@ -196,7 +196,7 @@ export default function Survey() {
                       itemPositions.current[q.itemId] = e.nativeEvent.layout.y;
                     }}
                     className={`p-llg rounded-lg shadow-md mb-lg bg-white px-pageX ${
-                      isUnanswered ? "border-2 border-red-500" : ""
+                      isUnanswered ? "border-2 border-red" : ""
                     }`}
                   >
                     {/*질문 출력*/}
