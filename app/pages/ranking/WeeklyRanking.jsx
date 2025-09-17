@@ -98,29 +98,30 @@ export default function WeeklyRanking() {
   );
 
   return (
-    <View style={{ flex: 1, padding: 10 }}>
+    <View className="flex-1 px-pageX">
       <CustomAlert visible={alertVisible} {...alertProps} />
       {/* 상단 박스 (사용자 순위 정보) */}
       {myRank && (
-        <LinearGradient
-          colors={["#58BE84", "#0C7B7E"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          className="p-lg mb-4 shadow"
-          style={{ borderRadius: 8 }}
-        >
-          <View className="flex-col items-center">
-            <Text className="text-white font-sf-b text-bodyLg">
-              실시간 현재 순위 : {myRank.rank}위
-            </Text>
-            {myRank.lastWeekRank !== null &&
-              myRank.lastWeekRank !== undefined && (
-                <Text className="text-white font-sf-r text-bodySm mt-1">
-                  지난 주에는 {myRank.lastWeekRank}위로 완료했어요!
-                </Text>
-              )}
-          </View>
-        </LinearGradient>
+        <View className="mb-sm">
+          <LinearGradient
+            colors={["#58BE84", "#0C7B7E"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ borderRadius: 8, padding: 8 }}
+          >
+            <View className="flex-col items-center">
+              <Text className="text-white font-sf-b text-bodyLg">
+                실시간 현재 순위 : {myRank.rank}위
+              </Text>
+              {myRank.lastWeekRank !== null &&
+                myRank.lastWeekRank !== undefined && (
+                  <Text className="text-white font-sf-r text-bodySm mt-1">
+                    지난 주에는 {myRank.lastWeekRank}위로 완료했어요!
+                  </Text>
+                )}
+            </View>
+          </LinearGradient>
+        </View>
       )}
 
       {/* 랭킹 참여 조건 미달 메시지 */}

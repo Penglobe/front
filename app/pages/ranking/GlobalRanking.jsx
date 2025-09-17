@@ -27,6 +27,7 @@ const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
   if (!ranker) return <View style={{ flex: 1 }} />;
 
   const AvatarComponent = getAvatarRenderComponent(ranker.profile);
+  const topOffset = Math.max(4, Math.round(height * 0.08)); // 등수 살짝 내릴 오프셋
 
   return (
     <View className="flex-1 items-center justify-end">
@@ -42,24 +43,42 @@ const PodiumItem = ({ ranker, height, podiumColor, rankTextColor }) => {
         {ranker.nickname}
       </Text>
 
-      {/* 점수 */}
-      <View
-        className="px-xs py-xs rounded-md my-xxs"
-        style={{ backgroundColor: "#318643" }}
-      >
-        <Text className="font-sf-r text-footnote text-white">
-          {ranker.score}kg
-        </Text>
-      </View>
-
       {/* 시상대 */}
       <View
-        className="w-full items-center justify-center rounded-t-lg pt-xxs"
-        style={{ height: height, backgroundColor: podiumColor }}
+        className="w-full rounded-t-lg relative" // relative로 기준점 설정
+        style={{ height, backgroundColor: podiumColor }}
       >
-        <Text className={`font-sf-b text-h1 ${rankTextColor}`}>
-          {ranker.rank}위
-        </Text>
+        {/* 등수: 위쪽에 고정 + 살짝 내림 */}
+        <View
+          style={{
+            position: "absolute",
+            top: topOffset,
+            left: 0,
+            right: 0,
+            alignItems: "center",
+          }}
+        >
+          <Text className={`font-sf-b text-h2 text-white`}>
+            {ranker.rank}위
+          </Text>
+        </View>
+
+        {/* 점수: 아래에 고정 (위 변경의 영향 없음) */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 1,
+            left: 0,
+            right: 0,
+            alignItems: "center",
+          }}
+        >
+          <View className="px-xs py-xxs rounded-md">
+            <Text className="font-sf-b text-caption text-white">
+              {ranker.score}kg
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -160,52 +179,19 @@ export default function GlobalRanking() {
         <PodiumItem
           ranker={ranker2}
           height={70}
-          podiumColor="#DBDBDB" // 2등 - 은색
-          rankTextColor="text-black"
+          podiumColor="#749BF0" // 2등 - 은색
         />
         <PodiumItem
           ranker={ranker1}
           height={100}
-          podiumColor="#F9C332" // 1등 - 금색
-          rankTextColor="text-white"
+          podiumColor="#D64D2D" // 1등 - 금색
         />
         <PodiumItem
           ranker={ranker3}
           height={50}
-          podiumColor="#858494" // 3등 - 동색
-          rankTextColor="text-white"
+          podiumColor="#40BF58" // 3등 - 동색
         />
       </View>
-
-      {/* 구분선 / 메시지 */}
-      {showParticipationMessage ? (
-        <View>
-          <View className="bg-deactivateButton border-l-4 border-500 p-lg my-md rounded-lg">
-            <Text className="font-bold">랭킹 참여 조건 미달</Text>
-            <Text>
-              전체 랭킹에 참여하려면 탄소 절감 활동 기록이 필요해요! 활동을 통해
-              탄소 절감량을 늘리고 랭킹에 참여해보세요!
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View className="flex-col items-center">
-          <LinearGradient
-            colors={["#58BE84", "#0C7B7E"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            className="p-lg mb-md shadow"
-            style={{ borderRadius: 8 }}
-          >
-            <Text className="text-center font-sf-b text-bodySm text-white">
-              전체 랭킹
-            </Text>
-            <Text className="text-center font-sf-b text-cpation text-white -mt-xs">
-              현재까지의 누적 탄소 절감량을 기준으로 랭킹을 매겨요!
-            </Text>
-          </LinearGradient>
-        </View>
-      )}
 
       {/* 나머지 랭킹 목록 */}
       <View className="flex-1 pb-md">

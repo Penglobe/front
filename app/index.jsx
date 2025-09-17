@@ -12,7 +12,7 @@ import {
 import { Images } from "@constants/Images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { login, getAccessToken } from "@services/authService";
+import { login, getAccessToken, me, logout } from "@services/authService";
 import { useAuth } from "@hooks/useAuth";
 import { useKakaoLogin } from "@hooks/useKakaoLogin";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -45,7 +45,16 @@ export default function Index() {
   useEffect(() => {
     (async () => {
       const at = await getAccessToken();
-      if (at) router.replace("/(tabs)/home"); // ✅ 토큰 있으면 홈으로
+      if (!at) return; // 토큰 없으면 로그인 화면 유지
+      try {
+        // 방법 1) 서버에서 현재 유저 조회
+        const user = await me(); // { userId, type: "ADMIN" | "USER", ... }
+        const isAdmin = String(user?.type || "").toUpperCase() === "ADMIN";
+        router.replace(isAdmin ? "/pages/admin/adminMain" : "/(tabs)/home");
+      } catch {
+        // 토큰 만료/오류 시 그냥 로그인 화면
+        await logout();
+      }
     })();
   }, [router]);
 
