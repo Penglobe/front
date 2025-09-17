@@ -10,7 +10,7 @@ import {
   RefreshControl,
   TextInput,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch } from "@services/authService";
@@ -190,6 +190,9 @@ export default function StoreListPage() {
 
   return (
     <View className="flex-1">
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       <BgGradient />
       <View className="absolute inset-0 pb-[150px]">
         <HeaderBar title="얼음 거래소" />

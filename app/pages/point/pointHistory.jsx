@@ -11,7 +11,7 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import colors from "@constants/Colors.cjs";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
 
@@ -215,6 +215,9 @@ export default function PointHistory() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.white }}>
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       <BgGradient />
       <HeaderBar
         title="얼음 적립 내역"

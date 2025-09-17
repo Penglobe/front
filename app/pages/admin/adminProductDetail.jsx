@@ -159,7 +159,7 @@ export default function ProductDetailPage() {
 
           {/* 삭제 버튼 */}
           <Pressable
-            className="flex-1 y-4 rounded-xl bg-red-600 items-center justify-center opacity-90"
+            className="flex-1 y-4 rounded-xl bg-red items-center justify-center opacity-90"
             onPress={() => {
               setAlertTitle("삭제 확인");
               setAlertMessage("정말 삭제하시겠습니까?");
@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
                 <Image
                   source={{ uri: imgUri }}
                   className="w-full h-full"
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
               ) : (
                 <Text className="text-gray-400">이미지 없음</Text>
