@@ -78,7 +78,7 @@ export default function SurveyResult() {
               <View className="bg-white rounded-2xl shadow-md px-xl py-llg mb-llg">
                 <Text className="text-h4">
                   오늘의 탄소{" "}
-                  <Text className="text-red-500 text-h3 font-bold">절감량</Text>
+                  <Text className="text-red text-h3 font-bold">절감량</Text>
                 </Text>
                 <View className="items-end">
                   <Text className="text-h1 font-sf-b text-[#318643] mt-xs">
