@@ -86,7 +86,10 @@ export default function MissionScreen() {
       />
 
       {/* 규정: 페이지 맨 위 헤더 */}
-      <HeaderBar title="환경 미션" />
+      <HeaderBar
+        title="환경 미션"
+        onBack={() => router.replace("/(tabs)/home")}
+      />
 
       {/* 규정: 헤더 아래는 px-pageX 래퍼로 감싸기 */}
       <ScrollView
@@ -160,22 +163,24 @@ export default function MissionScreen() {
           setClaimInfo(null);
         }}
       >
-        <Text className="text-black text-h2 font-sf-b mb-xs text-center">
-          보상 지급 완료!
-        </Text>
-        <View className="w-full flex-row items-center justify-center">
-          <Text className="text-green font-sf-b text-h2">
-            {claimInfo?.rewardPoints ?? 0}
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b mb-xs text-center">
+            보상 지급 완료!
           </Text>
+          <View className="w-full flex-row items-center justify-center">
+            <Text className="text-green font-sf-b text-h2">
+              {claimInfo?.rewardPoints ?? 0}
+            </Text>
 
-          <Images.Ice width={28} height={28} />
+            <Images.Ice width={28} height={28} />
 
-          <Text className="text-black font-sf-b text-h2">을 받았어요.</Text>
+            <Text className="text-black font-sf-b text-h2">을 받았어요.</Text>
+          </View>
+          <View className="items-center my-3">
+            <Images.Ipa2 width={150} height={150} />
+          </View>
+          <MainButton label="확인" onPress={() => setOpen(false)} />
         </View>
-        <View className="items-center my-3">
-          <Images.Ipa2 width={150} height={150} />
-        </View>
-        <MainButton label="확인" onPress={() => setOpen(false)} />
       </Modal>
 
       {/* 하단 고정 버튼들 */}

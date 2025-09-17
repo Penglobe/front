@@ -123,11 +123,26 @@ export default function ProductDetailPage() {
           <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
             {/* 이미지 */}
             <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
+              {/* 배경: 좌우 꽉 채우기 */}
+              {imgUri && (
+                <Image
+                  source={{ uri: imgUri }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  resizeMode="cover"
+                  blurRadius={12} // iOS/안드로이드 모두 지원
+                />
+              )}
+
               {imgUri ? (
                 <Image
                   source={{ uri: imgUri }}
                   className="w-full h-full"
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
               ) : (
                 <Text className="text-gray-400">이미지 없음</Text>

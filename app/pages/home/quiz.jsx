@@ -74,25 +74,23 @@ export default function QuizPage() {
     <View className="flex-1">
       {/* 정답/오답 모달 */}
       <Modal visible={open} onClose={() => setOpen(false)}>
-        <View className="items-center">
-          <Text className="text-black text-h2 font-sf-b text-center">
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b text-center mb-xs">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text className="text-black text-h2 font-sf-b">
+          <View className="w-full flex-row items-center justify-center">
+            <Text className="text-green text-h2 font-sf-b">
               {result ? "10" : "1"}
             </Text>
-            <Images.Ice width={40} height={40} />
+            <Images.Ice width={28} height={28} />
             <Text className="text-black text-h2 font-sf-b">을 받았어요.</Text>
           </View>
-          <View className="items-center">
-            {result ? <Images.Ipa2 /> : <Images.Ipa_sad />}
+          <View className="items-center my-3">
+            {result ? (
+              <Images.Ipa2 width={150} height={150} />
+            ) : (
+              <Images.Ipa_sad width={150} height={150} />
+            )}
           </View>
         </View>
         <MainButton
@@ -109,25 +107,18 @@ export default function QuizPage() {
         visible={submittedModalOpen}
         onClose={() => setSubmittedModalOpen(false)}
       >
-        <View className="items-center">
-          <Text className="text-black text-h2 font-sf-b text-center">
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b text-center mb-xs">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          ></View>
-          <Text className="text-black text-caption font-sf-b py-xs">
+          <Text className="text-black text-h2 font-sf-b">
             오늘 퀴즈로 더 받을 수 있는 얼음은 없어요
           </Text>
-          <View className="items-center">
+          <View className="items-center my-3">
             {result ? (
-              <Images.Ipa2 width={200} height={200} />
+              <Images.Ipa2 width={150} height={150} />
             ) : (
-              <Images.Ipa_sad width={200} height={200} />
+              <Images.Ipa_sad width={150} height={150} />
             )}
           </View>
         </View>
