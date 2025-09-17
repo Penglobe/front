@@ -8,6 +8,7 @@ import CustomAlert from "@components/CustomAlert"; // CustomAlert import
 import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
 import { Images } from "@constants/Images";
+import { Pressable, Modal } from "react-native";
 
 export default function WeeklyRanking() {
   const [rankingList, setRankingList] = useState([]);
@@ -18,7 +19,7 @@ export default function WeeklyRanking() {
   const [showParticipationMessage, setShowParticipationMessage] =
     useState(false); // 메시지 표시 여부 상태
   const [showNoDataImage, setShowNoDataImage] = useState(false); // 이미지 표시 여부 상태 추가
-
+  const [isInfoModalVisible, setInfoModalVisible] = useState(false);
   const { user, isLoading: isAuthLoading } = useAuth();
 
   // CustomAlert state
@@ -132,6 +133,14 @@ export default function WeeklyRanking() {
         </LinearGradient>
       )}
 
+      {/* 정보 버튼 */}
+      {/*
+      <View className="items-end my-sm">
+        <Pressable onPress={() => setInfoModalVisible(true)}>
+          <Text className="text-black font-bold text-h2">ⓘ</Text>
+        </Pressable>
+      </View> */}
+
       {/* 랭킹 참여 조건 미달 메시지 */}
       {showParticipationMessage && (
         <View className="bg-deactivateButton p-lg mb-sm rounded-lg">
@@ -170,7 +179,12 @@ export default function WeeklyRanking() {
           {/* 10위 밖에 있을 경우 ... 및 사용자 카드 표시 */}
           {myRank && !myRankingFromTop10 && (
             <>
-              <Text className="text-center text-gray-600 my-2">...</Text>
+              <Text
+                className="text-center text-black text-bold text-body my-xs -mt-sm"
+                style={{ lineHeight: 18, fontWeight: "900" }}
+              >
+                .{"\n"}.{"\n"}.
+              </Text>
               <RankingCard
                 item={{
                   rank: myRank.rank,
@@ -184,6 +198,23 @@ export default function WeeklyRanking() {
           )}
         </ScrollView>
       )}
+      <Modal visible={isInfoModalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-2xl p-6 w-4/5 max-w-md">
+            <Text className="text-lg font-bold mb-4">주간 랭킹 안내</Text>
+            <Text className="mb-4 ">
+              주간 랭킹은 지난 주 출석을 한 사용자들을 대상으로 탄소 절감량을
+              기준으로 산정됩니다.
+            </Text>
+            <Pressable
+              onPress={() => setInfoModalVisible(false)}
+              className="bg-blue-500 p-3 rounded-md items-center"
+            >
+              <Text className="text-green font-bold">닫기</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
