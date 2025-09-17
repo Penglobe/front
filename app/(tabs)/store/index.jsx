@@ -232,14 +232,14 @@ export default function StoreListPage() {
                 <Pressable
                   key={type}
                   onPress={() => setFilterType(type)}
-                  className={`px-md py-xs rounded-xl  ${
+                  className={`px-lg py-sm rounded-xl  ${
                     filterType === type
                       ? "bg-green border-green"
                       : "bg-white border-gray-300"
                   }`}
                 >
                   <Text
-                    className={`font-sf-md ${
+                    className={`font-sf-md text-label ${
                       filterType === type ? "text-white" : "text-gray-700"
                     }`}
                   >
