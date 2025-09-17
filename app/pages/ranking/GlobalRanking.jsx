@@ -15,7 +15,6 @@ const AVATAR_MAP = {
   ProfileIce: Images.ProfileIce,
   Fish: Images.Fish,
   Polarbear: Images.Polarbear,
-  Polarbear2: Images.Polarbear2,
 };
 
 const getAvatarRenderComponent = (profileKey) => {
@@ -176,30 +175,20 @@ export default function GlobalRanking() {
     <View className="flex-1 px-pageX">
       <CustomAlert visible={alertVisible} {...alertProps} />
 
-      {/* 정보 버튼 */}
-      <View className="items-end my-sm">
-        <Pressable onPress={() => setInfoModalVisible(true)}>
+      {/* 시상대 섹션 (높이 조절) */}
+      <View className="h-48 flex-row items-end p-sm mt-xs relative">
+        {/* 정보 버튼: 우상단 고정 */}
+        <Pressable
+          onPress={() => setInfoModalVisible(true)}
+          className="absolute top-2 right-2 z-10"
+          hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+        >
           <Text className="text-black font-bold text-h2">ⓘ</Text>
         </Pressable>
-      </View>
 
-      {/* 시상대 섹션 (높이 조절) */}
-      <View className="h-48 flex-row items-end p-sm mt-xs">
-        <PodiumItem
-          ranker={ranker2}
-          height={70}
-          podiumColor="#749BF0" 
-        />
-        <PodiumItem
-          ranker={ranker1}
-          height={100}
-          podiumColor="#D64D2D" 
-        />
-        <PodiumItem
-          ranker={ranker3}
-          height={50}
-          podiumColor="#40BF58" // 3등 - 동색
-        />
+        <PodiumItem ranker={ranker2} height={70} podiumColor="#749BF0" />
+        <PodiumItem ranker={ranker1} height={100} podiumColor="#D64D2D" />
+        <PodiumItem ranker={ranker3} height={50} podiumColor="#40BF58" />
       </View>
 
       {/* 나머지 랭킹 목록 */}

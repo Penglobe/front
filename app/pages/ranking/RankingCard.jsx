@@ -8,7 +8,6 @@ const AVATAR_MAP = {
   ProfileIce: Images.ProfileIce,
   Fish: Images.Fish,
   Polarbear: Images.Polarbear,
-  Polarbear2: Images.Polarbear2,
 };
 
 const getAvatarRenderComponent = (profileKey) => {

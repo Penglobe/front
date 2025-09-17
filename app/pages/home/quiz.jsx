@@ -111,7 +111,7 @@ export default function QuizPage() {
           <Text className="text-black text-h2 font-sf-b text-center mb-xs">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
-          <Text className="text-black text-h2 font-sf-b">
+          <Text className="text-black text-caption font-sf-b">
             오늘 퀴즈로 더 받을 수 있는 얼음은 없어요
           </Text>
           <View className="items-center my-3">

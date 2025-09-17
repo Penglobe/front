@@ -217,9 +217,13 @@ export default function Home() {
             elevation: 4,
           }}
         >
-          <Text className="text-black text-body font-sf-md">
-            총 탄소 절감량
-          </Text>
+          <View className="w-full flex-row items-center justify-between">
+            <Text className="text-black text-body font-sf-md">
+              총 탄소 절감량
+            </Text>
+            <Text className="text-black text-h2 font-sf-md">{">"}</Text>
+          </View>
+
           <Text className="font-grotesk-b text-h1 text-green">
             {(Number(totalScore) || 0).toFixed(2)}
             <Text className="text-black"> kg</Text>

@@ -200,20 +200,6 @@ export default function Index() {
               </Text>
             </Pressable>
           </View>
-
-          {/* 카카오 원형 버튼 */}
-          <Pressable
-            onPress={onKakaoLogin}
-            disabled={!isReady || loading}
-            className="mt-10 self-center rounded-full items-center justify-center"
-            style={[
-              styles.kakaoBtnShadow,
-              { width: 58, height: 58, backgroundColor: "#FEE500" },
-            ]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Images.Kakao width={30} height={30} />
-          </Pressable>
         </View>
       </KeyboardAwareScrollView>
 
