@@ -6,7 +6,6 @@ import {
   View,
   Text,
   ScrollView,
-  Alert,
   Pressable,
   TouchableOpacity,
 } from "react-native";
@@ -17,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
 import Modal from "@components/Modal";
+import CustomAlert from "@components/CustomAlert";
 
 // 날짜
 function formatDate(dateObj) {
@@ -31,7 +31,7 @@ function formatDate(dateObj) {
   }
 }
 
-const fmt = (n, digits = 1) => (n == null ? "-" : Number(n).toFixed(digits));
+const fmt = (n, digits = 2) => (n == null ? "-" : Number(n).toFixed(digits));
 
 export default function DietResult() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function DietResult() {
 
   // 사진/결과
   const photoUri = ResultStore.photoUri;
-  const result = ResultStore.data;
+  const result = ResultStore.data; // (미사용이어도 유지)
 
   // 탄소 계산 결과
   const rawCarbon = ResultStore.carbon;
@@ -71,48 +71,87 @@ export default function DietResult() {
     ? "저장 중..."
     : "얼음 받기";
 
+  const [alertState, setAlertState] = React.useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: undefined,
+    onConfirm: undefined,
+    onCancel: undefined,
+  });
+
+  const openAlert = (opts) =>
+    setAlertState((s) => ({ ...s, visible: true, ...opts }));
+  const closeAlert = () =>
+    setAlertState((s) => ({
+      ...s,
+      visible: false,
+      onConfirm: undefined,
+      onCancel: undefined,
+    }));
+
   const onRightPress = () => {
     if (saving || totalKg == null || savedKg == null) return;
 
-    // 0얼음 케이스
+    // 0얼음
     if (isZeroPoint) {
-      Alert.alert(
-        "얼음 적립",
-        "이번 식사는 평균보다 배출량이 높아 0얼음 입니다.",
-        [{ text: "홈으로", onPress: () => router.push("/(tabs)/home") }]
-      );
+      openAlert({
+        title: "얼음 적립",
+        message: "이번 식사는 평균보다 배출량이 높아 0얼음 입니다.",
+        confirmText: "홈으로",
+        onConfirm: () => router.replace("/(tabs)/home"),
+      });
       return;
     }
 
-    // 소수 한 자리
-    const ice = savedKg * 100;
+    // 100g → 10얼음 = 1kg → 100얼음
+    const ice = Math.round(Number(savedKg.toFixed(2)) * 100);
 
-    Alert.alert("얼음 적립", `${ice} 얼음을 적립합니다.`, [
-      { text: "받기", onPress: () => saveDietRecord() },
-    ]);
+    openAlert({
+      title: "얼음 적립",
+      message: `${ice.toLocaleString("ko-KR")} 얼음 적립합니다.`,
+      confirmText: "받기",
+      cancelText: "취소",
+      onConfirm: async () => {
+        const ok = await saveDietRecord();
+        if (ok) router.replace("/(tabs)/home");
+      },
+    });
   };
 
   const saveDietRecord = async () => {
+    setSaving(true);
     try {
       if (!userId) {
-        Alert.alert(
-          "로그인 필요",
-          "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
-        );
-        return;
+        openAlert({
+          title: "로그인 필요",
+          message: "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.",
+          confirmText: "확인",
+        });
+        return false;
       }
+
       if (savedKg == null) {
-        Alert.alert("저장 불가", "절감량을 먼저 계산해 주세요.");
-        return;
+        openAlert({
+          title: "저장 불가",
+          message: "절감량을 먼저 계산해 주세요.",
+          confirmText: "확인",
+        });
+        return false;
       }
+
       if (savedKg <= 0) {
-        Alert.alert("저장 불가", "절감한 탄소가 0kg CO₂ 입니다.");
-        return;
+        openAlert({
+          title: "저장 불가",
+          message: "절감한 탄소가 0kg CO₂ 입니다.",
+          confirmText: "확인",
+        });
+        return false;
       }
 
-      setSaving(true);
-      const body = { co2Kg: Number(savedKg.toFixed(1)) };
-
+      // 저장 요청
+      const body = { co2Kg: Number(savedKg.toFixed(2)) };
       const res = await apiFetch("/diet/ingest/save", {
         method: "POST",
         body,
@@ -125,12 +164,14 @@ export default function DietResult() {
 
       // 유저 정보 갱신
       await refreshUser?.();
-
-      Alert.alert("저장 완료", "절감한 탄소량이 기록되었습니다.", [
-        { text: "확인", onPress: () => router.push("/(tabs)/home") },
-      ]);
-    } catch (e) {
-      Alert.alert("저장 실패", String(e?.message || e));
+      return true; // 성공
+    } catch (err) {
+      openAlert({
+        title: "오류",
+        message: err?.message ?? "저장 중 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+      return false; // 실패
     } finally {
       setSaving(false);
     }
@@ -184,7 +225,7 @@ export default function DietResult() {
                 </View>
                 <View className="items-end">
                   <Text className="text-3xl font-sf-b text-[#318643] mt-1">
-                    {fmt(savedKg, 2)} kg CO₂
+                    {fmt(savedKg)} kg CO₂
                   </Text>
                 </View>
                 {isZeroPoint && (
@@ -215,9 +256,7 @@ export default function DietResult() {
                           <Text className="font-sf-b">
                             {it.name ?? "이름 없음"}
                           </Text>
-                          <Text>
-                            {kg != null ? `${fmt(kg, 1)} kg CO₂` : "—"}
-                          </Text>
+                          <Text>{kg != null ? `${fmt(kg)} kg CO₂` : "—"}</Text>
                         </View>
                       );
                     })}
@@ -243,7 +282,7 @@ export default function DietResult() {
 
                 {/* 포인트/0포인트 */}
                 <Pressable
-                  className={`flex-1 rounded-xl items-center justify-center py-llg bg-green`}
+                  className="flex-1 rounded-xl items-center justify-center py-llg bg-green"
                   onPress={onRightPress}
                   disabled={saving || totalKg == null || savedKg == null}
                   style={({ pressed }) => [
@@ -251,7 +290,7 @@ export default function DietResult() {
                     !isZeroPoint && pressed && { backgroundColor: "#318643" },
                   ]}
                 >
-                  <Text className={`font-sf-md text-button text-white`}>
+                  <Text className="font-sf-md text-button text-white">
                     {rightLabel}
                   </Text>
                 </Pressable>
@@ -269,33 +308,40 @@ export default function DietResult() {
                 </TouchableOpacity>
               </View>
               <View className="gap-2">
-                <Text className="font-sf-b text-bodySm text-green leading-[20px]">
-                  절감량 = 한 끼 식사 탄소 배출량 - 해당 식단 탄소배출량
+                <Text className="font-sf-b text-bodySm text-green">
+                  절감량 = 표준 한 끼(1.5 kg CO₂) − 이번 식단의 총 배출량
                 </Text>
-                <Text className="text-caption text-gray-600 leading-[20px]">
-                  ※ 한국인 한 끼 식사 탄소 배출량은 약 4.5kg CO₂ 입니다.
+                <Text className="text-caption text-gray-600">
+                  ※ ‘총 배출량’은 음식 자체 + (집/배달/포장/식당) 가감 포함이며,
+                  {"\n"}표시는 소수 둘째 자리까지 반올림합니다.
                 </Text>
                 <View className="gap-4 mt-sm mb-lg">
                   <View className="flex-row items-center gap-1">
-                    <Images.House width={20} height={20} />
-                    <Text className="text-black font-sf text-label">집: </Text>
+                    <Images.Home width={20} height={20} />
+                    <Text className="text-black font-sf text-label">
+                      집: 가정 조리(한 끼당 1.19㎏) + 음식 자체 배출량
+                    </Text>
                   </View>
+
                   <View className="flex-row items-center gap-1">
                     <Images.Delivery width={20} height={20} />
                     <Text className="text-black font-sf text-label">
-                      배달:{" "}
+                      배달: 오토바이(0.137kg/km × 4km) + 일회용기(0.050kg) +
+                      음식 자체 배출량
                     </Text>
                   </View>
+
                   <View className="flex-row items-center gap-1">
                     <Images.Takeout width={20} height={20} />
                     <Text className="text-black font-sf text-label">
-                      포장(테이크아웃):
+                      포장(테이크아웃): 일회용기(0.050kg) + 음식 자체 배출량
                     </Text>
                   </View>
+
                   <View className="flex-row items-center gap-1">
                     <Images.Restaurant width={20} height={20} />
                     <Text className="text-black font-sf text-label">
-                      식당:{" "}
+                      식당: 시설·운영(한 끼당 3.43kg) + 음식 자체 배출량
                     </Text>
                   </View>
                 </View>
@@ -304,6 +350,26 @@ export default function DietResult() {
           </ScrollView>
         </View>
       </View>
+
+      <CustomAlert
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        cancelText={alertState.cancelText}
+        onConfirm={() => {
+          closeAlert();
+          alertState.onConfirm?.();
+        }}
+        onCancel={
+          alertState.onCancel
+            ? () => {
+                closeAlert();
+                alertState.onCancel?.();
+              }
+            : undefined
+        }
+      />
     </View>
   );
 }
