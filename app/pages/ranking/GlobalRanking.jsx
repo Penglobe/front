@@ -129,7 +129,7 @@ export default function GlobalRanking() {
         setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
       }
 
-              apiResponse = await apiFetch("/rankings/global"); // 업데이트된 데이터 조회
+      apiResponse = await apiFetch("/rankings/global"); // 업데이트된 데이터 조회
       if (!apiResponse.ok)
         throw new Error(`전체 랭킹 에러: ${apiResponse.status}`);
 
@@ -193,7 +193,7 @@ export default function GlobalRanking() {
 
       {/* 나머지 랭킹 목록 */}
       <View className="flex-1 pb-md">
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
           {others.map((item) => {
             const isCurrentUser = item.userId === currentUserId;
             return (

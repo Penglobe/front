@@ -105,18 +105,18 @@ export default function MissionScreen() {
             className="bg-[#D9D9D9] rounded-2xl px-md py-lg shadow-md"
             style={{ elevation: 4 }}
           >
-            <View className="flex-row items-start">
-              <Images.Notice width={18} height={20} />
-
-              <View className="flex-1 pl-sm">
-                <Text className="text-black font-sf-b text-h3 leading-[20px]">
+            <View className="gap-2">
+              <View className="flex-row items-start gap-2">
+                <Images.Information_Black width={24} height={24} />
+                <Text className="text-black font-sf-b text-h3">
                   누적 탄소 절감량을 확인하세요.
                 </Text>
-                <Text className="text-black font-sf-b text-caption leading-[20px] mt-xs">
-                  출석 미션은 매달 새로 시작됩니다.{"\n"}
-                  이전 보상을 수령해야 다음 보상이 수령가능합니다.
-                </Text>
               </View>
+
+              <Text className="text-black font-sf-b text-caption ml-2xl leading-[18px]">
+                출석 미션은 매달 새로 시작됩니다.{"\n"}
+                이전 보상을 수령해야 다음 보상이 수령가능합니다.
+              </Text>
             </View>
           </View>
 

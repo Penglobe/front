@@ -159,6 +159,7 @@ export default function WeeklyRanking() {
       ) : (
         <ScrollView
           className="flex-1 bg-white rounded-xl p-lg shadow"
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 15, flexGrow: 1 }}
         >
           {rankingList.map((item) => {

@@ -220,7 +220,7 @@ export default function PointHistory() {
       />
       <BgGradient />
       <HeaderBar
-        title="얼음 적립 내역"
+        title="얼음 내역"
         onBack={() => router.replace("/(tabs)/home")}
       />
 
@@ -259,7 +259,7 @@ export default function PointHistory() {
             style={{ backgroundColor: Colors.green }}
           >
             <Text className="text-white font-sf-md text-caption">
-              얼음 구매
+              얼음 충전
             </Text>
           </Pressable>
         </View>
