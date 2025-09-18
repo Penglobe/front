@@ -4,9 +4,11 @@ import RankingCard from "@pages/ranking/RankingCard";
 import { apiFetch, me } from "@services/authService";
 import { Images } from "@constants/Images";
 import CustomAlert from "@components/CustomAlert";
-
+import colors from "@constants/Colors.cjs";
 import LoadingScreen from "@components/LoadingScreen"; // LoadingScreen import
 import { useFocusEffect } from "@react-navigation/native"; // Import useFocusEffect
+
+const { Colors } = colors;
 
 // 아바타 관련 로직
 const AVATAR_MAP = {
@@ -129,7 +131,7 @@ export default function GlobalRanking() {
         setCurrentUserNickname(userInfo.nickname); // 닉네임 설정 다시 추가
       }
 
-              apiResponse = await apiFetch("/rankings/global"); // 업데이트된 데이터 조회
+      apiResponse = await apiFetch("/rankings/global"); // 업데이트된 데이터 조회
       if (!apiResponse.ok)
         throw new Error(`전체 랭킹 에러: ${apiResponse.status}`);
 
@@ -229,7 +231,10 @@ export default function GlobalRanking() {
       </View>
 
       <Modal visible={isInfoModalVisible} transparent animationType="fade">
-        <View className="flex-1 justify-center items-center bg-black/50">
+        <View
+          className="flex-1 justify-center items-center"
+          style={{ backgroundColor: Colors.bgblack }}
+        >
           <View className="bg-white rounded-2xl p-6 w-4/5 max-w-md">
             <Text className="text-lg font-bold mb-4">전체 랭킹 안내</Text>
             <Text className="mb-4 ">
