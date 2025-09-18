@@ -11,9 +11,7 @@ import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Logo from "@assets/images/logo/logo.svg";
-import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 import ToriFace from "@assets/images/character/tori-face.svg";
-import Ipa_gif from "@assets/images/character/ipa.gif";
 import Ipa1 from "@assets/images/character/ipa-1.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Ipa3 from "@assets/images/character/ipa-3.svg";
@@ -110,9 +108,6 @@ export const Images = {
   IpaFace,
   Logo,
   Kakao,
-  Ipa_sad,
-  ToriFace,
-  Ipa_gif,
   ToriFace,
   Ipa1,
   Ipa2,
