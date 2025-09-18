@@ -1,242 +1,223 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { View, Text, Image, ScrollView, Pressable } from "react-native";
+// app/admin/products/edit.jsx
+import { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BgGradient from "@components/BgGradient";
-import HeaderBar from "@components/HeaderBar";
 import { apiFetch } from "@services/authService";
-import { Images } from "@constants/Images";
-import MainButton from "@components/MainButton";
-import Modal from "@components/Modal";
-import Constants from "expo-constants";
-import { useAuth } from "../../../hooks/useAuth";
+import HeaderBar from "@components/HeaderBar";
+import BgGradient from "@components/BgGradient";
 import CustomAlert from "@components/CustomAlert";
 
-const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
-const BASE = (SERVER_URL || "").replace(/\/+$/, "");
-function toUri(path) {
-  if (!path) return null;
-  if (/^https?:\/\//i.test(path)) return path;
-  const rel = path.startsWith("/") ? path : `/${path}`;
-  return `${BASE}${rel}`;
-}
-
-export default function ProductDetailPage() {
+export default function ProductEdit() {
   const { id } = useLocalSearchParams();
-  const pid = Array.isArray(id) ? id[0] : id;
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [item, setItem] = useState(null);
-  const [qty, setQty] = useState(1);
-  const [confirmVisible, setConfirmVisible] = useState(false); // 구매 확인 모달 상태
-  const { user, refreshUser } = useAuth();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [asset, setAsset] = useState(null); // 새 이미지
+  const [origin, setOrigin] = useState(null); // 기존 데이터
+  const [loading, setLoading] = useState(false);
 
-  // 🔔 커스텀 알럿 상태
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
-  // "loadError" | "purchaseSuccess" | "purchaseFail" | "deleteConfirm" | "deleteSuccess" | "deleteFail"
 
-  const load = useCallback(async () => {
-    if (!pid) return;
-    try {
-      const res = await apiFetch(`/shop/products/${pid}`);
-      const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || `조회 실패(${res.status})`);
-      setItem(json?.data ?? json);
-    } catch (e) {
-      setAlertTitle("오류");
-      setAlertMessage(e?.message ?? "상품 정보를 불러올 수 없습니다.");
-      setAlertMode("loadError");
-      setAlertVisible(true);
+  // 🔹 상품 불러오기
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await apiFetch(`/shop/products/${id}`);
+        const json = await res.json();
+        setOrigin(json.data ?? json);
+        setName(json.data?.name ?? "");
+        setDescription(json.data?.description ?? "");
+        setPrice(String(json.data?.price ?? ""));
+      } catch (e) {
+        setAlertTitle("오류");
+        setAlertMessage("상품 정보를 불러올 수 없습니다.");
+        setAlertMode("fail");
+        setAlertVisible(true);
+      }
+    })();
+  }, [id]);
+
+  // 🔹 이미지 선택 + 압축
+  const pickImage = async () => {
+    let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (!perm.granted && perm.status !== "limited") {
+      perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     }
-  }, [pid, router]);
+    if (!perm.granted && perm.status !== "limited") {
+      setAlertTitle("권한 필요");
+      setAlertMessage("갤러리 접근 권한을 허용해주세요.");
+      setAlertMode("perm");
+      setAlertVisible(true);
+      return;
+    }
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  // 모달 열릴 때 보유 포인트 최신화
-  useEffect(() => {
-    if (confirmVisible) refreshUser();
-  }, [confirmVisible, refreshUser]);
-
-  const price = item?.price ?? 0;
-  const total = price * qty;
-  const totalPoint = Number(user?.totalPoint ?? 0);
-
-  const minus = () => setQty((n) => Math.max(1, n - 1));
-  const plus = () => setQty((n) => n + 1);
-
-  // 모달 열기
-  const openConfirm = () => {
-    setConfirmVisible(true);
+    const r = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.9,
+    });
+    if (!r.canceled) {
+      let picked = r.assets[0];
+      if (Platform.OS === "ios") {
+        try {
+          const compressed = await ImageManipulator.manipulateAsync(
+            picked.uri,
+            [{ resize: { width: 1024 } }],
+            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          picked = { ...picked, uri: compressed.uri };
+        } catch (e) {
+          console.warn("이미지 압축 실패:", e);
+        }
+      }
+      setAsset(picked);
+    }
   };
 
-  // 구매 처리 API
-  const handleBuy = useCallback(async () => {
+  // 🔹 수정 API
+  const onSubmit = async () => {
     try {
-      const res = await apiFetch(`/shop/orders`, {
-        method: "POST",
-        body: JSON.stringify({ productId: item.productId, qty }),
+      setLoading(true);
+
+      const fd = new FormData();
+      fd.append("name", name.trim());
+      fd.append("description", description.trim());
+      fd.append("price", String(Math.max(0, Number(price))));
+
+      if (asset) {
+        fd.append("image", {
+          uri: asset.uri,
+          name: asset.fileName ?? "image.jpg",
+          type: asset.mimeType ?? "image/jpeg",
+        });
+      }
+
+      const res = await apiFetch(`/shop/products/${id}`, {
+        method: "PUT", // 또는 PATCH (백엔드 맞춰주세요)
+        body: fd,
       });
       const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || `구매 실패(${res.status})`);
-      const data = json?.data ?? json;
+      if (!res.ok) throw new Error(json?.message || "상품 수정 실패");
 
-      setConfirmVisible(false); // 모달 닫기
-
-      setAlertTitle("구매 완료");
-      setAlertMessage(
-        `${item.name}\n사용한 얼음: ${
-          data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-        }개`
-      );
-      setAlertMode("purchaseSuccess");
+      setAlertTitle("완료");
+      setAlertMessage("상품이 수정되었습니다.");
+      setAlertMode("success");
       setAlertVisible(true);
     } catch (e) {
-      setAlertTitle("구매 실패");
-      setAlertMessage("잔액이 부족합니다.");
-      setAlertMode("purchaseFail");
-      setAlertVisible(true);
-    }
-  }, [item, qty, router]);
-
-  // 삭제 처리
-  const handleDelete = async () => {
-    try {
-      const res = await apiFetch(`/shop/products/${item.productId}`, {
-        method: "DELETE",
-      });
-      const json = await res.json().catch(() => null);
-
-      if (!res.ok) throw new Error(json?.message ?? "삭제 실패");
-
-      setAlertTitle("삭제 완료");
-      setAlertMessage("상품이 삭제되었습니다.");
-      setAlertMode("deleteSuccess");
-      setAlertVisible(true);
-    } catch (e) {
-      setAlertTitle("삭제 실패");
+      setAlertTitle("수정 실패");
       setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
-      setAlertMode("deleteFail");
+      setAlertMode("fail");
       setAlertVisible(true);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!item) {
+  if (!origin) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-gray-500">불러오는 중...</Text>
+      <View className="flex-1 items-center justify-center">
+        <Text>불러오는 중...</Text>
       </View>
     );
   }
 
-  const imgUri = toUri(item?.img);
-  const bottomGap = Math.max(insets.bottom, 16) + 76;
-
   return (
-    <View className="flex-1">
+    <KeyboardAvoidingView
+      className="flex-1 bg-white"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <BgGradient />
-      <HeaderBar title="관리자 페이지 > 상품 정보" />
+      <HeaderBar title="상품 수정" />
 
-      {/* 본문 */}
-      <View className="flex-1 px-pageX pt-md">
-        <View className="flex-row justify-between mt-xl mb-lg gap-5">
-          {/* 수정 버튼 */}
+      <ScrollView className="flex-1 px-pageX py-4">
+        <L label="상품명">
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+          />
+        </L>
+
+        <L label="설명">
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            multiline
+          />
+        </L>
+
+        <L label="가격(얼음)">
+          <TextInput
+            value={price}
+            onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
+            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+          />
+        </L>
+
+        <L label="이미지">
+          {asset ? (
+            <Image source={{ uri: asset.uri }} className="w-40 h-40 mb-md" />
+          ) : origin?.img ? (
+            <Image source={{ uri: origin.img }} className="w-40 h-40 mb-md" />
+          ) : (
+            <Text className="text-gray-500">이미지 없음</Text>
+          )}
           <Pressable
-            className="flex-1 py-4 rounded-xl bg-blue items-center justify-center opacity-90"
-            onPress={() =>
-              router.push(`/pages/admin/edit?id=${item.productId}`)
-            }
+            onPress={pickImage}
+            className="px-md py-sm bg-emerald-600 rounded-xl mt-sm"
           >
-            <Text className="text-white font-sf-b text-h4 text-center">
-              수정
-            </Text>
+            <Text className="text-white font-sf-b">이미지 변경</Text>
           </Pressable>
+        </L>
 
-          {/* 삭제 버튼 */}
-          <Pressable
-            className="flex-1 y-4 rounded-xl bg-red items-center justify-center opacity-90"
-            onPress={() => {
-              setAlertTitle("삭제 확인");
-              setAlertMessage("정말 삭제하시겠습니까?");
-              setAlertMode("deleteConfirm");
-              setAlertVisible(true);
-            }}
-          >
-            <Text className="text-white font-sf-b text-h4 text-center">
-              삭제
-            </Text>
-          </Pressable>
-        </View>
+        <Pressable
+          className="flex-1 py-4 rounded-xl bg-blue items-center justify-center opacity-90 mt-lg"
+          onPress={onSubmit}
+          disabled={loading}
+        >
+          <Text className="text-white font-sf-b text-h4 text-center">
+            {loading ? "저장 중..." : "수정"}
+          </Text>
+        </Pressable>
+      </ScrollView>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
-          <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
-            <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
-              {imgUri ? (
-                <Image
-                  source={{ uri: imgUri }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              ) : (
-                <Text className="text-gray-400">이미지 없음</Text>
-              )}
-            </View>
-
-            <View className="px-sm py-sm">
-              <Text className="font-sf-b text-h3 mb-lg text-green">
-                상품 정보
-              </Text>
-              <Text className="text-h2 font-sf-b">{item.name}</Text>
-              {!!item.description && (
-                <View className="mt-md mb-3xl">
-                  <Text className="text-body text-gray-700">
-                    {item.description}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-
-      {/* ✅ CustomAlert */}
       <CustomAlert
         visible={alertVisible}
         title={alertTitle}
         message={alertMessage}
-        confirmText={
-          alertMode === "deleteConfirm"
-            ? "삭제"
-            : alertMode === "purchaseSuccess"
-              ? "사용 내역 보기"
-              : "확인"
-        }
-        cancelText={alertMode === "deleteConfirm" ? "취소" : undefined}
+        confirmText="확인"
         onConfirm={() => {
           setAlertVisible(false);
-
-          if (alertMode === "loadError") {
-            router.back();
+          if (alertMode === "success") {
+            router.replace("/pages/admin/adminMain");
           }
-          if (alertMode === "purchaseSuccess") {
-            router.push("/pages/shop/orderlist");
-          }
-          if (alertMode === "deleteConfirm") {
-            handleDelete();
-          }
-          if (alertMode === "deleteSuccess") {
-            router.push("/pages/admin/adminMain");
-          }
-        }}
-        onCancel={() => {
-          setAlertVisible(false);
         }}
       />
+    </KeyboardAvoidingView>
+  );
+}
+
+function L({ label, children }) {
+  return (
+    <View className="mb-md">
+      <Text className="text-gray-700 mb-sm font-sf-md">{label}</Text>
+      {children}
     </View>
   );
 }

@@ -86,6 +86,10 @@
   <string>Allow $(PRODUCT_NAME) to access your location</string>
   <key>NSLocationWhenInUseUsageDescription</key>
   <string>지도에 현재 위치를 표시하기 위해 위치 권한이 필요합니다.</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+<string>사진을 선택하기 위해 사진 보관함 접근 권한이 필요합니다.</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>사진을 저장하기 위해 사진 보관함 접근 권한이 필요합니다.</string>
 
   <key>NSUserActivityTypes</key>
   <array>

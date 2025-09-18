@@ -113,7 +113,7 @@ export default function TransportFinish() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="이동 결과" showBack onBack={goHome} />
+      <HeaderBar title="펭걸음 결과" showBack onBack={goHome} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

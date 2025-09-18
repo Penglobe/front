@@ -10,13 +10,14 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import CustomAlert from "@components/CustomAlert";
 
-export default function newDonation() {
+export default function NewDonation() {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -31,13 +32,9 @@ export default function newDonation() {
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
-  // "permError" | "inputError" | "success" | "fail"
 
   const pickImage = async () => {
-    // 현재 권한 확인
     let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
-
-    // 아직 결정 안 됐으면 요청
     if (!perm.granted && perm.status !== "limited") {
       perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     }
@@ -49,11 +46,30 @@ export default function newDonation() {
       setAlertVisible(true);
       return;
     }
+
     const r = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
     });
-    if (!r.canceled) setAsset(r.assets[0]);
+
+    if (!r.canceled) {
+      let picked = r.assets[0];
+
+      if (Platform.OS === "ios") {
+        try {
+          const compressed = await ImageManipulator.manipulateAsync(
+            picked.uri,
+            [{ resize: { width: 1024 } }],
+            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          picked = { ...picked, uri: compressed.uri };
+        } catch (e) {
+          console.warn("이미지 압축 실패:", e);
+        }
+      }
+
+      setAsset(picked);
+    }
   };
 
   const onSubmit = async () => {
@@ -67,6 +83,7 @@ export default function newDonation() {
       }
 
       setLoading(true);
+
       const fd = new FormData();
       fd.append("name", name.trim());
       fd.append("description", description.trim());
@@ -80,8 +97,18 @@ export default function newDonation() {
         method: "POST",
         body: fd,
       });
+
       const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || "기부 등록 실패");
+      if (!res.ok) {
+        console.error("❌ Donation API error:", {
+          status: res.status,
+          statusText: res.statusText,
+          body: json,
+        });
+        throw new Error(
+          json?.message || `기부 등록 실패 (status ${res.status})`
+        );
+      }
 
       setAlertTitle("완료");
       setAlertMessage("기부가 생성되었습니다.");
@@ -103,7 +130,6 @@ export default function newDonation() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <BgGradient />
-      {/* 헤더 */}
       <HeaderBar title="기부 등록" />
 
       <ScrollView
@@ -171,7 +197,6 @@ export default function newDonation() {
         )}
       </ScrollView>
 
-      {/* ✅ CustomAlert */}
       <CustomAlert
         visible={alertVisible}
         title={alertTitle}

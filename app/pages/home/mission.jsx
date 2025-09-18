@@ -86,10 +86,7 @@ export default function MissionScreen() {
       />
 
       {/* 규정: 페이지 맨 위 헤더 */}
-      <HeaderBar
-        title="환경 미션"
-        onBack={() => router.replace("/(tabs)/home")}
-      />
+      <HeaderBar title="미션" onBack={() => router.replace("/(tabs)/home")} />
 
       {/* 규정: 헤더 아래는 px-pageX 래퍼로 감싸기 */}
       <ScrollView
@@ -123,7 +120,7 @@ export default function MissionScreen() {
           {/* 환경걸음 */}
           {windows?.WALK_CO2_KG && (
             <MissionSection
-              title="환경걸음 탄소절감량"
+              title="펭걸음 탄소절감량"
               icon={<Images.Walk width={40} height={40} />}
               slots={windows.WALK_CO2_KG}
               onClaim={onClaim}
@@ -133,7 +130,7 @@ export default function MissionScreen() {
           {/* 식단 */}
           {windows?.DIET_CO2_KG && (
             <MissionSection
-              title="식단 탄소절감량"
+              title="빙하 식탁 탄소절감량"
               icon={<Images.Diet width={40} height={40} />}
               slots={windows.DIET_CO2_KG}
               onClaim={onClaim}

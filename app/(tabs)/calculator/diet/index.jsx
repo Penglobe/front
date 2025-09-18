@@ -62,7 +62,7 @@ export default function Diet() {
     } catch (e) {
       openAlert({
         title: "오류",
-        message: "식단 횟수 조회에 실패했습니다. 다시 시도해 주세요.",
+        message: "빙하 식탁 횟수 조회에 실패했습니다. 다시 시도해 주세요.",
       });
       console.error(e);
     }
@@ -71,7 +71,7 @@ export default function Diet() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="식단 측정" />
+      <HeaderBar title="빙하 식탁" />
       <View className="flex-1 px-pageX pt-2xl">
         <Text className="font-sf-b text-green text-h1 leading-[32px]">
           식사 사진을 올리면, {"\n"}이번 한 끼로 탄소를 얼마나{"\n"}절감했는지

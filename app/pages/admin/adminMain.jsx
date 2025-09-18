@@ -37,7 +37,7 @@ export default function AdminMain() {
 
         {/* 로고 */}
         <View className="items-center mb-4xl">
-          <Images.Logo width={240} height={240} />
+          <Images.Ipa_Admin width={240} height={240} />
         </View>
 
         {/* 상품 등록 버튼 */}

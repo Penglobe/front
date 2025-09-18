@@ -1,3 +1,4 @@
+// app/admin/products/edit.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -43,8 +44,8 @@ export default function ProductEditPage() {
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
-  // "loadError" | "saveSuccess" | "saveFail"
 
+  // 상품 불러오기
   const load = useCallback(async () => {
     if (!id) return;
     try {
@@ -54,6 +55,7 @@ export default function ProductEditPage() {
       if (!res.ok)
         throw new Error(result?.message || `조회 실패(${res.status})`);
       const data = result?.data ?? result;
+
       setItem(data);
       setName(data.name || "");
       setPrice(data.price?.toString() || "");
@@ -71,6 +73,7 @@ export default function ProductEditPage() {
     load();
   }, [load]);
 
+  // 이미지 선택
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -82,28 +85,40 @@ export default function ProductEditPage() {
     }
   };
 
+  // 안전한 mime 추출 함수
+  const getMimeType = (file) => {
+    if (file.mimeType) return file.mimeType;
+    const ext = (file.fileName || file.uri).split(".").pop().toLowerCase();
+    if (ext === "png") return "image/png";
+    if (ext === "heic" || ext === "heif") return "image/heic";
+    return "image/jpeg"; // 기본 fallback
+  };
+
+  // 저장
   const handleSave = async () => {
     try {
       const formData = new FormData();
       formData.append("name", name);
-      if (description) formData.append("description", description);
+      formData.append("description", description);
+      formData.append("price", price);
+
       if (image) {
         formData.append("image", {
           uri: image.uri,
-          type: "image/jpeg",
+          type: "image/jpeg", // mimeType 지정
           name: "upload.jpg",
         });
       }
 
+      // res 받아오기
       const res = await apiFetch(`/shop/products/${id}`, {
         method: "PUT",
         body: formData,
+        headers: {}, // Content-Type은 비워둬야 RN이 자동 설정
       });
 
-      if (!res.ok) {
-        const json = await res.json().catch(() => null);
-        throw new Error(json?.message || "수정 실패");
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || "수정 실패");
 
       // 성공
       setAlertTitle("수정 완료");

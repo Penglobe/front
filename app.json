@@ -94,7 +94,7 @@
     ],
     "extra": {
       "router": {},
-      "SERVER_URL": "https://penglobe.shinhanacademy.co.kr",
+      "SERVER_URL": "http://192.168.45.94:8080",
       "eas": {
         "projectId": "315ea738-4d43-4580-9823-38af233c0afb"
       }

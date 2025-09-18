@@ -110,7 +110,7 @@ export default function TransportStart() {
           paddingBottom: 150,
         }}
       >
-        <HeaderBar title="환경 걸음" className="px-pageX" />
+        <HeaderBar title="펭걸음" className="px-pageX" />
 
         {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
         <ScrollView

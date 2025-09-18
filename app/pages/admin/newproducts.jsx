@@ -11,6 +11,7 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
@@ -36,13 +37,10 @@ export default function ProductNew() {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertMode, setAlertMode] = useState(null); // "perm", "input", "success", "fail"
+  const [alertMode, setAlertMode] = useState(null);
 
   const pickImage = async () => {
-    // 현재 권한 확인
     let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
-
-    // 아직 결정 안 됐으면 요청
     if (!perm.granted && perm.status !== "limited") {
       perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     }
@@ -50,15 +48,34 @@ export default function ProductNew() {
     if (!perm.granted && perm.status !== "limited") {
       setAlertTitle("권한 필요");
       setAlertMessage("갤러리 접근 권한을 허용해주세요.");
-      setAlertMode("permError");
+      setAlertMode("perm");
       setAlertVisible(true);
       return;
     }
+
     const r = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
     });
-    if (!r.canceled) setAsset(r.assets[0]);
+
+    if (!r.canceled) {
+      let picked = r.assets[0];
+
+      if (Platform.OS === "ios") {
+        try {
+          const compressed = await ImageManipulator.manipulateAsync(
+            picked.uri,
+            [{ resize: { width: 1024 } }],
+            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          picked = { ...picked, uri: compressed.uri };
+        } catch (e) {
+          console.warn("이미지 압축 실패:", e);
+        }
+      }
+
+      setAsset(picked);
+    }
   };
 
   const onSubmit = async () => {
@@ -75,14 +92,13 @@ export default function ProductNew() {
       const fd = new FormData();
       fd.append("name", name.trim());
       fd.append("description", description.trim());
-      fd.append("price", String(Math.max(0, Number(price)))); // 음수 방지
+      fd.append("price", String(Math.max(0, Number(price))));
       fd.append("image", {
         uri: asset.uri,
         name: asset.fileName ?? "image.jpg",
         type: asset.mimeType ?? "image/jpeg",
       });
 
-      // ⚠️ apiFetch가 FormData면 Content-Type 자동 처리
       const res = await apiFetch("/shop/products", {
         method: "POST",
         body: fd,
@@ -188,7 +204,6 @@ export default function ProductNew() {
         )}
       </ScrollView>
 
-      {/* ✅ CustomAlert */}
       <CustomAlert
         visible={alertVisible}
         title={alertTitle}
