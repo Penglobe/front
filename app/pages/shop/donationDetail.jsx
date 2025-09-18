@@ -16,7 +16,7 @@ import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
 import Modal from "@components/Modal";
 import Constants from "expo-constants";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuth } from "@hooks/useAuth";
 import CustomAlert from "@components/CustomAlert";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
@@ -38,6 +38,7 @@ export default function ProductDetailPage() {
   const [qty, setQty] = useState(0);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const { user, refreshUser } = useAuth();
+  const closeConfirm = () => setConfirmVisible(false);
 
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -77,7 +78,15 @@ export default function ProductDetailPage() {
   const openConfirm = () => {
     if (qty < 100) {
       setAlertTitle("최소 기부금 안내");
-      setAlertMessage("기부금은 최소 100얼음 이상이어야 합니다.");
+      setAlertMessage(
+        <Text>
+          기부금은{" "}
+          <Text style={{ color: "green", fontWeight: "bold" }}>
+            최소 100얼음
+          </Text>{" "}
+          입니다.
+        </Text>
+      );
       setAlertMode("minAmount");
       setAlertVisible(true);
       return; // 100 미만이면 모달 열지 않음
@@ -100,9 +109,16 @@ export default function ProductDetailPage() {
 
       setAlertTitle("기부 완료");
       setAlertMessage(
-        `${item.name}\n사용한 얼음: ${
-          data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0
-        }얼음\n\n당신의 기부가 지구를 지키는 큰 힘이 됩니다!`
+        <Text>
+          {item.name}
+          {"\n"}
+          사용한 얼음:{" "}
+          <Text className="text-green text-body font-sf-b">
+            {data?.totalPoints?.toLocaleString?.() ?? data?.totalPoints ?? 0}
+            얼음
+          </Text>
+          {"\n\n"}당신의 기부가 지구를 지키는 큰 힘이 됩니다!
+        </Text>
       );
       setAlertMode("donateSuccess");
       setAlertVisible(true);
@@ -141,20 +157,20 @@ export default function ProductDetailPage() {
         <View className="flex-1 pt-md px-pageX">
           <View className="bg-white rounded-2xl pt-md pb-llg px-md">
             {/* 이미지 */}
-            <View className="w-full h-[220px] rounded-2xl bg-gray items-center justify-center overflow-hidden">
+            <View className="w-full h-[320px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
               {imgUri ? (
                 <Image
                   source={{ uri: imgUri }}
                   className="w-full h-full"
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
               ) : (
                 <Text className="text-gray-400">이미지 없음</Text>
               )}
             </View>
 
-            <View className="py-sm">
-              <Text className="font-sf-b text-h3 text-green">기부명</Text>
+            <View className="py-md gap-2 px-xs">
+              <Text className="font-sf-b text-h4 text-green">기부명</Text>
               <Text className="text-h2 font-sf-b">{item.name}</Text>
 
               {!!item.description && (
@@ -163,7 +179,7 @@ export default function ProductDetailPage() {
                 </Text>
               )}
 
-              <Text className="font-sf-b text-h3 text-green">
+              <Text className="font-sf-b text-h4 text-green mt-3xl">
                 기부금 (얼음)
               </Text>
 
@@ -188,12 +204,12 @@ export default function ProductDetailPage() {
                 />
               </View>
 
-              <View className="flex-row items-center self-end">
+              <View className="flex-row items-center self-end mt-md mb-md">
                 <Text className="text-green font-sf-b text-h1">{qty}</Text>
                 <Images.Ice width={35} height={35} />
               </View>
             </View>
-            <MainButton label="다음" onPress={openConfirm} />
+            <MainButton label="기부하기" onPress={openConfirm} />
           </View>
         </View>
       </ScrollView>
@@ -201,78 +217,83 @@ export default function ProductDetailPage() {
       {/* 구매 확인 모달 */}
       <Modal visible={confirmVisible}>
         <View className="mb-4">
-          <Text className="text-black text-h1 font-sf-b mb-md text-center">
+          <Text className="text-black text-h3 font-sf-b mb-md text-center">
             기부 결제 확인
           </Text>
+
+          <View className="gap-lg">
+            {/* 구매 상품 */}
+            <View className="justify-between flex-row">
+              <Text className="text-black font-sf-sb text-h4">기부명</Text>
+              <Text
+                className="text-h4 font-sf-b text-green"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.name}
+              </Text>
+            </View>
+
+            {/* 기부 포인트 */}
+            <View className="justify-between flex-row">
+              <Text className="text-black font-sf-sb text-h4">
+                기부금(얼음)
+              </Text>
+              <View className="flex-row gap-1">
+                <Text
+                  className="text-h4 font-sf-b text-green"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {qty}
+                </Text>
+                <Images.Ice width={22} height={22} />
+              </View>
+            </View>
+
+            {/* 현재 보유 얼음 */}
+            <View className="justify-between flex-row">
+              <Text className="text-black font-sf-sb text-h4">
+                현재 보유 얼음
+              </Text>
+              <View className="flex-row gap-1">
+                <Text
+                  className="text-h4 font-sf-b text-green"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {totalPoint.toLocaleString()}
+                </Text>
+                <Images.Ice width={22} height={22} />
+              </View>
+            </View>
+
+            {totalPoint < qty && (
+              <Text className="text-red w-full text-label text-right mb-md">
+                보유 얼음이 부족합니다.
+              </Text>
+            )}
+          </View>
+        </View>
+
+        <View className="flex-row gap-4">
           <Pressable
-            onPress={() => setConfirmVisible(false)}
-            className="absolute right-[10px] top-0 p-0.5"
+            onPress={closeConfirm}
+            className="flex-1 rounded-xl items-center justify-center py-llg bg-darkGray"
           >
-            <Text className="text-h1 text-gray-400">✕</Text>
+            <Text className="text-white font-sf-md">취소</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleBuy}
+            disabled={totalPoint < qty}
+            className={`flex-1 rounded-xl items-center justify-center py-llg bg-green active:bg-emerald-700 ${
+              totalPoint < qty ? "opacity-60" : ""
+            }`}
+          >
+            <Text className="text-white font-sf-md">기부하기</Text>
           </Pressable>
         </View>
-
-        {/* 구매 상품 */}
-        <View className="flex-row items-center mb-lg min-h-[28px]">
-          <Text className="w-[112px] text-black font-sf-sb text-h3">
-            기부명
-          </Text>
-          <View className="flex-1 flex-row items-center justify-end">
-            <Text
-              className="text-h3 font-sf-b text-green leading-[22px]"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {item.name}
-            </Text>
-          </View>
-        </View>
-
-        {/* 기부 포인트 */}
-        <View className="flex-row items-center mb-5 min-h-[28px]">
-          <Text className="w-[112px] text-black font-sf-sb text-h3">
-            기부금(포인트)
-          </Text>
-          <View className="flex-1 flex-row items-center justify-end">
-            <Text className="text-h3 font-sf-b text-green leading-[22px]">
-              {qty}
-            </Text>
-            <Images.Ice width={22} height={22} />
-          </View>
-        </View>
-
-        {/* 현재 보유 얼음 */}
-        <View
-          className={`flex-row items-center ${
-            totalPoint < qty ? "mb-1" : "mb-5"
-          }`}
-        >
-          <Text className="w-[112px] text-black font-sf-sb text-h3">
-            현재 보유 얼음
-          </Text>
-          <View className="flex-1 flex-row items-center justify-end">
-            <Text className="text-h3 font-sf-b text-green leading-[22px]">
-              {totalPoint.toLocaleString()}
-            </Text>
-            <Images.Ice width={22} height={22} />
-          </View>
-        </View>
-
-        {totalPoint < qty && (
-          <Text className="text-rose-600 w-full text-right mb-md">
-            잔액이 부족합니다.
-          </Text>
-        )}
-
-        <MainButton
-          onPress={handleBuy}
-          disabled={totalPoint < qty}
-          className={totalPoint < qty ? "opacity-60" : ""}
-        >
-          <View className="flex-row items-center">
-            <Text className="text-white font-sf-b ml-2 text-h4">결제하기</Text>
-          </View>
-        </MainButton>
       </Modal>
 
       <CustomAlert
