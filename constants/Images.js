@@ -55,6 +55,7 @@ import Delivery from "@assets/icons/delivery.svg";
 import Takeout from "@assets/icons/takeout.svg";
 import Restaurant from "@assets/icons/restaurant.svg";
 import Information from "@assets/icons/information.svg";
+import Arrow from "@assets/icons/arrow.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -138,4 +139,5 @@ export const Images = {
   IpaWalk,
   ToriWalk,
   IpaToriNoData,
+  Arrow,
 };

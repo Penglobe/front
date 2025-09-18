@@ -115,7 +115,7 @@ export default function Index() {
       />
 
       {/* 로고 */}
-      <View className="items-center mt-[40%] mb-[6%]">
+      <View className="items-center mt-[50%] mb-[6%]">
         <Images.Logo width={LOGO_SIZE} height={LOGO_SIZE} />
       </View>
 

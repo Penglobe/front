@@ -221,7 +221,7 @@ export default function Home() {
             <Text className="text-black text-body font-sf-md">
               총 탄소 절감량
             </Text>
-            <Text className="text-black text-h2 font-sf-md">{">"}</Text>
+            <Images.Arrow width={28} height={28} />
           </View>
 
           <Text className="font-grotesk-b text-h1 text-green">
