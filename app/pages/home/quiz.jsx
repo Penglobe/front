@@ -89,7 +89,7 @@ export default function QuizPage() {
             {result ? (
               <Images.Ipa2 width={150} height={150} />
             ) : (
-              <Images.Ipa_sad width={150} height={150} />
+              <Images.Ipa1 width={150} height={150} />
             )}
           </View>
         </View>
@@ -118,7 +118,7 @@ export default function QuizPage() {
             {result ? (
               <Images.Ipa2 width={150} height={150} />
             ) : (
-              <Images.Ipa_sad width={150} height={150} />
+              <Images.Ipa1 width={150} height={150} />
             )}
           </View>
         </View>
