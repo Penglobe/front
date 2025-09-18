@@ -220,6 +220,7 @@ export default function TransportBookmark() {
               <ActivityIndicator className="mt-3" />
             ) : (
               <FlatList
+                showsVerticalScrollIndicator={false}
                 data={searchResults}
                 keyExtractor={(item, idx) =>
                   item.id || `s-${item.x}-${item.y}-${idx}`
@@ -258,6 +259,7 @@ export default function TransportBookmark() {
 
         <FlatList
           data={bookmarks}
+          showsVerticalScrollIndicator={false}
           keyExtractor={(item) => "b-" + item.bookmarkId}
           renderItem={({ item }) => (
             <PlaceCard

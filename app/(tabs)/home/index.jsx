@@ -171,7 +171,7 @@ export default function Home() {
       <View className="mt-6xl px-pageX flex-row justify-between">
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
-          className="flex-row items-center justify-between bg-blue rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
+          className="min-w-[100px] flex-row items-center justify-between bg-blue rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
@@ -188,7 +188,7 @@ export default function Home() {
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
-          className="flex-row items-center justify-between bg-green rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
+          className="min-w-[100px] flex-row items-center justify-between bg-green rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },

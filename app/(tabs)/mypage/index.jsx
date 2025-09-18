@@ -129,7 +129,7 @@ export default function MyPage() {
     } catch {
       showAlert({
         title: "오류",
-        message: "마이페이지 정보를 불러오는 중 오류가 발생했습니다.",
+        message: "내 정보를 불러오는 중 오류가 발생했습니다.",
       });
     } finally {
       // 로딩 최소 노출
@@ -282,7 +282,7 @@ export default function MyPage() {
     return (
       <View className="flex-1">
         <BgGradient />
-        <LoadingScreen message="마이페이지 정보를 불러오는 중..." />
+        <LoadingScreen message="내 정보를 불러오는 중..." />
       </View>
     );
   }
@@ -290,7 +290,7 @@ export default function MyPage() {
   if (!myPageInfo) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text>마이페이지 정보를 불러오지 못했습니다.</Text>
+        <Text>내 정보를 불러오지 못했습니다.</Text>
       </View>
     );
   }
@@ -312,7 +312,7 @@ export default function MyPage() {
       <CustomAlert visible={alertVisible} {...alertProps} />
 
       <View className="absolute inset-0 pb-[150px]">
-        <HeaderBar title="마이페이지" />
+        <HeaderBar title="내 정보" />
 
         <ScrollView
           showsVerticalScrollIndicator={false}

@@ -195,7 +195,7 @@ export default function GlobalRanking() {
 
       {/* 나머지 랭킹 목록 */}
       <View className="flex-1 pb-md">
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
           {others.map((item) => {
             const isCurrentUser = item.userId === currentUserId;
             return (

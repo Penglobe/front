@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ipa from "@assets/images/character/ipa-face.svg";
 import IpaTori from "@assets/images/character/ipa-tori-1.svg";
 import Ice from "@assets/icons/ice.svg";
+import { Images } from "@constants/Images";
 
 export default function TransportFinish() {
   const router = useRouter();
@@ -114,7 +115,10 @@ export default function TransportFinish() {
       <BgGradient />
       <HeaderBar title="이동 결과" showBack onBack={goHome} />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 50 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 50 }}
+      >
         <View className="flex-1 px-pageX">
           <View className="flex-row items-center mb-5 mt-5">
             {Number(points) > 0 ? (
@@ -160,7 +164,7 @@ export default function TransportFinish() {
             <View className="flex-row items-center justify-between">
               <Text className="font-sf-md text-lg">탄소 절감량</Text>
               <TouchableOpacity onPress={() => setShowInfo(true)}>
-                <Text className="text-gray-400 text-2xl">ⓘ</Text>
+                <Images.Information width={28} height={28} />
               </TouchableOpacity>
             </View>
             <View className="items-end">
@@ -183,7 +187,7 @@ export default function TransportFinish() {
         </View>
 
         <Modal visible={showInfo} transparent animationType="fade">
-          <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="flex-1 justify-center items-center bg-bgblack opacitiy-0.6">
             <View className="bg-white rounded-xl p-5 w-4/5">
               <Text className="text-base font-sf-b mb-2">계산 기준</Text>
               <Text className="text-sm text-gray-600 leading-5">

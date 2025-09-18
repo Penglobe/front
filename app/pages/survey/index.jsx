@@ -10,6 +10,7 @@ import { apiFetch } from "@services/authService";
 import CustomAlert from "@components/CustomAlert";
 import LoadingScreen from "@components/LoadingScreen";
 import { Stack } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Survey() {
   const router = useRouter(); // 페이지 이동용
@@ -18,6 +19,8 @@ export default function Survey() {
   const [firstUnanswered, setFirstUnanswered] = useState(null); // 제출 시 답 안 한 문항 id
   const { user } = useAuth(); // 로그인 사용자 정보
   const [loading, setLoading] = useState(true); // 질문 가져오는 중
+
+  const insets = useSafeAreaInsets();
 
   // 🔔 CustomAlert 상태
   const [alertVisible, setAlertVisible] = useState(false);
@@ -159,6 +162,8 @@ export default function Survey() {
     }
   };
 
+  const bottomGap = Math.max(insets.bottom, 16) + 24;
+
   return (
     <>
       <Stack.Screen
@@ -169,14 +174,19 @@ export default function Survey() {
         title="빙하 리포트"
         onBack={() => router.replace("/(tabs)/home")}
       />
-      <ScrollView className="flex-1 bg-gray-100" ref={scrollRef}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: bottomGap }}
+        className="flex-1 bg-gray-100"
+        ref={scrollRef}
+      >
         <View className="px-pageX">
           <View>
             {/* 타이틀 */}
             <View className="px-sm w-full flex-row items-start justify-between">
               {/* 왼쪽 텍스트 블록 */}
               <View className="flex-1 pr-sm pt-llg">
-                <Text className="text-red text-h4 font-sf-b">
+                <Text className="text-red text-body font-sf-b">
                   내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은 습관을
                   만들어봐요.
                 </Text>

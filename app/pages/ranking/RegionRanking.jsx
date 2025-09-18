@@ -5,10 +5,18 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { View, Text, ScrollView, FlatList } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import RankingCard from "@pages/ranking/RankingCard";
-import Svg, { Path, G, Text as SvgText, Rect } from "react-native-svg";
+import Svg, { G, Text as SvgText, Rect, Path } from "react-native-svg";
 import geojson from "@assets/map/krmap.json";
+import Animated, {
+  useSharedValue,
+  useAnimatedProps,
+  withSpring,
+} from "react-native-reanimated";
+
+// Path를 Animated 컴포넌트로 감쌈
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 export default function RegionRanking({
   selectedRegion,
@@ -18,7 +26,7 @@ export default function RegionRanking({
   const scrollViewRef = useRef(null);
   const [mapLayout, setMapLayout] = useState(null);
 
-  // 지도 데이터 계산
+  // === 지도 데이터 계산 ===
   const mapData = useMemo(() => {
     if (!mapLayout) return null;
 
@@ -146,7 +154,6 @@ export default function RegionRanking({
   }, [mapLayout]);
 
   const onScrollToIndexFailed = (info) => {
-    // FlatList의 일반적인 버그에 대한 해결 방법
     const wait = new Promise((resolve) => setTimeout(resolve, 100));
     wait.then(() => {
       if (rankingData.length > info.index) {
@@ -159,21 +166,16 @@ export default function RegionRanking({
     });
   };
 
-  // 카드로 스크롤
   const scrollToRegion = (regionName) => {
-    if (!scrollViewRef.current) {
-      return;
-    }
-
+    if (!scrollViewRef.current) return;
     const index = rankingData.findIndex(
       (item) => item.regionName === regionName
     );
-
     if (index !== -1) {
       scrollViewRef.current.scrollToIndex({
         index,
         animated: true,
-        viewPosition: 0.5, // 0: 상단, 0.5: 중앙, 1: 하단
+        viewPosition: 0.5,
       });
     }
   };
@@ -183,10 +185,40 @@ export default function RegionRanking({
     scrollToRegion(title);
   };
 
-  // 초기 선택 지역 자동 스크롤
   useEffect(() => {
     if (selectedRegion) scrollToRegion(selectedRegion);
   }, [selectedRegion, rankingData]);
+
+  // === 개별 지역 Path 컴포넌트 (애니메이션 포함) ===
+  const RegionPath = ({ d, isSelected, title }) => {
+    const scale = useSharedValue(1);
+
+    const animatedProps = useAnimatedProps(() => {
+      return {
+        transform: [{ scale: scale.value }],
+      };
+    });
+
+    const onPressIn = () => {
+      scale.value = withSpring(1.05, { damping: 4 }); // 클릭 시 확대
+      handleRegionPress(title);
+    };
+    const onPressOut = () => {
+      scale.value = withSpring(1, { damping: 4 }); // 원래 크기 복귀
+    };
+
+    return (
+      <AnimatedPath
+        d={d}
+        animatedProps={animatedProps}
+        fill={isSelected ? "#4599C2" : "#e4f4f7ff"}
+        stroke="gray"
+        strokeWidth={0.5}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+      />
+    );
+  };
 
   return (
     <View className="px-pageX" style={{ flex: 1 }}>
@@ -214,18 +246,19 @@ export default function RegionRanking({
                         polygon[0]
                           .map(
                             ([x, y]) =>
-                              `${x * mapData.mainScale + mapData.mainOffsetX},${mapData.mapContainerHeight - (y * mapData.mainScale + mapData.mainOffsetY)}`
+                              `${x * mapData.mainScale + mapData.mainOffsetX},${
+                                mapData.mapContainerHeight -
+                                (y * mapData.mainScale + mapData.mainOffsetY)
+                              }`
                           )
                           .join("L") +
                         "Z";
                       return (
-                        <Path
+                        <RegionPath
                           key={p_idx}
                           d={d}
-                          fill={isSelected ? "green" : "white"}
-                          stroke="darkgray"
-                          strokeWidth={0.5}
-                          onPressIn={() => handleRegionPress(title)}
+                          isSelected={isSelected}
+                          title={title}
                         />
                       );
                     })}
@@ -259,18 +292,18 @@ export default function RegionRanking({
                     polygon[0]
                       .map(
                         ([x, y]) =>
-                          `${x * mapData.jejuScale + mapData.jejuOffsetX},${mapData.jejuOffsetY - y * mapData.jejuScale}`
+                          `${x * mapData.jejuScale + mapData.jejuOffsetX},${
+                            mapData.jejuOffsetY - y * mapData.jejuScale
+                          }`
                       )
                       .join("L") +
                     "Z";
                   return (
-                    <Path
+                    <RegionPath
                       key={p_idx}
                       d={d}
-                      fill={isSelected ? "green" : "white"}
-                      stroke="#333"
-                      strokeWidth={0.5}
-                      onPressIn={() => handleRegionPress(title)}
+                      isSelected={isSelected}
+                      title={title}
                     />
                   );
                 });
@@ -285,10 +318,8 @@ export default function RegionRanking({
                 textAnchor="middle"
                 alignmentBaseline="middle"
                 fontSize={16}
-                fontWeight="bold"
-                fill="white"
-                stroke="black"
-                strokeWidth={0.5}
+                font={"SFPro-Bold"}
+                fill="#3D4D53"
               >
                 {selectedRegion}
               </SvgText>
@@ -299,37 +330,29 @@ export default function RegionRanking({
 
       {/* 카드 리스트 */}
       <View style={{ flex: 1, paddingHorizontal: 10, marginTop: 10 }}>
-        <Text
-          style={{
-            textAlign: "center",
-            color: "green",
-            fontWeight: "bold",
-            marginBottom: 8,
-          }}
-        >
-          지역별 탄소 절감량 랭킹
-        </Text>
+        <View className="items-center mb-md">
+          <Text className="font-sf-b text-green">지역별 탄소 절감량 랭킹</Text>
+        </View>
         <FlatList
           style={{ flex: 1 }}
           ref={scrollViewRef}
           data={rankingData}
           keyExtractor={(item) => item.rank + item.regionName}
           onScrollToIndexFailed={onScrollToIndexFailed}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => {
             const isProminent = item.regionName === selectedRegion;
             return (
-              <View>
-                <RankingCard
-                  item={{
-                    rank: item.rank,
-                    nickname: item.regionName,
-                    score: item.totalCo2,
-                  }}
-                  isProminent={isProminent}
-                  onPress={() => handleRegionPress(item.regionName)}
-                />
-              </View>
+              <RankingCard
+                item={{
+                  rank: item.rank,
+                  nickname: item.regionName,
+                  score: item.totalCo2,
+                }}
+                isProminent={isProminent}
+                onPress={() => handleRegionPress(item.regionName)}
+              />
             );
           }}
         />

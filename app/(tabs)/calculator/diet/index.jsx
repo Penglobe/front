@@ -87,7 +87,7 @@ export default function Diet() {
         </Pressable>
 
         <View className="items-center justify-center">
-          <Images.Ipa_Tori_diet className="mb-sm" width={320} height={260} />
+          <Images.Ipa_Tori_diet width={320} height={260} />
         </View>
       </View>
 
