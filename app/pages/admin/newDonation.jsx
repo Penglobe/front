@@ -34,8 +34,15 @@ export default function newDonation() {
   // "permError" | "inputError" | "success" | "fail"
 
   const pickImage = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
+    // 현재 권한 확인
+    let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
+
+    // 아직 결정 안 됐으면 요청
+    if (!perm.granted && perm.status !== "limited") {
+      perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    }
+
+    if (!perm.granted && perm.status !== "limited") {
       setAlertTitle("권한 필요");
       setAlertMessage("갤러리 접근 권한을 허용해주세요.");
       setAlertMode("permError");
