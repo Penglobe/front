@@ -73,7 +73,7 @@ export default function Diet() {
       <BgGradient />
       <HeaderBar title="빙하 식탁" />
       <View className="flex-1 px-pageX pt-2xl">
-        <Text className="font-sf-b text-black text-h1 leading-[32px]">
+        <Text className="font-sf-b text-green text-h1 leading-[32px]">
           식사 사진을 올리면, {"\n"}이번 한 끼로 탄소를 얼마나{"\n"}절감했는지
           알려드려요!
         </Text>

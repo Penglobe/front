@@ -66,7 +66,11 @@ export default function SurveyResult() {
       {/* 헤더 */}
       <HeaderBar title="빙하 리포트" />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      >
         <View className="px-pageX gap-4">
           <View className="flex-row items-center mt-llg">
             <Images.ToriFace width={40} height={40} />
