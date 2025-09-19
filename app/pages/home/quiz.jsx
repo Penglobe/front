@@ -97,7 +97,7 @@ export default function QuizPage() {
           label="확인"
           onPress={() => {
             setOpen(false);
-            router.push("/(tabs)/home");
+            router.replace("/(tabs)/home");
           }}
         />
       </Modal>
