@@ -39,7 +39,7 @@ const Co2Chart = () => {
         data: userCo2,
         color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
         strokeWidth: 3,
-        label: "나의 평균 CO₂",
+        label: "나의 평균 절감량",
       },
       {
         data: totalCo2,
@@ -48,7 +48,7 @@ const Co2Chart = () => {
         label: "전체 사용자 평균 CO₂",
       },
     ],
-    legend: ["나의 평균 CO₂", "전체 사용자 평균CO₂"],
+    legend: ["나의 평균 절감량", "전체 사용자 평균 절감량"],
   };
 
   const chartConfig = {
@@ -62,9 +62,13 @@ const Co2Chart = () => {
   };
 
   return (
-    <ScrollView horizontal>
+    <ScrollView
+      horizontal
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+    >
       <View className="pt-2">
-        <Text className="text-lg font-sf-md mb-lg">주간 CO₂ 평균</Text>
+        <Text className="text-lg font-sf-md mb-lg">주간 평균 절감량</Text>
         <LineChart
           data={chartData}
           width={screenWidth - 30}
