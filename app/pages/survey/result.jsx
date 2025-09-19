@@ -9,7 +9,7 @@ import {
 import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import MainButton from "@components/MainButton";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useCallback, useState, useRef } from "react";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { Images } from "@constants/Images";
@@ -57,6 +57,9 @@ export default function SurveyResult() {
 
   return (
     <View className="flex-1">
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       {/* 배경 */}
       <BgGradient />
 

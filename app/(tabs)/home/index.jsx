@@ -2,12 +2,11 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Dimensions,
   Alert,
   Text,
   BackHandler,
 } from "react-native";
-import { useFocusEffect, useRouter, usePathname } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@hooks/useAuth";
 import MainButton from "@components/MainButton";
@@ -22,7 +21,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { Image as ExpoImage } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 
 export default function Home() {

@@ -227,8 +227,8 @@ export default function AdminProductView() {
           alertMode === "confirm-delete"
             ? "삭제"
             : alertMode === "no-id"
-            ? "뒤로가기"
-            : "확인"
+              ? "뒤로가기"
+              : "확인"
         }
         cancelText={alertMode === "confirm-delete" ? "취소" : undefined}
         onConfirm={() => {
