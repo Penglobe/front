@@ -47,7 +47,12 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{ gestureEnabled: false, headerShown: false }}
+          />
+        </Stack>
       </View>
     </AuthProvider>
   );
