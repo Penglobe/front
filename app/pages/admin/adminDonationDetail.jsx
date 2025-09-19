@@ -109,7 +109,6 @@ export default function ProductDetailPage() {
 
   const imgUri = toUri(item?.img);
 
-  // 플로팅 버튼 높이(+여백)만큼 스크롤 하단에 공간 확보
   const bottomGap = Math.max(insets.bottom, 16) + 76;
 
   return (
@@ -120,7 +119,6 @@ export default function ProductDetailPage() {
       {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
       <View className="flex-1 px-pageX mt-llg">
         <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
-          {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
           <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
             {/* 이미지 */}
             <View className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden">
@@ -181,7 +179,6 @@ export default function ProductDetailPage() {
                   const json = await res.json().catch(() => null);
 
                   if (!res.ok) {
-                    // 서버에서 내려준 메시지를 그대로 Alert로 보여주기
                     throw new Error(json?.message ?? "삭제 실패");
                   }
 
