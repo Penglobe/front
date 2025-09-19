@@ -17,6 +17,16 @@ import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import CustomAlert from "@components/CustomAlert";
+import MainButton from "@components/MainButton";
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
+function toUri(path) {
+  if (!path) return null;
+  return path.startsWith("http")
+    ? path
+    : `${BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+}
 
 export default function ProductEdit() {
   const { id } = useLocalSearchParams();
@@ -25,8 +35,8 @@ export default function ProductEdit() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [asset, setAsset] = useState(null); // 새 이미지
-  const [origin, setOrigin] = useState(null); // 기존 데이터
+  const [asset, setAsset] = useState(null);
+  const [origin, setOrigin] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [alertVisible, setAlertVisible] = useState(false);
@@ -34,7 +44,6 @@ export default function ProductEdit() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
 
-  // 🔹 상품 불러오기
   useEffect(() => {
     (async () => {
       try {
@@ -53,7 +62,6 @@ export default function ProductEdit() {
     })();
   }, [id]);
 
-  // 🔹 이미지 선택 + 압축
   const pickImage = async () => {
     let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perm.granted && perm.status !== "limited") {
@@ -89,7 +97,6 @@ export default function ProductEdit() {
     }
   };
 
-  // 🔹 수정 API
   const onSubmit = async () => {
     try {
       setLoading(true);
@@ -108,7 +115,7 @@ export default function ProductEdit() {
       }
 
       const res = await apiFetch(`/shop/products/${id}`, {
-        method: "PUT", // 또는 PATCH (백엔드 맞춰주세요)
+        method: "PUT",
         body: fd,
       });
       const json = await res.json().catch(() => null);
@@ -136,6 +143,11 @@ export default function ProductEdit() {
     );
   }
 
+  const canSave =
+    name.trim().length > 0 &&
+    String(price).trim().length > 0 &&
+    !Number.isNaN(Number(price));
+
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-white"
@@ -144,12 +156,18 @@ export default function ProductEdit() {
       <BgGradient />
       <HeaderBar title="상품 수정" />
 
-      <ScrollView className="flex-1 px-pageX py-4">
+      <ScrollView
+        className="flex-1 px-pageX py-lg"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <L label="상품명">
           <TextInput
             value={name}
             onChangeText={setName}
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholder="에코 텀블러"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
           />
         </L>
 
@@ -157,7 +175,9 @@ export default function ProductEdit() {
           <TextInput
             value={description}
             onChangeText={setDescription}
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholder="상세 설명"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
             multiline
           />
         </L>
@@ -166,35 +186,57 @@ export default function ProductEdit() {
           <TextInput
             value={price}
             onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholder="예) 3000"
+            placeholderTextColor="#9CA3AF"
+            keyboardType="number-pad"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
           />
         </L>
 
         <L label="이미지">
           {asset ? (
-            <Image source={{ uri: asset.uri }} className="w-40 h-40 mb-md" />
+            <Image
+              source={{ uri: asset.uri }}
+              className="w-full h-48 rounded-xl mb-md"
+              resizeMode="cover"
+            />
           ) : origin?.img ? (
-            <Image source={{ uri: origin.img }} className="w-40 h-40 mb-md" />
+            <Image
+              source={{ uri: toUri(origin.img) }}
+              className="w-full h-48 rounded-xl mb-md"
+              resizeMode="cover"
+            />
           ) : (
             <Text className="text-gray-500">이미지 없음</Text>
           )}
-          <Pressable
-            onPress={pickImage}
-            className="px-md py-sm bg-emerald-600 rounded-xl mt-sm"
-          >
-            <Text className="text-white font-sf-b">이미지 변경</Text>
-          </Pressable>
+
+          <View className="flex-row gap-3 mt-sm">
+            <Pressable
+              onPress={pickImage}
+              className="flex-1 py-md bg-green/40 rounded-xl items-center"
+            >
+              <Text className="text-green font-sf-b">다른 이미지</Text>
+            </Pressable>
+            {(asset || origin?.img) && (
+              <Pressable
+                onPress={() => {
+                  setAsset(null);
+                  setOrigin({ ...origin, img: null });
+                }}
+                className="flex-1 py-md bg-red/40 rounded-xl items-center"
+              >
+                <Text className="font-sf-md text-red">삭제</Text>
+              </Pressable>
+            )}
+          </View>
         </L>
 
-        <Pressable
-          className="flex-1 py-4 rounded-xl bg-blue items-center justify-center opacity-90 mt-lg"
+        <MainButton
+          label={loading ? "저장 중..." : "수정"}
           onPress={onSubmit}
-          disabled={loading}
-        >
-          <Text className="text-white font-sf-b text-h4 text-center">
-            {loading ? "저장 중..." : "수정"}
-          </Text>
-        </Pressable>
+          disabled={!canSave || loading}
+          className="mt-xl"
+        />
       </ScrollView>
 
       <CustomAlert
@@ -215,8 +257,8 @@ export default function ProductEdit() {
 
 function L({ label, children }) {
   return (
-    <View className="mb-md">
-      <Text className="text-gray-700 mb-sm font-sf-md">{label}</Text>
+    <View className="mb-lg">
+      <Text className="text-black mb-sm font-sf-md">{label}</Text>
       {children}
     </View>
   );

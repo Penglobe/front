@@ -17,6 +17,7 @@ import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import CustomAlert from "@components/CustomAlert";
+import MainButton from "@components/MainButton";
 
 export default function ProductNew() {
   const router = useRouter();
@@ -129,15 +130,17 @@ export default function ProductNew() {
       <HeaderBar title="상품 등록" />
 
       <ScrollView
-        className="flex-1 px-pageX py-4"
+        className="flex-1 px-pageX py-lg"
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         <L label="상품명">
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="에코 텀블러"
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
             autoCapitalize="none"
           />
         </L>
@@ -147,7 +150,8 @@ export default function ProductNew() {
             value={description}
             onChangeText={setDescription}
             placeholder="상세 설명"
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
             multiline
           />
         </L>
@@ -156,52 +160,52 @@ export default function ProductNew() {
           <TextInput
             value={price}
             onChangeText={(t) => setPrice(t.replace(/[^\d]/g, ""))}
-            placeholder="3000"
+            placeholder="예) 3000"
             keyboardType="number-pad"
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
           />
         </L>
 
         <L label="이미지">
           {asset ? (
-            <View className="items-start">
+            <View>
               <Image
                 source={{ uri: asset.uri }}
-                className="w-40 h-40 rounded-xl mb-md"
+                className="w-full h-48 rounded-xl mb-md"
+                resizeMode="cover"
               />
-              <View className="flex-row">
+              <View className="flex-row gap-3">
                 <Pressable
                   onPress={pickImage}
-                  className="px-md py-sm bg-emerald-600 rounded-xl mr-sm"
+                  className="flex-1 py-md bg-green/40 rounded-xl items-center"
                 >
-                  <Text className="text-white font-sf-b">다른 이미지</Text>
+                  <Text className="text-green font-sf-b">다른 이미지</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => setAsset(null)}
-                  className="px-md py-sm bg-gray-200 rounded-xl"
+                  className="flex-1 py-md bg-red/40 rounded-xl items-center"
                 >
-                  <Text className="font-sf-md text-gray-700">삭제</Text>
+                  <Text className="font-sf-md text-red">삭제</Text>
                 </Pressable>
               </View>
             </View>
           ) : (
             <Pressable
               onPress={pickImage}
-              className="px-lg py-md bg-emerald-600 rounded-2xl items-center"
+              className="w-full py-llg bg-green rounded-xl items-center"
             >
               <Text className="text-white font-sf-b">이미지 선택</Text>
             </Pressable>
           )}
         </L>
 
-        {canSave && !loading && (
-          <Pressable
-            onPress={onSubmit}
-            className="mt-xl rounded-2xl py-md items-center bg-emerald-600"
-          >
-            <Text className="text-white font-sf-b">생성</Text>
-          </Pressable>
-        )}
+        <MainButton
+          label={loading ? "등록 중..." : "상품 등록"}
+          onPress={onSubmit}
+          disabled={!canSave || loading}
+          className="mt-xl"
+        />
       </ScrollView>
 
       <CustomAlert
@@ -222,8 +226,8 @@ export default function ProductNew() {
 
 function L({ label, children }) {
   return (
-    <View className="mb-md">
-      <Text className="text-gray-700 mb-sm font-sf-md">{label}</Text>
+    <View className="mb-lg">
+      <Text className="text-black mb-sm font-sf-md">{label}</Text>
       {children}
     </View>
   );

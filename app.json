@@ -9,12 +9,13 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/logo/logo.png",
+      "image": "./assets/images/logo/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "splash": {
+        "image": "./assets/images/logo/splash.png",
         "resizeMode": "contain"
       },
       "supportsTablet": true,
@@ -50,6 +51,7 @@
     },
     "android": {
       "splash": {
+        "image": "./assets/images/logo/splash.png",
         "resizeMode": "contain"
       },
       "compileSdkVersion": 35,
@@ -94,7 +96,7 @@
     ],
     "extra": {
       "router": {},
-      "SERVER_URL": "http://192.168.45.94:8080",
+      "SERVER_URL": "https://penglobe.shinhanacademy.co.kr",
       "eas": {
         "projectId": "315ea738-4d43-4580-9823-38af233c0afb"
       }

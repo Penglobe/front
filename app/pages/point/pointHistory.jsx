@@ -18,11 +18,11 @@ import MainButton from "@components/MainButton";
 const { Colors } = colors;
 
 const reasonLabels = {
-  TRANSPORT_ACTIVITY: "환경 걸음",
-  DIET: "식습관",
+  TRANSPORT_ACTIVITY: "펭걸음",
+  DIET: "빙하 식탁",
   ATTENDANCE: "출석",
   QUIZ: "퀴즈",
-  SURVEY: "설문",
+  SURVEY: "빙하 리포트",
   MISSION_REWARD: "미션 보상",
   SHOP_PURCHASE: "굿즈 구매",
   DONATION: "기부",

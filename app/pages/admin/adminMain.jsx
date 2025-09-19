@@ -25,59 +25,71 @@ export default function AdminMain() {
     <View className="flex-1">
       {/* 배경 */}
       <BgGradient />
-      <View className="w-[100%] h-[100px]"></View>
-      <View className="px-pageX flex-1">
+
+      <View className="px-pageX flex-1 pt-3xl">
         {/* 총 탄소 절감량 카드 */}
-        <View className="px-xl py-xl bg-white rounded-xl items-start shadow-md mb-2xl">
-          <Text className="text-black text-body font-sf-md">
-            안녕하세요, 관리자님!{"\n\n"}오늘도 환경을 위한 상품과 기부를
-            관리하고, {"\n"}더 나은 지구를 만들어봐요!
-          </Text>
-        </View>
+        <View className="py-3xl">
+          <View className="items-center pt-3xl">
+            <View className="w-full px-xl py-xl bg-white rounded-xl shadow-md gap-2">
+              <Text className="text-black text-h3 font-sf-b">
+                안녕하세요, 관리자님!
+              </Text>
+              <Text className="text-black text-body font-sf-md">
+                오늘도 환경을 위한 상품과 기부를 관리하고, {"\n"}
+                <Text className="text-green font-sf-b">더 나은 지구</Text>를
+                만들어봐요!
+              </Text>
+            </View>
 
-        {/* 로고 */}
-        <View className="items-center mb-4xl">
-          <Images.Ipa_Admin width={240} height={240} />
-        </View>
+            <View className="ml-6 w-0 h-0 border-l-transparent border-t-[20px] border-l-[20px] border-r-[20px] border-t-white border-r-transparent" />
 
-        {/* 상품 등록 버튼 */}
-        <View className="flex-row gap-4">
-          <Pressable
-            className="flex-1 rounded-xl items-center justify-center py-llg bg-green active:bg-emerald-700"
-            onPress={() => router.push("/pages/admin/newproducts")}
-          >
-            <Text className="font-sf-md text-button text-s text-white">
-              상품 등록하기
-            </Text>
-          </Pressable>
-
-          <Pressable
-            className="flex-1 rounded-xl items-center justify-center py-llg bg-green active:bg-emerald-700"
-            onPress={() => router.push("/pages/admin/newDonation")}
-          >
-            <Text className="font-sf-md text-button text-s text-white">
-              기부 등록하기
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* 관리 버튼 */}
-        <MainButton
-          label="기부 & 상품 관리하기 (수정/삭제)"
-          onPress={() => router.push("/pages/admin/showlist")}
-          className="mt-lg bg-green/80"
-        />
-
-        <Pressable
-          onPress={handleLogout}
-          className="flex-row items-center justify-center mt-2xl"
-        >
-          <View className="flex-row items-center">
-            <Text className="text-black font-sf-md text-body underline">
-              로그아웃
-            </Text>
+            {/* 로고 */}
+            <View className="items-center">
+              <Images.Ipa_Admin width={240} height={240} />
+            </View>
           </View>
-        </Pressable>
+
+          {/* 상품 등록 버튼 */}
+          <View className="flex-row gap-4">
+            <Pressable
+              className="flex-1 rounded-xl items-center justify-center py-llg bg-green active:bg-emerald-700 gap-2"
+              onPress={() => router.push("/pages/admin/newproducts")}
+            >
+              <Images.Product width={32} height={32} />
+              <Text className="font-sf-md text-button text-s text-white">
+                상품 등록하기
+              </Text>
+            </Pressable>
+
+            <Pressable
+              className="flex-1 rounded-xl items-center justify-center py-llg bg-green active:bg-emerald-700 gap-2"
+              onPress={() => router.push("/pages/admin/newDonation")}
+            >
+              <Images.Donation width={32} height={32} />
+              <Text className="font-sf-md text-button text-s text-white">
+                기부 등록하기
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* 관리 버튼 */}
+          <MainButton
+            label="기부 & 상품 관리하기 (수정/삭제)"
+            onPress={() => router.push("/pages/admin/showlist")}
+            className="mt-lg bg-green"
+          />
+
+          <Pressable
+            onPress={handleLogout}
+            className="flex-row items-center justify-center mt-2xl"
+          >
+            <View className="flex-row items-center">
+              <Text className="text-black font-sf-md text-body underline">
+                로그아웃
+              </Text>
+            </View>
+          </Pressable>
+        </View>
       </View>
 
       <CustomAlert

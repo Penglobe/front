@@ -59,6 +59,9 @@ import Information from "@assets/icons/information.svg";
 import Arrow from "@assets/icons/arrow.svg";
 import Leaf from "@assets/icons/leaf.svg";
 import Information_Black from "@assets/icons/information-black.svg";
+import Product from "@assets/icons/product.svg";
+import Donation from "@assets/icons/donation.svg";
+import Edit from "@assets/icons/edit.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -146,4 +149,7 @@ export const Images = {
   Leaf,
   Information_Black,
   Ipa_Admin,
+  Product,
+  Donation,
+  Edit,
 };
