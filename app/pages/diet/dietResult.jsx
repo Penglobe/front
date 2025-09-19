@@ -181,7 +181,7 @@ export default function DietResult() {
 
   return (
     <View className="flex-1">
-      <HeaderBar title="식단 측정 결과" />
+      <HeaderBar title="빙하 식탁 결과" />
       <View className="flex-1">
         <BgGradient />
         <View className="px-pageX">
@@ -301,7 +301,9 @@ export default function DietResult() {
               <View className="flex-row justify-between items-center mb-md">
                 <View className="flex-row items-center">
                   <Images.Tori_diet width={34} height={34} />
-                  <Text className="text-body font-sf-b">식단 계산 기준</Text>
+                  <Text className="text-body font-sf-b">
+                    얼음 식탁 계산 기준
+                  </Text>
                 </View>
                 <TouchableOpacity onPress={() => setOpen(false)}>
                   <Text className="text-green text-label font-sf-md">닫기</Text>
@@ -309,7 +311,7 @@ export default function DietResult() {
               </View>
               <View className="gap-2">
                 <Text className="font-sf-b text-bodySm text-green">
-                  절감량 = 표준 한 끼 − 이번 식단의 총 배출량
+                  절감량 = 표준 한 끼 배출량 − 이번 식사 배출량
                 </Text>
                 <Text className="text-caption text-green">
                   ※ 한국인 표준 한 끼는 1.5 kg CO₂ 입니다.
@@ -376,6 +378,9 @@ export default function DietResult() {
                       </Text>
                     </View>
                   </View>
+                  <Text className="text-caption text-gray-600">
+                    ※ 계산 기준: 기후변화행동연구소, 매일일보, 한겨레신문 참고
+                  </Text>
                 </View>
               </View>
             </Modal>

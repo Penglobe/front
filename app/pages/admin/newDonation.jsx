@@ -1,3 +1,4 @@
+// app/admin/donations/new.jsx
 import { useState } from "react";
 import {
   View,
@@ -10,13 +11,15 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 import { apiFetch } from "@services/authService";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import CustomAlert from "@components/CustomAlert";
+import MainButton from "@components/MainButton";
 
-export default function newDonation() {
+export default function NewDonation() {
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -31,13 +34,19 @@ export default function newDonation() {
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
-  // "permError" | "inputError" | "success" | "fail"
 
+  // 안전한 mime 추출 함수
+  const getMimeType = (file) => {
+    if (file.mimeType) return file.mimeType;
+    const ext = (file.fileName || file.uri).split(".").pop().toLowerCase();
+    if (ext === "png") return "image/png";
+    if (ext === "heic" || ext === "heif") return "image/heic";
+    return "image/jpeg"; // fallback
+  };
+
+  // 이미지 선택
   const pickImage = async () => {
-    // 현재 권한 확인
     let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
-
-    // 아직 결정 안 됐으면 요청
     if (!perm.granted && perm.status !== "limited") {
       perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     }
@@ -49,13 +58,33 @@ export default function newDonation() {
       setAlertVisible(true);
       return;
     }
+
     const r = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.9,
     });
-    if (!r.canceled) setAsset(r.assets[0]);
+
+    if (!r.canceled) {
+      let picked = r.assets[0];
+
+      if (Platform.OS === "ios") {
+        try {
+          const compressed = await ImageManipulator.manipulateAsync(
+            picked.uri,
+            [{ resize: { width: 1024 } }],
+            { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          picked = { ...picked, uri: compressed.uri };
+        } catch (e) {
+          console.warn("이미지 압축 실패:", e);
+        }
+      }
+
+      setAsset(picked);
+    }
   };
 
+  // 등록 API
   const onSubmit = async () => {
     try {
       if (!canSave) {
@@ -67,21 +96,31 @@ export default function newDonation() {
       }
 
       setLoading(true);
+
       const fd = new FormData();
       fd.append("name", name.trim());
       fd.append("description", description.trim());
       fd.append("image", {
         uri: asset.uri,
-        name: asset.fileName ?? "image.jpg",
-        type: asset.mimeType ?? "image/jpeg",
+        name: asset.fileName ?? "upload.jpg",
+        type: getMimeType(asset),
       });
 
       const res = await apiFetch("/shop/products/donation", {
         method: "POST",
         body: fd,
       });
+
       const json = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(json?.message || "기부 등록 실패");
+      if (!res.ok) {
+        console.error("❌ Donation API error:", {
+          status: res.status,
+          body: json,
+        });
+        throw new Error(
+          json?.message || `기부 등록 실패 (status ${res.status})`
+        );
+      }
 
       setAlertTitle("완료");
       setAlertMessage("기부가 생성되었습니다.");
@@ -103,18 +142,20 @@ export default function newDonation() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <BgGradient />
-      {/* 헤더 */}
       <HeaderBar title="기부 등록" />
 
       <ScrollView
-        className="flex-1 px-pageX py-4"
+        className="flex-1 px-pageX py-lg"
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         <L label="기부명">
           <TextInput
             value={name}
             onChangeText={setName}
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholder="예) 지구를 위한 나무심기"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
             autoCapitalize="none"
           />
         </L>
@@ -124,54 +165,53 @@ export default function newDonation() {
             value={description}
             onChangeText={setDescription}
             placeholder="상세 설명"
-            className="bg-white rounded-2xl px-lg py-md border border-gray-200"
+            placeholderTextColor="#9CA3AF"
+            className="w-full bg-white text-black py-md px-md text-md font-sf-md rounded-xl border border-gray"
             multiline
           />
         </L>
 
         <L label="이미지">
           {asset ? (
-            <View className="items-start">
+            <View>
               <Image
                 source={{ uri: asset.uri }}
-                className="w-40 h-40 rounded-xl mb-md"
+                className="w-full h-48 rounded-xl mb-md"
+                resizeMode="cover"
               />
-              <View className="flex-row">
+              <View className="flex-row gap-3">
                 <Pressable
                   onPress={pickImage}
-                  className="px-md py-sm bg-emerald-600 rounded-xl mr-sm"
+                  className="flex-1 py-md bg-green/40 rounded-xl items-center"
                 >
-                  <Text className="text-white font-sf-b">다른 이미지</Text>
+                  <Text className="text-green font-sf-b">다른 이미지</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => setAsset(null)}
-                  className="px-md py-sm bg-gray-200 rounded-xl"
+                  className="flex-1 py-md bg-red/40 rounded-xl items-center"
                 >
-                  <Text className="font-sf-md text-gray-700">삭제</Text>
+                  <Text className="font-sf-md text-red">삭제</Text>
                 </Pressable>
               </View>
             </View>
           ) : (
             <Pressable
               onPress={pickImage}
-              className="px-lg py-md bg-emerald-600 rounded-2xl items-center"
+              className="w-full py-llg bg-green rounded-xl items-center"
             >
               <Text className="text-white font-sf-b">이미지 선택</Text>
             </Pressable>
           )}
         </L>
 
-        {canSave && !loading && (
-          <Pressable
-            onPress={onSubmit}
-            className="mt-xl rounded-2xl py-md items-center bg-emerald-600"
-          >
-            <Text className="text-white font-sf-b">생성</Text>
-          </Pressable>
-        )}
+        <MainButton
+          label={loading ? "등록 중..." : "기부 등록"}
+          onPress={onSubmit}
+          disabled={!canSave || loading}
+          className="mt-xl"
+        />
       </ScrollView>
 
-      {/* ✅ CustomAlert */}
       <CustomAlert
         visible={alertVisible}
         title={alertTitle}
@@ -190,8 +230,8 @@ export default function newDonation() {
 
 function L({ label, children }) {
   return (
-    <View className="mb-md">
-      <Text className="text-gray-700 mb-sm font-sf-md">{label}</Text>
+    <View className="mb-lg">
+      <Text className="text-black mb-sm font-sf-md">{label}</Text>
       {children}
     </View>
   );

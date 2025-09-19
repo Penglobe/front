@@ -185,7 +185,7 @@ export default function GlobalRanking() {
           className="absolute top-2 right-2 z-10"
           hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
         >
-          <Text className="text-black font-bold text-h2">ⓘ</Text>
+          <Images.Information width={24} height={24} />
         </Pressable>
 
         <PodiumItem ranker={ranker2} height={70} podiumColor="#749BF0" />

@@ -236,22 +236,38 @@ export default function Home() {
       </View>
 
       {/* 퀴즈 버튼 */}
-      <Animated.View className="mt-auto items-center mb-[180px]">
+
+      <View className="mt-auto items-center mb-[180px]">
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
-          className="flex-row items-center justify-center rounded-3xl px-xl py-md gap-2 bg-yellow active:bg-amber-300"
+          className="flex-row items-center justify-center rounded-3xl px-xl py-sm gap-3 bg-[#F9C332]"
           style={{
             shadowColor: "#F9C332",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.18,
-            shadowRadius: 4,
-            elevation: 4,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.3,
+            shadowRadius: 6,
+            elevation: 6,
           }}
         >
-          <Images.Quiz width={24} height={24} />
-          <Text className="text-white font-sf-b text-body">오늘의 퀴즈</Text>
+          {/* 아이콘 원형 배경 */}
+          <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+            <Images.Quiz width={26} height={26} />
+          </View>
+
+          {/* 텍스트 */}
+          <Text
+            className="text-white font-sf-b text-body"
+            style={{
+              textShadowColor: "rgba(0,0,0,0.3)",
+              textShadowOffset: { width: 1, height: 1 },
+              textShadowRadius: 2,
+              letterSpacing: 1,
+            }}
+          >
+            펭퀴즈
+          </Text>
         </Pressable>
-      </Animated.View>
+      </View>
 
       <Modal visible={att.visible}>
         <View className="flex-row items-center mb-3 justify-center relative">

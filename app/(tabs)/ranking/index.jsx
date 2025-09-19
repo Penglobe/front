@@ -74,8 +74,8 @@ export default function Ranking() {
       >
         <HeaderBar title="랭킹" />
         {/* 탭 메뉴 */}
-        <View className="px-pageX mt-4">
-          <View className="flex-row justify-center mb-4 gap-5">
+        <View className="mt-4 px-pageX ml-md mr-md">
+          <View className="flex-row w-full justify-between mb-4">
             {tabs.map((tab) => (
               <Pressable
                 key={tab.key}
@@ -87,8 +87,8 @@ export default function Ranking() {
                 <Text
                   className={
                     activeTab === tab.key
-                      ? "text-white font-bold text-bodyLg"
-                      : "text-green font-bold text-bodyLg"
+                      ? "text-white font-sf-b text-body"
+                      : "text-green font-sf-b text-body"
                   }
                 >
                   {tab.label}

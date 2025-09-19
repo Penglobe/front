@@ -435,7 +435,7 @@ export default function TransportMap() {
             goFinish();
           }}
           disabled={!transportId}
-          className={`mb-md ${transportId ? "bg-red-500" : "bg-gray-400"}`}
+          className={`mb-md ${transportId ? "bg-green" : "bg-gray-400"}`}
         />
       </View>
     </View>

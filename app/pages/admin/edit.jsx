@@ -1,3 +1,4 @@
+// app/admin/products/edit.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -15,6 +16,7 @@ import HeaderBar from "@components/HeaderBar";
 import { apiFetch } from "@services/authService";
 import Constants from "expo-constants";
 import CustomAlert from "@components/CustomAlert";
+import MainButton from "@components/MainButton";
 
 const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
@@ -35,16 +37,16 @@ export default function ProductEditPage() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState(null); // 로컬 이미지 객체
-  const [imgUri, setImgUri] = useState(null); // 미리보기용
+  const [image, setImage] = useState(null);
+  const [imgUri, setImgUri] = useState(null);
 
-  // 🔔 커스텀 알럿 상태
+  // 🔔 CustomAlert 상태
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertMode, setAlertMode] = useState(null);
-  // "loadError" | "saveSuccess" | "saveFail"
 
+  // 데이터 불러오기
   const load = useCallback(async () => {
     if (!id) return;
     try {
@@ -53,6 +55,7 @@ export default function ProductEditPage() {
 
       if (!res.ok)
         throw new Error(result?.message || `조회 실패(${res.status})`);
+
       const data = result?.data ?? result;
       setItem(data);
       setName(data.name || "");
@@ -65,16 +68,17 @@ export default function ProductEditPage() {
       setAlertMode("loadError");
       setAlertVisible(true);
     }
-  }, [id, router]);
+  }, [id]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  // 이미지 선택
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
+      quality: 0.8,
     });
     if (!result.canceled) {
       setImage(result.assets[0]);
@@ -82,11 +86,14 @@ export default function ProductEditPage() {
     }
   };
 
+  // 저장
   const handleSave = async () => {
     try {
       const formData = new FormData();
-      formData.append("name", name);
-      if (description) formData.append("description", description);
+      formData.append("name", name.trim());
+      formData.append("description", description.trim());
+      formData.append("price", price);
+
       if (image) {
         formData.append("image", {
           uri: image.uri,
@@ -98,14 +105,12 @@ export default function ProductEditPage() {
       const res = await apiFetch(`/shop/products/${id}`, {
         method: "PUT",
         body: formData,
+        headers: {},
       });
 
-      if (!res.ok) {
-        const json = await res.json().catch(() => null);
-        throw new Error(json?.message || "수정 실패");
-      }
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || "수정 실패");
 
-      // 성공
       setAlertTitle("수정 완료");
       setAlertMessage("상품 정보가 수정되었습니다.");
       setAlertMode("saveSuccess");
@@ -121,7 +126,7 @@ export default function ProductEditPage() {
   if (!item) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-gray-500">불러오는 중...</Text>
+        <Text className="text-gray">불러오는 중...</Text>
         <CustomAlert
           visible={alertVisible}
           title={alertTitle}
@@ -129,9 +134,7 @@ export default function ProductEditPage() {
           confirmText="확인"
           onConfirm={() => {
             setAlertVisible(false);
-            if (alertMode === "loadError") {
-              router.back();
-            }
+            if (alertMode === "loadError") router.back();
           }}
         />
       </View>
@@ -143,60 +146,64 @@ export default function ProductEditPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="관리자 페이지 > 상품 수정" />
+      <HeaderBar title="상품 수정" />
       <ScrollView
         contentContainerStyle={{ paddingBottom: bottomGap }}
         className="px-pageX pt-md"
       >
         {/* 이미지 */}
         <Pressable
-          className="w-full h-[220px] rounded-2xl mt-xs mb-sm bg-gray items-center justify-center overflow-hidden"
+          className="w-full h-[220px] rounded-2xl mb-md bg-gray items-center justify-center overflow-hidden"
           onPress={pickImage}
         >
           {imgUri ? (
             <Image
               source={{ uri: imgUri }}
               className="w-full h-full"
-              resizeMode="contain"
+              resizeMode="cover"
             />
           ) : (
-            <Text className="text-gray-400">이미지 선택</Text>
+            <Text className="text-gray">이미지 선택</Text>
           )}
         </Pressable>
 
-        {/* 상품 정보 입력 */}
+        {/* 입력 폼 */}
         <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
-          <Text className="text-h3 font-sf-b mb-md">상품명</Text>
+          <Text className="text-h3 font-sf-b mb-sm">상품명</Text>
           <TextInput
             value={name}
             onChangeText={setName}
             placeholder="상품명을 입력하세요"
-            className="border border-gray-300 rounded-md p-2 mb-md"
+            placeholderTextColor="#9CA3AF"
+            className="w-full border border-gray rounded-xl px-md py-md mb-lg"
           />
 
-          <Text className="text-h3 font-sf-b mb-md">가격 (수정불가)</Text>
+          <Text className="text-h3 font-sf-b mb-sm">가격 (수정 불가)</Text>
           <TextInput
-            value={price?.toString()}
+            value={price}
             editable={false}
             selectTextOnFocus={false}
-            className="border border-gray-300 rounded-md p-2 mb-md bg-gray-100 text-gray-700"
+            className="w-full border border-gray rounded-xl px-md py-md mb-lg bg-gray/40 text-black"
           />
 
-          <Text className="text-h3 font-sf-b mb-md">설명</Text>
+          <Text className="text-h3 font-sf-b mb-sm">설명</Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
             placeholder="상품 설명을 입력하세요"
+            placeholderTextColor="#9CA3AF"
             multiline
-            className="border border-gray-300 rounded-md p-2 mb-md h-24"
+            className="w-full border border-gray rounded-xl px-md py-md h-28 mb-lg"
           />
 
-          <Pressable
+          <MainButton
+            label="저장"
             onPress={handleSave}
-            className="mt-lg py-4 bg-blue rounded-xl items-center justify-center opacity-90"
+            disabled={false}
+            className="mt-lg bg-blue"
           >
-            <Text className="text-white font-sf-b text-h4">저장</Text>
-          </Pressable>
+            <Text className="text-white font-sf-b text-body">저장</Text>
+          </MainButton>
         </View>
       </ScrollView>
 
@@ -208,12 +215,8 @@ export default function ProductEditPage() {
         confirmText="확인"
         onConfirm={() => {
           setAlertVisible(false);
-          if (alertMode === "loadError") {
-            router.back();
-          }
-          if (alertMode === "saveSuccess") {
-            router.push("/pages/admin/showlist");
-          }
+          if (alertMode === "loadError") router.back();
+          if (alertMode === "saveSuccess") router.push("/pages/admin/showlist");
         }}
       />
     </View>

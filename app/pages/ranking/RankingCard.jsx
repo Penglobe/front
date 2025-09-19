@@ -19,7 +19,7 @@ export default function RankingCard({ item, isProminent, onPress }) {
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
         className={`bg-white rounded-xl p-lg mb-sm shadow-sm ${
-          isProminent ? "border-2 border-green" : "border-2 border-gray"
+          isProminent ? "border-2 border-green" : "border-2 border-white"
         }`}
       >
         <View className="flex-row justify-between items-center">

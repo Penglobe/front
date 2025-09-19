@@ -418,7 +418,7 @@ export default function MyPage() {
                       <View className="flex-row items-center gap-2">
                         <Images.Walk width={24} height={24} />
                         <Text className="text-black font-sf-md text-body">
-                          환경 걸음
+                          펭걸음
                         </Text>
                       </View>
                       <Text className="text-black font-grotesk-md text-body">
@@ -430,7 +430,7 @@ export default function MyPage() {
                       <View className="flex-row items-center gap-2">
                         <Images.Diet width={24} height={24} />
                         <Text className="text-black font-sf-md text-body">
-                          식단
+                          빙하 식탁
                         </Text>
                       </View>
                       <Text className="text-black font-grotesk-md text-body">

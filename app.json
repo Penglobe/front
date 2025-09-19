@@ -9,12 +9,13 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/logo/logo.png",
+      "image": "./assets/images/logo/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
       "splash": {
+        "image": "./assets/images/logo/splash.png",
         "resizeMode": "contain"
       },
       "supportsTablet": true,
@@ -50,6 +51,7 @@
     },
     "android": {
       "splash": {
+        "image": "./assets/images/logo/splash.png",
         "resizeMode": "contain"
       },
       "compileSdkVersion": 35,

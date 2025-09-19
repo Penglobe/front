@@ -115,61 +115,10 @@ export default function ProductDetailPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="관리자 페이지 > 기부" />
+      <HeaderBar title="기부 수정" />
 
       {/* 본문: 스크롤이 흰 카드(View)만 감싸도록 배치 */}
-      <View className="flex-1 px-pageX pt-md">
-        <View className="flex-row justify-between mt-xl mb-lg gap-5">
-          {/* 수정 버튼 */}
-          <Pressable
-            className="flex-1 py-4 rounded-xl bg-blue items-center justify-center opacity-90"
-            onPress={() =>
-              router.push(`/pages/admin/edit?id=${item.productId}`)
-            }
-          >
-            <Text className="text-white font-sf-b text-h4 text-center">
-              수정
-            </Text>
-          </Pressable>
-
-          {/* 삭제 버튼 */}
-          <Pressable
-            className="flex-1 y-4 rounded-xl bg-red items-center justify-center opacity-90"
-            onPress={async () => {
-              const confirm = await new Promise((resolve) => {
-                setAlertTitle("삭제 확인");
-                setAlertMessage("정말 삭제하시겠습니까?");
-                setAlertVisible(true);
-              });
-              if (!confirm) return;
-
-              try {
-                const res = await apiFetch(`/shop/products/${item.productId}`, {
-                  method: "DELETE",
-                });
-                const json = await res.json().catch(() => null);
-
-                if (!res.ok) {
-                  // 서버에서 내려준 메시지를 그대로 Alert로 보여주기
-                  throw new Error(json?.message ?? "삭제 실패");
-                }
-
-                setAlertTitle("삭제 완료");
-                setAlertMessage("기부가 삭제되었습니다.");
-                setAlertVisible(true);
-              } catch (e) {
-                setAlertTitle("삭제 실패");
-                setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요");
-                setAlertVisible(true);
-              }
-            }}
-          >
-            <Text className="text-white font-sf-b text-h4 text-center">
-              삭제
-            </Text>
-          </Pressable>
-        </View>
-
+      <View className="flex-1 px-pageX mt-llg">
         <ScrollView contentContainerStyle={{ paddingBottom: bottomGap }}>
           {/* ⬇️ 이 흰 카드가 컨텐츠 높이만큼만 렌더 → 버튼 위에서 끝남 */}
           <View className="bg-white rounded-2xl px-pageX pt-md pb-llg">
@@ -197,6 +146,59 @@ export default function ProductDetailPage() {
                 </View>
               )}
             </View>
+          </View>
+          <View className="flex-row justify-between mt-xl mb-lg gap-5">
+            {/* 수정 버튼 */}
+            <Pressable
+              className="flex-1 py-4 rounded-xl bg-green items-center justify-center opacity-90"
+              onPress={() =>
+                router.push(`/pages/admin/edit?id=${item.productId}`)
+              }
+            >
+              <Text className="text-white font-sf-b text-h4 text-center">
+                수정
+              </Text>
+            </Pressable>
+
+            {/* 삭제 버튼 */}
+            <Pressable
+              className="flex-1 y-4 rounded-xl bg-red items-center justify-center opacity-90"
+              onPress={async () => {
+                const confirm = await new Promise((resolve) => {
+                  setAlertTitle("삭제 확인");
+                  setAlertMessage("정말 삭제하시겠습니까?");
+                  setAlertVisible(true);
+                });
+                if (!confirm) return;
+
+                try {
+                  const res = await apiFetch(
+                    `/shop/products/${item.productId}`,
+                    {
+                      method: "DELETE",
+                    }
+                  );
+                  const json = await res.json().catch(() => null);
+
+                  if (!res.ok) {
+                    // 서버에서 내려준 메시지를 그대로 Alert로 보여주기
+                    throw new Error(json?.message ?? "삭제 실패");
+                  }
+
+                  setAlertTitle("삭제 완료");
+                  setAlertMessage("기부가 삭제되었습니다.");
+                  setAlertVisible(true);
+                } catch (e) {
+                  setAlertTitle("삭제 실패");
+                  setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요");
+                  setAlertVisible(true);
+                }
+              }}
+            >
+              <Text className="text-white font-sf-b text-h4 text-center">
+                삭제
+              </Text>
+            </Pressable>
           </View>
         </ScrollView>
       </View>
