@@ -140,7 +140,7 @@ export default function QuizPage() {
         pointerEvents="none"
       />
 
-      <HeaderBar title="오늘의 퀴즈" />
+      <HeaderBar title="펭퀴즈" />
 
       <View className="px-pageX pt-2xl gap-2xl">
         {/* 날짜/설명 */}
