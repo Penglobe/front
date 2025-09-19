@@ -1,4 +1,3 @@
-// app/admin/products/edit.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -7,8 +6,10 @@ import {
   ScrollView,
   Pressable,
   Image,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import BgGradient from "@components/BgGradient";
@@ -18,7 +19,7 @@ import Constants from "expo-constants";
 import CustomAlert from "@components/CustomAlert";
 import MainButton from "@components/MainButton";
 
-const SERVER_URL = Constants.expoConfig.extra.SERVER_URL;
+const SERVER_URL = Constants.expoConfig?.extra?.SERVER_URL;
 const BASE = (SERVER_URL || "").replace(/\/+$/, "");
 
 function toUri(path) {
@@ -26,6 +27,23 @@ function toUri(path) {
   if (/^https?:\/\//i.test(path)) return path;
   const rel = path.startsWith("/") ? path : `/${path}`;
   return `${BASE}${rel}`;
+}
+
+function ensureFilePart(asset) {
+  const uri = asset?.uri || "";
+  const extMatch = uri.match(/\.(jpg|jpeg|png|heic|webp)$/i);
+  const ext = (extMatch?.[1] || "jpg").toLowerCase();
+  const mimeByExt = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    heic: "image/heic",
+    webp: "image/webp",
+  };
+  const type = asset?.mimeType || mimeByExt[ext] || "image/jpeg";
+  const filenameFromUri = uri.split("/").pop();
+  const name = asset?.fileName || filenameFromUri || `image.${ext}`;
+  return { uri, name, type };
 }
 
 export default function ProductEditPage() {
@@ -51,8 +69,7 @@ export default function ProductEditPage() {
     if (!id) return;
     try {
       const res = await apiFetch(`/shop/products/${id}`);
-      const result = await res.json();
-
+      const result = await res.json().catch(() => null);
       if (!res.ok)
         throw new Error(result?.message || `조회 실패(${res.status})`);
 
@@ -74,16 +91,32 @@ export default function ProductEditPage() {
     load();
   }, [load]);
 
-  // 이미지 선택
+  // 이미지 선택 (iOS는 압축 + mime 지정)
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
+      quality: 0.9,
     });
-    if (!result.canceled) {
-      setImage(result.assets[0]);
-      setImgUri(result.assets[0].uri);
+    if (result.canceled) return;
+
+    let picked = result.assets[0];
+
+    if (Platform.OS === "ios") {
+      try {
+        const compressed = await ImageManipulator.manipulateAsync(
+          picked.uri,
+          [{ resize: { width: 1024 } }],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        picked = { ...picked, uri: compressed.uri, mimeType: "image/jpeg" };
+      } catch (err) {
+        console.warn("이미지 압축 실패:", err);
+      }
     }
+
+    const filePart = ensureFilePart(picked);
+    setImage({ ...picked, ...filePart });
+    setImgUri(filePart.uri);
   };
 
   // 저장
@@ -95,24 +128,20 @@ export default function ProductEditPage() {
       formData.append("price", price);
 
       if (image) {
-        formData.append("image", {
-          uri: image.uri,
-          type: "image/jpeg",
-          name: "upload.jpg",
-        });
+        const { uri, name: fname, type } = ensureFilePart(image);
+        formData.append("image", { uri, name: fname, type });
       }
 
       const res = await apiFetch(`/shop/products/${id}`, {
         method: "PUT",
         body: formData,
-        headers: {},
       });
 
       const json = await res.json().catch(() => null);
       if (!res.ok) throw new Error(json?.message || "수정 실패");
 
       setAlertTitle("수정 완료");
-      setAlertMessage("상품 정보가 수정되었습니다.");
+      setAlertMessage("기부/상품 정보가 수정되었습니다.");
       setAlertMode("saveSuccess");
       setAlertVisible(true);
     } catch (e) {
@@ -146,7 +175,7 @@ export default function ProductEditPage() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <HeaderBar title="상품 수정" />
+      <HeaderBar title="기부/상품 수정" />
       <ScrollView
         contentContainerStyle={{ paddingBottom: bottomGap }}
         className="px-pageX pt-md"
@@ -201,9 +230,7 @@ export default function ProductEditPage() {
             onPress={handleSave}
             disabled={false}
             className="mt-lg bg-blue"
-          >
-            <Text className="text-white font-sf-b text-body">저장</Text>
-          </MainButton>
+          />
         </View>
       </ScrollView>
 

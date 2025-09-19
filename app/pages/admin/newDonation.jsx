@@ -41,7 +41,7 @@ export default function NewDonation() {
     const ext = (file.fileName || file.uri).split(".").pop().toLowerCase();
     if (ext === "png") return "image/png";
     if (ext === "heic" || ext === "heif") return "image/heic";
-    return "image/jpeg"; // fallback
+    return "image/jpeg";
   };
 
   // 이미지 선택

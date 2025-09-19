@@ -149,7 +149,7 @@ export default function QuizPage() {
             {formattedDate}
           </Text>
           <Text className="font-sf-b text-body mt-sm">
-            환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}얼음은 없어도 지식은 쌓을 수
+            펭퀴즈 첫 제출로만 얼음 적립! {"\n"}얼음은 없어도 지식은 쌓을 수
             있어요!
           </Text>
         </View>
