@@ -185,19 +185,19 @@ export default function Survey() {
             {/* 타이틀 */}
             <View className="px-sm w-full flex-row items-start justify-between">
               {/* 왼쪽 텍스트 블록 */}
-              <View className="flex-1 pr-sm pt-llg">
-                <Text className="text-red text-body font-sf-b">
+              <View className="flex-1 py-md pt-llg">
+                <Text className="text-red text-h4 font-sf-b">
                   내 탄소와 자원 사용을 돌아보고, {"\n"}조금씩 더 좋은 습관을
                   만들어봐요.
                 </Text>
-                <Text className="text-sm mt-xxs">
+                <Text className="text-sm py-md">
                   ※ 하루에 한 번만 가능합니다.
                 </Text>
               </View>
 
               {/* 오른쪽 이미지 (줄어들지 않게) */}
-              <View className="shrink-0">
-                <Images.survey_ipa width={80} height={100} />
+              <View className="shrink-0 py-lg">
+                <Images.survey_ipa width={70} height={100} />
               </View>
             </View>
 

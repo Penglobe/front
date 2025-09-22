@@ -176,7 +176,7 @@ export default function QuizPage() {
           </View>
         </View>
         <View className="items-center justify-center py-md">
-          <Images.IpaTori1 width={250} height={180} />
+          <Images.IpaTori2 width={250} height={220} />
         </View>
       </View>
     </View>

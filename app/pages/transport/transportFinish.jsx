@@ -176,10 +176,10 @@ export default function TransportFinish() {
               🚗 자동차로 이동했다면 약 {carCo2} kg CO₂가 배출돼요.
             </Text>
           </View>
+        </View>
 
-          <View className="items-center">
-            <IpaTori width={260} height={220} />
-          </View>
+        <View className="items-center mt-6 mb-5">
+          <IpaTori width={200} height={170} />
         </View>
 
         <View className="px-pageX mb-10">

@@ -26,11 +26,11 @@ export default function AdminMain() {
       {/* 배경 */}
       <BgGradient />
 
-      <View className="px-pageX flex-1 pt-3xl">
+      <View className="px-pageX flex-1 pt-xl">
         {/* 총 탄소 절감량 카드 */}
         <View className="py-3xl">
-          <View className="items-center pt-3xl">
-            <View className="w-full px-xl py-xl bg-white rounded-xl shadow-md gap-2">
+          <View className="items-center pt-xl">
+            <View className="w-full px-lg py-lg bg-white rounded-xl shadow-md gap-2">
               <Text className="text-black text-h3 font-sf-b">
                 안녕하세요, 관리자님!
               </Text>
@@ -45,7 +45,7 @@ export default function AdminMain() {
 
             {/* 로고 */}
             <View className="items-center">
-              <Images.Ipa_Admin width={240} height={240} />
+              <Images.Ipa_Admin width={300} height={300} />
             </View>
           </View>
 

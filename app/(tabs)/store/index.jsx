@@ -265,11 +265,7 @@ export default function StoreListPage() {
                       selected ? "bg-green" : "bg-white/80"
                     }`}
                   >
-                    <Text
-                      className={
-                        selected ? "text-white font-sf-b" : "text-green"
-                      }
-                    >
+                    <Text className={selected ? "text-white" : "text-green"}>
                       {label}
                     </Text>
                   </Pressable>

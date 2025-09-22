@@ -33,7 +33,8 @@ export default function TransportFail() {
   useEffect(() => {
     (async () => {
       try {
-        const started = await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
+        const started =
+          await Location.hasStartedLocationUpdatesAsync(TASK_NAME);
         if (started) await Location.stopLocationUpdatesAsync(TASK_NAME);
       } catch {}
 
@@ -71,16 +72,16 @@ export default function TransportFail() {
   return (
     <View className="flex-1">
       <BgGradient />
-      <View className="flex-1 py-3xl items-center px-pageX">
+      <View className="flex-1 py-3xl px-pageX">
         <View className="items-center mt-40">
-          <ToriObstacle width={300} height={180} />
+          <ToriObstacle width={300} height={230} />
         </View>
 
-        <Text className="text-red-600 text-h1 font-bold py-2xl">
+        <Text className="text-red text-h1 px-llg font-bold py-2xl">
           이동 기록이 중단되었어요!
         </Text>
 
-        <View className="rounded-2xl px-llg py-xl w-full">
+        <View className="rounded-2xl px-llg py-md w-full">
           <Text className="text-gray-800 text-h3 mb-sm">
             {reason || "이동 중 문제가 발생했어요."}
           </Text>
@@ -90,7 +91,7 @@ export default function TransportFail() {
           </Text>
         </View>
 
-        <View className="w-full mt-20 py-6xl">
+        <View className="w-full py-6xl">
           <MainButton
             label="홈으로 돌아가기"
             onPress={goHome}

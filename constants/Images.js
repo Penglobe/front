@@ -9,6 +9,7 @@ import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 // 캐릭터
 import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
+import IpaTori2 from "@assets/images/character/ipa-tori-2.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Logo from "@assets/images/logo/logo.svg";
 import ToriFace from "@assets/images/character/tori-face.svg";
@@ -112,6 +113,7 @@ export const Images = {
   Quiz_IpaTory,
   Camera,
   IpaTori1,
+  IpaTori2,
   IpaFace,
   Logo,
   Kakao,
