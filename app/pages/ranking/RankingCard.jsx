@@ -5,6 +5,9 @@ import { Images } from "@constants/Images";
 const AVATAR_MAP = {
   ToriFace: Images.ToriFace,
   IpaFace: Images.IpaFace,
+  ProfileIce: Images.ProfileIce,
+  Fish: Images.Fish,
+  Polarbear: Images.Polarbear,
 };
 
 const getAvatarRenderComponent = (profileKey) => {
@@ -15,8 +18,8 @@ export default function RankingCard({ item, isProminent, onPress }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
       <View
-        className={`bg-white rounded-xl p-lg mb-2 shadow-sm ${
-          isProminent ? "border-green" : "border-gray"
+        className={`bg-white rounded-xl p-lg mb-sm shadow-sm ${
+          isProminent ? "border-2 border-green" : "border-2 border-white"
         }`}
       >
         <View className="flex-row justify-between items-center">

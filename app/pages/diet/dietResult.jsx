@@ -1,15 +1,22 @@
 import React from "react";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
-import MainButton from "@components/MainButton";
 import { Images } from "@constants/Images";
-import { View, Text, ScrollView, StyleSheet, Alert, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 import { ResultStore } from "@utils/storage";
 import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "@hooks/useAuth";
 import { apiFetch } from "@services/authService";
+import Modal from "@components/Modal";
+import CustomAlert from "@components/CustomAlert";
 
 // 날짜
 function formatDate(dateObj) {
@@ -24,7 +31,7 @@ function formatDate(dateObj) {
   }
 }
 
-const fmt = (n, digits = 1) => (n == null ? "-" : Number(n).toFixed(digits));
+const fmt = (n, digits = 2) => (n == null ? "-" : Number(n).toFixed(digits));
 
 export default function DietResult() {
   const router = useRouter();
@@ -38,7 +45,7 @@ export default function DietResult() {
 
   // 사진/결과
   const photoUri = ResultStore.photoUri;
-  const result = ResultStore.data;
+  const result = ResultStore.data; // (미사용이어도 유지)
 
   // 탄소 계산 결과
   const rawCarbon = ResultStore.carbon;
@@ -46,8 +53,8 @@ export default function DietResult() {
   const totalKg =
     typeof carbon?.totalCo2Kg === "number" ? carbon.totalCo2Kg : null;
 
-  // 한 끼 식사 평균 배출량 (임시)
-  const typicalMealKg = 4.8;
+  // 한 끼 식사 평균 배출량
+  const typicalMealKg = 1.5;
   const savedKg = totalKg != null ? Math.max(0, typicalMealKg - totalKg) : null;
 
   // 날짜 문자열
@@ -58,45 +65,93 @@ export default function DietResult() {
   const userId = user?.userId;
 
   const isZeroPoint = savedKg != null && savedKg <= 0;
-  const canSave = totalKg != null && savedKg != null && savedKg > 0 && !saving;
-  const rightLabel = isZeroPoint ? "0포인트 받기" : (saving ? "저장 중..." : "포인트 받기");
+  const rightLabel = isZeroPoint
+    ? "홈으로"
+    : saving
+    ? "저장 중..."
+    : "얼음 받기";
+
+  const [alertState, setAlertState] = React.useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: undefined,
+    onConfirm: undefined,
+    onCancel: undefined,
+  });
+
+  const openAlert = (opts) =>
+    setAlertState((s) => ({ ...s, visible: true, ...opts }));
+  const closeAlert = () =>
+    setAlertState((s) => ({
+      ...s,
+      visible: false,
+      onConfirm: undefined,
+      onCancel: undefined,
+    }));
 
   const onRightPress = () => {
-  if (isZeroPoint) {
-    Alert.alert(
-      "0포인트 안내",
-      "이번 식사는 평균보다 배출량이 높아 0포인트입니다.",
-      [{ text: "홈으로", onPress: () => router.push("/(tabs)/home") }]
-    );
-    return;
-  }
-  // 저장 진행
-  saveDietRecord();
-};
+    if (saving || totalKg == null || savedKg == null) return;
 
-  // 절약량 저장
+    // 0얼음
+    if (isZeroPoint) {
+      openAlert({
+        title: "얼음 적립",
+        message: "이번 식사는 평균보다 배출량이 높아 0얼음 입니다.",
+        confirmText: "홈으로",
+        onConfirm: () => router.replace("/(tabs)/home"),
+      });
+      return;
+    }
+
+    // 100g → 10얼음 = 1kg → 100얼음
+    const ice = Math.round(Number(savedKg.toFixed(2)) * 100);
+
+    openAlert({
+      title: "얼음 적립",
+      message: `${ice.toLocaleString("ko-KR")} 얼음 적립합니다.`,
+      confirmText: "받기",
+      cancelText: "취소",
+      onConfirm: async () => {
+        const ok = await saveDietRecord();
+        if (ok) router.replace("/(tabs)/home");
+      },
+    });
+  };
+
   const saveDietRecord = async () => {
+    setSaving(true);
     try {
       if (!userId) {
-        Alert.alert(
-          "로그인 필요",
-          "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
-        );
-        return;
+        openAlert({
+          title: "로그인 필요",
+          message: "사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요.",
+          confirmText: "확인",
+        });
+        return false;
       }
+
       if (savedKg == null) {
-        Alert.alert("저장 불가", "절약량을 먼저 계산해 주세요.");
-        return;
+        openAlert({
+          title: "저장 불가",
+          message: "절감량을 먼저 계산해 주세요.",
+          confirmText: "확인",
+        });
+        return false;
       }
+
       if (savedKg <= 0) {
-        Alert.alert("저장 불가", "절약한 탄소가 0kg 입니다.");
-        return;
+        openAlert({
+          title: "저장 불가",
+          message: "절감한 탄소가 0kg CO₂ 입니다.",
+          confirmText: "확인",
+        });
+        return false;
       }
 
-      setSaving(true);
-      // 백엔드가 Authentication에서 userId 추출 → 바디엔 co2Kg만 보냄
-      const body = { co2Kg: Number(savedKg.toFixed(1)) };
-
+      // 저장 요청
+      const body = { co2Kg: Number(savedKg.toFixed(2)) };
       const res = await apiFetch("/diet/ingest/save", {
         method: "POST",
         body,
@@ -109,166 +164,249 @@ export default function DietResult() {
 
       // 유저 정보 갱신
       await refreshUser?.();
-
-      Alert.alert("저장 완료", "절약한 탄소량이 기록되었습니다.", [
-        { text: "확인", onPress: () => router.push("/(tabs)/home") },
-      ]);
-    } catch (e) {
-      Alert.alert("저장 실패", String(e?.message || e));
+      return true; // 성공
+    } catch (err) {
+      openAlert({
+        title: "오류",
+        message: err?.message ?? "저장 중 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+      return false; // 실패
     } finally {
       setSaving(false);
     }
   };
 
+  const [open, setOpen] = React.useState(false);
+
   return (
     <View className="flex-1">
-      <HeaderBar title="식단 측정 결과"/>
+      <HeaderBar title="빙하 식탁 결과" />
       <View className="flex-1">
         <BgGradient />
         <View className="px-pageX">
-        <ScrollView
-          showsVerticalScrollIndicator={false}  
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 32}}
-        >
-          <View className="gap-4">
-
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 32 }}
+          >
             {/* 날짜 */}
-            <View className="pt-llg flex-row justify-center items-center">
-            <View className="flex-1">
-              <Text className="font-sb-md text-black text-caption">
-                식사 날짜
-              </Text>
-              <Text className="font-grotesk-md text-black text-h3">
-                {dateStr || "—"}
-              </Text>
+            <View className="pt-md flex-row justify-center items-center">
+              <View className="flex-1">
+                <Text className="font-sb-md text-black text-caption">
+                  식사 날짜
+                </Text>
+                <Text className="font-grotesk-md text-black text-h3">
+                  {dateStr || "—"}
+                </Text>
               </View>
-              <Images.Ipa_diet width={48} height={48} />
+              <Images.Ipa_diet width={72} height={72} />
             </View>
 
-            {/* 촬영 사진 */}
-            {photoUri && (
-              <View className="h-[320px] rounded-[12px] overflow-hidden">
-                <ExpoImage
-                  source={{ uri: photoUri }}
-                  style={{ width: "100%", height: "100%" }}
-                  contentFit="cover"
-                />
-              </View>
-            )}
+            <View className="gap-4">
+              {/* 촬영 사진 */}
+              {photoUri && (
+                <View className="h-[320px] rounded-[12px] overflow-hidden">
+                  <ExpoImage
+                    source={{ uri: photoUri }}
+                    style={{ width: "100%", height: "100%" }}
+                    contentFit="cover"
+                  />
+                </View>
+              )}
 
-            {/* 탄소 배출 결과 카드 */}
-            <View className="w-[100%] bg-white rounded-xl px-lg py-llg gap-sm border-green border-2">
-              <View className="flex-row">
-              <Images.Diet width={32} height={32}/>
-              <Text className="font-grotesk-b text-h1 text-green">
-                {totalKg != null ? fmt(totalKg, 1) : "—"}
-                <Text className="text-h3 font-sf-md text-green">
-                  {" "}
-                  kg (CO
-                  <Text className="text-overline">2</Text>eq)
-                </Text>
-              </Text>
-              </View>
-
-              {/* 비교 문구 */}
-              <Text className="font-sf-md px-ssm text-black text-bodySm">
-                {savedKg != null ? (
-                  savedKg > 0
-                    ? `한 끼 식사로 ${fmt(savedKg, 1)} kg CO₂eq 를 절약했어요!`
-                    : "이번 식사는 평균보다 배출량이 높아 포인트가 0점이에요"
-                ) : (
-                  "탄소 배출량을 계산 중이에요."
+              {/* 탄소 배출 결과 카드 */}
+              <View className="bg-white rounded-2xl px-6 py-5">
+                <View className="flex-row items-center justify-between">
+                  <Text className="font-sf-md text-lg">식사 탄소 절감량</Text>
+                  <TouchableOpacity onPress={() => setOpen(true)}>
+                    <Images.Information width={28} height={28} />
+                  </TouchableOpacity>
+                </View>
+                <View className="items-end">
+                  <Text className="text-3xl font-sf-b text-[#318643] mt-1">
+                    {fmt(savedKg)} kg CO₂
+                  </Text>
+                </View>
+                {isZeroPoint && (
+                  <View
+                    className="mt-md rounded-lg px-sm py-sm"
+                    style={{ backgroundColor: "#FEF2F2" }}
+                  >
+                    <Text className="text-[12px] font-sf-md text-red">
+                      이번 식사는 평균보다 배출량이 많아 얼음 지급이 없습니다.
+                    </Text>
+                  </View>
                 )}
-              </Text>
-            </View>
-
-            {/* 일반 정보 */}
-            <View className="w-[100%] items-center flex-row">
-              <Images.Tori_diet width={48} height={48} />
-              <Text className="font-sf-md text-h4">
-                보통 한 끼 식사에서 {"\n"}약 <Text className="font-sf-b text-green">{typicalMealKg} kg CO₂eq</Text>가 배출돼요!
-              </Text>
-            </View>
-
-            {/* 항목별 배출량 리스트 */}
-            {Array.isArray(carbon?.items) && carbon.items.length > 0 && (
-              <View className="w-full bg-white rounded-xl px-lg py-md mt-xxs">
-                <Text className="font-sf-b text-[16px] mb-2">
-                  항목별 배출량
-                </Text>
-                {carbon.items.map((it, idx) => {
-                  const kg = typeof it?.co2Kg === "number" ? it.co2Kg : null;
-                  return (
-                    <View
-                      key={`${it.name}-${idx}`}
-                      className="bg-white rounded-xl px-md py-md mb-sm border border-[#eee]"
-                    >
-                      <Text className="font-sf-b">
-                        {it.name ?? "이름 없음"}
-                      </Text>
-                      <Text>{kg != null ? `${fmt(kg, 1)} kg CO₂eq` : "—"}</Text>
-                    </View>
-                  );
-                })}
               </View>
-            )}
 
-          <View className="flex-row mt-sm gap-2">
-          {/* 다시 찍기 → 카메라 화면 */}
-          <Pressable
-            className="flex-1 rounded-xl items-center justify-center py-llg bg-gray2"
-            onPress={() => router.replace("/pages/diet/dietTest")}
-            disabled={saving}
-            android_ripple={{ color: "rgba(0,0,0,0.08)" }}
-            style={({ pressed }) => [
-              { opacity: saving ? 0.6 : 1 },
-              pressed && { backgroundColor: "#e5e7eb" },
-            ]}
-          >
-            <Text className="font-sf-b text-button text-white">다시 찍기</Text>
-          </Pressable>
+              {/* 항목별 배출량 리스트 */}
+              {Array.isArray(carbon?.items) && carbon.items.length > 0 && (
+                <View className="bg-white rounded-2xl px-6 py-5">
+                  <View className="justify-between gap-2">
+                    <Text className="font-sf-md text-lg">항목별 배출량</Text>
+                    {carbon.items.map((it, idx) => {
+                      const kg =
+                        typeof it?.co2Kg === "number" ? it.co2Kg : null;
+                      return (
+                        <View
+                          key={`${it.name}-${idx}`}
+                          className="bg-white rounded-xl gap-2 px-md py-md mb-sm border border-gray"
+                        >
+                          <Text className="font-sf-b">
+                            {it.name ?? "이름 없음"}
+                          </Text>
+                          <Text>{kg != null ? `${fmt(kg)} kg CO₂` : "—"}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
 
-          {/* 포인트/0포인트 */}
-          <Pressable
-            className={`flex-1 rounded-xl items-center justify-center py-llg bg-green`}
-            onPress={onRightPress}
-            // 저장 자체가 불가능한 경우만 막음(값없음/저장중). 0포인트는 막지 않음!
-            disabled={saving || totalKg == null || savedKg == null}
-            android_ripple={{ color: isZeroPoint ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.2)" }}
-            style={({ pressed }) => [
-              // 0포인트일 때는 살짝 어둡게, 저장 가능일 때는 초록 눌림
-              isZeroPoint && pressed && { backgroundColor: "#d1d5db" },     // gray-300 → pressed gray-400 느낌
-              !isZeroPoint && pressed && { backgroundColor: "#16a34a90" }, // green 눌림
-            ]}
-          >
-            <Text className={`font-sf-md text-button text-white`}>
-              {rightLabel}
-            </Text>
-          </Pressable>
+              <View className="flex-row mt-sm gap-2">
+                <Pressable
+                  className="flex-1 rounded-xl items-center justify-center py-llg bg-gray2"
+                  onPress={() => router.replace("/pages/diet/dietTest")}
+                  disabled={saving}
+                  android_ripple={{ color: "rgba(0,0,0,0.08)" }}
+                  style={({ pressed }) => [
+                    { opacity: saving ? 0.6 : 1 },
+                    pressed && { backgroundColor: "#e5e7eb" },
+                  ]}
+                >
+                  <Text className="font-sf-b text-button text-white">
+                    다시 찍기
+                  </Text>
+                </Pressable>
+
+                {/* 포인트/0포인트 */}
+                <Pressable
+                  className="flex-1 rounded-xl items-center justify-center py-llg bg-green"
+                  onPress={onRightPress}
+                  disabled={saving || totalKg == null || savedKg == null}
+                  style={({ pressed }) => [
+                    isZeroPoint && pressed && { backgroundColor: "#d1d5db" },
+                    !isZeroPoint && pressed && { backgroundColor: "#318643" },
+                  ]}
+                >
+                  <Text className="font-sf-md text-button text-white">
+                    {rightLabel}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <Modal visible={open} onClose={() => setOpen(false)}>
+              <View className="flex-row justify-between items-center mb-md">
+                <View className="flex-row items-center">
+                  <Images.Tori_diet width={34} height={34} />
+                  <Text className="text-body font-sf-b">
+                    얼음 식탁 계산 기준
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setOpen(false)}>
+                  <Text className="text-green text-label font-sf-md">닫기</Text>
+                </TouchableOpacity>
+              </View>
+              <View className="gap-2">
+                <Text className="font-sf-b text-bodySm text-green">
+                  절감량 = 표준 한 끼 배출량 − 이번 식사 배출량
+                </Text>
+                <Text className="text-caption text-green">
+                  ※ 한국인 표준 한 끼는 1.5 kg CO₂ 입니다.
+                </Text>
+                <Text className="text-caption text-gray-600">
+                  ※ ‘총 배출량’은 음식 자체 + (집/배달/포장/식당) 가감 포함이며,
+                  표시는 소수 둘째 자리까지 반올림합니다.
+                </Text>
+                <View className="gap-4 mt-sm mb-lg">
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Home width={16} height={16} className="mt-[2px]" />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">집</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 가정 조리(한 끼당 1.19kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Delivery
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">배달</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 오토바이 (0.137kg/km × 4km){"\n"}· 일회용기 (0.050kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Takeout
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">
+                        포장(테이크아웃)
+                      </Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 일회용기(0.050kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mb-sm rounded-lg bg-gray-100 flex-row items-start gap-2">
+                    <Images.Restaurant
+                      width={16}
+                      height={16}
+                      className="mt-[2px]"
+                    />
+                    <View className="flex-1">
+                      <Text className="font-sf-sb text-body">식당</Text>
+                      <Text className="text-black font-sf text-caption mt-1">
+                        · 시설·운영(한 끼당 3.43kg)
+                        {"\n"}· 음식 자체 배출량
+                      </Text>
+                    </View>
+                  </View>
+                  <Text className="text-caption text-gray-600">
+                    ※ 계산 기준: 기후변화행동연구소, 매일일보, 한겨레신문 참고
+                  </Text>
+                </View>
+              </View>
+            </Modal>
+          </ScrollView>
         </View>
-
-
-           </View>
-        </ScrollView>
-         </View>
       </View>
+
+      <CustomAlert
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        cancelText={alertState.cancelText}
+        onConfirm={() => {
+          closeAlert();
+          alertState.onConfirm?.();
+        }}
+        onCancel={
+          alertState.onCancel
+            ? () => {
+                closeAlert();
+                alertState.onCancel?.();
+              }
+            : undefined
+        }
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "black" },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  card: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
-});

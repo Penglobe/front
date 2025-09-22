@@ -1,5 +1,3 @@
-// 외부 JSON -> 최소 페이로드
-
 function pickBestCandidate(candidates = []) {
   const score = (c) => {
     const v = (x) => (x != null && x !== -1 ? 1 : 0);
@@ -34,7 +32,6 @@ function mergeSameItems(items) {
   return [...map.values()];
 }
 
-// 최소 페이로드 생성
 export function toCarbonRequestPayload(
   aiJson,
   opts = { merge: true, userId: null }
@@ -77,8 +74,8 @@ export function toCarbonRequestPayload(
 
   const finalItems = opts.merge ? mergeSameItems(cleaned) : cleaned;
 
-  return {
-    userId: opts.userId,
-    items: finalItems,
-  };
+  return { userId: opts.userId, items: finalItems };
 }
+
+export { pickBestCandidate, mergeSameItems };
+export default toCarbonRequestPayload;

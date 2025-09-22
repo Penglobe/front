@@ -7,15 +7,16 @@ import {
   Pressable,
   Platform,
   StyleSheet,
-  KeyboardAvoidingView,
-  Alert,
+  Dimensions,
 } from "react-native";
 import { Images } from "@constants/Images";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { login, getAccessToken } from "@services/authService";
+import { login, getAccessToken, me, logout } from "@services/authService";
 import { useAuth } from "@hooks/useAuth";
 import { useKakaoLogin } from "@hooks/useKakaoLogin";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import CustomAlert from "@components/CustomAlert";
 
 const INPUT_H = 56; // 입력칸 높이
 const BTN_H = 56; // 버튼 높이
@@ -29,16 +30,31 @@ export default function Index() {
   const params = useLocalSearchParams();
   const { loginWithKakao, isReady } = useKakaoLogin();
 
+  const { width: SCREEN_W } = Dimensions.get("window");
+  const LOGO_SIZE = Math.min(240, Math.max(160, SCREEN_W * 0.5));
+
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const canLogin = email.trim().length > 0 && pw.trim().length > 7;
 
   useEffect(() => {
     (async () => {
       const at = await getAccessToken();
-      if (at) router.replace("/(tabs)/home"); // ✅ 토큰 있으면 홈으로
+      if (!at) return; // 토큰 없으면 로그인 화면 유지
+      try {
+        // 방법 1) 서버에서 현재 유저 조회
+        const user = await me(); // { userId, type: "ADMIN" | "USER", ... }
+        const isAdmin = String(user?.type || "").toUpperCase() === "ADMIN";
+        router.replace(isAdmin ? "/pages/admin/adminMain" : "/(tabs)/home");
+      } catch {
+        // 토큰 만료/오류 시 그냥 로그인 화면
+        await logout();
+      }
     })();
   }, [router]);
 
@@ -52,11 +68,17 @@ export default function Index() {
   const onLogin = async () => {
     try {
       setLoading(true);
-      await login(email.trim(), pw.trim());
-      await refreshUser();
-      router.replace("/(tabs)/home");
+      const res = await login(email.trim(), pw.trim());
+
+      if (res.type?.toUpperCase() === "ADMIN") {
+        router.replace("/pages/admin/adminMain"); // 관리자 페이지
+      } else {
+        router.replace("/(tabs)/home"); // 일반 유저 홈
+      }
     } catch (e) {
-      Alert.alert("로그인 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("로그인 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -65,15 +87,20 @@ export default function Index() {
   const onKakaoLogin = async () => {
     try {
       if (!isReady) {
-        Alert.alert("잠시만요", "로그인 준비중입니다. 1초 후 다시 눌러주세요.");
+        setAlertTitle("잠시만요");
+        setAlertMessage("로그인 준비중입니다. 1초 후 다시 눌러주세요.");
+        setAlertVisible(true);
         return;
       }
       const result = await loginWithKakao();
       await refreshUser();
       // TODO: result 또는 사용자 정보에서 profileCompleted 여부 확인 후 분기
+
       router.replace("/(tabs)/home");
     } catch (e) {
-      Alert.alert("카카오 로그인 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("카카오 로그인 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요");
+      setAlertVisible(true);
     }
   };
 
@@ -88,22 +115,19 @@ export default function Index() {
       />
 
       {/* 로고 */}
-      <View
-        className="absolute left-0 right-0 items-center"
-        style={{ top: "18%" }}
-      >
-        <Images.Logo width={240} height={240} />
+      <View className="items-center mt-[50%] mb-[6%]">
+        <Images.Logo width={LOGO_SIZE} height={LOGO_SIZE} />
       </View>
 
       {/* 입력 + 버튼 영역 */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: (insets?.bottom ?? 0) + BLOCK_BOTTOM,
+      <KeyboardAwareScrollView
+        contentContainerStyle={{
+          paddingBottom: (insets?.bottom ?? 0) + BLOCK_BOTTOM,
         }}
+        enableOnAndroid={true}
+        enableAutomaticScroll={Platform.OS === "ios"}
+        extraScrollHeight={20} // 입력칸 위로 살짝 더 올려줌
+        keyboardShouldPersistTaps="handled"
       >
         <View className="px-pageX">
           {/* 아이디 / 비밀번호 */}
@@ -120,7 +144,6 @@ export default function Index() {
                 styles.inputShadow,
                 {
                   height: INPUT_H,
-                  paddingVertical: 14,
                   fontSize: FONT,
                   textAlignVertical: "center",
                 },
@@ -138,7 +161,6 @@ export default function Index() {
                 styles.inputShadow,
                 {
                   height: INPUT_H,
-                  paddingVertical: 14,
                   fontSize: FONT,
                   textAlignVertical: "center",
                 },
@@ -162,7 +184,9 @@ export default function Index() {
             ]}
           >
             <Text
-              className={`font-sf-b text-h3 ${canLogin ? "text-white" : "text-[#9CA3AF]"}`}
+              className={`font-sf-b text-h3 ${
+                canLogin ? "text-white" : "text-[#9CA3AF]"
+              }`}
             >
               {loading ? "로그인 중..." : "로그인"}
             </Text>
@@ -176,22 +200,15 @@ export default function Index() {
               </Text>
             </Pressable>
           </View>
-
-          {/* 카카오 원형 버튼 */}
-          <Pressable
-            onPress={onKakaoLogin}
-            disabled={!isReady || loading}
-            className="mt-10 self-center rounded-full items-center justify-center"
-            style={[
-              styles.kakaoBtnShadow,
-              { width: 58, height: 58, backgroundColor: "#FEE500" },
-            ]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Images.Kakao width={30} height={30} />
-          </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

@@ -1,6 +1,6 @@
 // TransportStart.jsx
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, Text, Alert, ScrollView } from "react-native";
+import { View, ActivityIndicator, Text, ScrollView } from "react-native";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import BgGradient from "@components/BgGradient";
@@ -8,26 +8,80 @@ import MainButton from "@components/MainButton";
 import TransportButton from "@components/TransportButton";
 import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
+import CustomAlert from "@components/CustomAlert";
+import LoadingScreen from "@components/LoadingScreen";
 
 export default function TransportStart() {
   const [location, setLocation] = useState(null);
   const [mode, setMode] = useState("TRANSIT");
   const router = useRouter();
 
-  // ✅ 권한 요청 & 현재 위치 가져오기
+  // ✅ Alert 상태
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: "",
+    onConfirm: () => setAlertConfig((prev) => ({ ...prev, visible: false })),
+    onCancel: undefined,
+  });
+
+  // ✅ Alert 오픈 헬퍼 함수
+  const openAlert = (config) =>
+    setAlertConfig({
+      visible: true,
+      title: config.title || "",
+      message: config.message || "",
+      confirmText: config.confirmText || "확인",
+      cancelText: config.cancelText,
+      onConfirm: () => {
+        if (config.onConfirm) config.onConfirm();
+        setAlertConfig((prev) => ({ ...prev, visible: false }));
+      },
+      onCancel: config.onCancel
+        ? () => {
+            config.onCancel();
+            setAlertConfig((prev) => ({ ...prev, visible: false }));
+          }
+        : undefined,
+    });
+
+  // ✅ 권한 요청 & 현재 위치 가져오기 (빠르게 + 보완)
   useEffect(() => {
     (async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("위치 권한이 필요합니다.");
+          openAlert({
+            title: "권한 필요",
+            message: "위치 권한이 필요합니다.",
+          });
           return;
         }
-        let loc = await Location.getCurrentPositionAsync({});
-        setLocation(loc.coords);
+
+        // 🔹 1단계: 캐싱된 위치 먼저 가져오기 (빠른 응답)
+        let lastLoc = await Location.getLastKnownPositionAsync();
+        if (lastLoc) {
+          setLocation(lastLoc.coords);
+        }
+
+        // 🔹 2단계: watchPositionAsync로 지속 업데이트 (정확도 보완)
+        await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced, // 적당한 정확도 & 속도 균형
+            distanceInterval: 10, // 10m 이동 시 업데이트
+          },
+          (loc) => {
+            setLocation(loc.coords);
+          }
+        );
       } catch (err) {
         console.error("위치 가져오기 실패:", err);
-        Alert.alert("현재 위치를 가져올 수 없습니다.");
+        openAlert({
+          title: "위치 실패",
+          message: "현재 위치를 가져올 수 없습니다.",
+        });
       }
     })();
   }, []);
@@ -35,10 +89,10 @@ export default function TransportStart() {
   if (!location) {
     return (
       <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" />
-        <Text className="mt-3 text-xl SFPro-Medium">
-          현재 위치를 불러오는 중...
-        </Text>
+        <BgGradient />
+        <LoadingScreen message="현재 위치를 찾는 중..." />
+        {/* ✅ CustomAlert */}
+        <CustomAlert {...alertConfig} />
       </View>
     );
   }
@@ -56,7 +110,7 @@ export default function TransportStart() {
           paddingBottom: 150,
         }}
       >
-        <HeaderBar title="환경 걸음" className="px-pageX" />
+        <HeaderBar title="펭걸음" className="px-pageX" />
 
         {/* ✅ ScrollView로 감싸서 스크롤 가능 */}
         <ScrollView
@@ -76,7 +130,7 @@ export default function TransportStart() {
           {/* 타이틀 */}
           <View className="px-pageX py-llg">
             <Text className="text-xl" style={{ fontFamily: "SFPro-Bold" }}>
-              이동 수단을 선택해 주세요
+              이동 수단을 선택해 주세요.
             </Text>
           </View>
 
@@ -127,6 +181,9 @@ export default function TransportStart() {
           </View>
         </ScrollView>
       </View>
+
+      {/* ✅ CustomAlert */}
+      <CustomAlert {...alertConfig} />
     </View>
   );
 }

@@ -1,4 +1,5 @@
-import { Pressable, View, Text } from "react-native";
+import React from "react";
+import { Pressable, View } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,9 +8,8 @@ import Animated, {
   withRepeat,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
-import React from "react";
 
-export function ShutterButton({ onPress, disabled, loading }) {
+const ShutterButton = ({ onPress, disabled, loading }) => {
   const pressScale = useSharedValue(1);
   const ringScale = useSharedValue(1);
 
@@ -47,7 +47,7 @@ export function ShutterButton({ onPress, disabled, loading }) {
   };
 
   return (
-    <View className="items-center mb-16">
+    <View className="items-center mb-lg">
       <Pressable
         onPress={onPress}
         disabled={disabled}
@@ -64,9 +64,11 @@ export function ShutterButton({ onPress, disabled, loading }) {
       >
         <Animated.View
           style={[wrapStyle, { overflow: "visible" }]}
-          className={`w-[80px] h-[80px] bg-transparent items-center justify-center ${disabled ? "opacity-60" : ""}`}
+          className={`w-[80px] h-[80px] bg-transparent items-center justify-center ${
+            disabled ? "opacity-60" : ""
+          }`}
         >
-          {/* 바깥 흰색 링 */}
+          {/* 바깥 흰색 */}
           <Animated.View
             style={ringStyle}
             className="w-[82px] h-[82px] rounded-full border-4 border-white bg-green/85 items-center justify-center"
@@ -82,4 +84,7 @@ export function ShutterButton({ onPress, disabled, loading }) {
       </Pressable>
     </View>
   );
-}
+};
+
+export default ShutterButton;
+export { ShutterButton };

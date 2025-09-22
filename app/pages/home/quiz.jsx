@@ -3,79 +3,68 @@ import { useRouter } from "expo-router";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import MainButton from "@components/MainButton";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@components/Modal";
 import { useAuth } from "@hooks/useAuth";
 import Constants from "expo-constants";
 
 const BASE_URL = `${Constants.expoConfig.extra.SERVER_URL}/quiz`;
 
-//console.log(`${BASE_URL}/today`);
-
 export default function QuizPage() {
   const router = useRouter();
-  const [question, setQuestion] = useState(null); //질문 가져오기
-  const [open, setOpen] = useState(false); //모달 열기
-  const [answer, setAnswer] = useState(null); //사용자 답변
-  const [result, setResult] = useState(null); // 정답 여부에 따라서 모달 내용 변경
   const { user } = useAuth();
 
-  /*user*/
-  //console.log("user", user); // 먼저 전체 객체를 찍어보세요
-  //console.log("userId", user.userId);
+  const [question, setQuestion] = useState(null);
+  const [open, setOpen] = useState(false); // 정답/오답 모달
+  const [submittedModalOpen, setSubmittedModalOpen] = useState(false); // 이미 제출 모달
+  const [answer, setAnswer] = useState(null);
+  const [result, setResult] = useState(null);
 
-  //console.log("userId", user.id);
-
-  /*날짜*/
   const today = new Date();
-  const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+  const formattedDate = `${today.getFullYear()}년 ${
+    today.getMonth() + 1
+  }월 ${today.getDate()}일`;
 
-  /*핸들러*/
-  const handleAnswer = (userAnswer) => {
-    setAnswer(userAnswer); //사용자 답변 설정
-
-    const userAnswerBool = userAnswer === "O"; //db에는 true/false로 저장되어 있음
-    const isCorrect = userAnswerBool === Boolean(question.isAnswerTrue); //정답 여부 확인
-
-    setResult(isCorrect); //결과 설정
-
-    setOpen(true); //모달 열기
-  };
-
-  /*퀴즈 가져오기*/
+  // 퀴즈 가져오기
   useEffect(() => {
     fetch(`${BASE_URL}/today`)
-      .then((response) => response.json())
-      .then((data) => {
-        //console.log("질문", data);
-        setQuestion(data);
-      })
-      .catch((error) => console.error("Error fetching quiz:", error));
+      .then((res) => res.json())
+      .then((data) => setQuestion(data))
+      .catch((err) => console.error("Error fetching quiz:", err));
   }, []);
 
-  /*퀴즈 정답처리*/
-  const handleSubmitAnswer = async () => {
-    if (!question || !answer) return;
+  // 답 제출 처리
+  const handleSubmitAnswer = async (userAnswer) => {
+    if (!question) return;
 
     try {
       const res = await fetch(`${BASE_URL}/submit`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.userId,
           quizId: question.quizId,
-          answer: answer === "O",
+          answer: userAnswer === "O",
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json(); // 중복 제출 시
-        alert(errorData.message); // 에러 메세지
+        alert(data.message);
         return;
       }
-      const data = await res.json(); // 정상
+
+      const isCorrect =
+        userAnswer === "O" ? question.isAnswerTrue : !question.isAnswerTrue;
+      setAnswer(userAnswer);
+      setResult(isCorrect);
+
+      if (data.submitted) {
+        setSubmittedModalOpen(true); // 이미 제출 모달
+      } else {
+        setOpen(true); // 정답/오답 모달
+      }
     } catch (e) {
       alert("서버 오류가 발생했습니다.");
     }
@@ -83,96 +72,111 @@ export default function QuizPage() {
 
   return (
     <View className="flex-1">
-      {/*모달*/}
+      {/* 정답/오답 모달 */}
       <Modal visible={open} onClose={() => setOpen(false)}>
         <View className="items-center mb-llg">
-          <Text className="text-black text-h2 font-sf-b text-center mb-sm">
+          <Text className="text-black text-h2 font-sf-b text-center mb-xs">
             {result ? "정답입니다!" : "오답입니다!"}
           </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text className="text-black text-h2 font-sf-b">
+          <View className="w-full flex-row items-center justify-center">
+            <Text className="text-green text-h2 font-sf-b">
               {result ? "10" : "1"}
             </Text>
-            <Images.Ice width={40} height={40} />
+            <Images.Ice width={28} height={28} />
             <Text className="text-black text-h2 font-sf-b">을 받았어요.</Text>
           </View>
-
-          <View className="items-center mb-llg">
-            {result ? <Images.Ipa2 /> : <Images.Ipa_sad />}
+          <View className="items-center my-3">
+            {result ? (
+              <Images.Ipa2 width={150} height={150} />
+            ) : (
+              <Images.Ipa1 width={150} height={150} />
+            )}
           </View>
         </View>
-
         <MainButton
-          label="포인트 받기"
-          onPress={async () => {
-            await handleSubmitAnswer(); // 정답 제출
-            setOpen(false); // 모달 닫기
-            router.push("/(tabs)/home"); // 홈 페이지 이동
+          label="확인"
+          onPress={() => {
+            setOpen(false);
+            router.replace("/(tabs)/home");
           }}
         />
       </Modal>
 
-      {/*배경*/}
+      {/* 이미 제출 모달 */}
+      <Modal
+        visible={submittedModalOpen}
+        onClose={() => setSubmittedModalOpen(false)}
+      >
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b text-center mb-xs">
+            {result ? "정답입니다!" : "오답입니다!"}
+          </Text>
+          <Text className="text-black text-caption font-sf-b">
+            오늘 퀴즈로 더 받을 수 있는 얼음은 없어요
+          </Text>
+          <View className="items-center my-3">
+            {result ? (
+              <Images.Ipa2 width={150} height={150} />
+            ) : (
+              <Images.Ipa1 width={150} height={150} />
+            )}
+          </View>
+        </View>
+        <MainButton
+          label="확인"
+          onPress={() => {
+            setSubmittedModalOpen(false);
+            router.push("/(tabs)/home");
+          }}
+        />
+      </Modal>
+
+      {/* 배경 */}
       <Images.BgQuiz
         width="100%"
         height="100%"
-        preserveAspectRatio="xMidYMid slice" //X축,Y축 기준을 중앙 + 꽉 채움
-        style={StyleSheet.absoluteFillObject} //부모 컨테이너 안을 전부 채우도록 배치
-        pointerEvents="none" //터치 이벤트 금지
+        preserveAspectRatio="xMidYMid slice"
+        style={StyleSheet.absoluteFillObject}
+        pointerEvents="none"
       />
 
-      <HeaderBar title="오늘의 퀴즈" />
-      {/*날짜, 오늘의 퀴즈*/}
+      <HeaderBar title="펭퀴즈" />
+
       <View className="px-pageX pt-2xl gap-2xl">
-        <View className="bg-white rounded-xl p-4">
-          <Text className="text-green font-sf-md text-lg">{formattedDate}</Text>
-          <Text className="font-sf-b text-h4 mt-sm">
-            환경 퀴즈 첫 제출로만 얼음 적립! {"\n"}하지만 얼음은 없어도 지식은
-            쌓을 수 있어요!
+        {/* 날짜/설명 */}
+        <View className="bg-white rounded-xl px-lg py-lg">
+          <Text className="text-green font-sf-b text-body">
+            {formattedDate}
+          </Text>
+          <Text className="font-sf-b text-body mt-sm">
+            펭퀴즈 첫 제출로만 얼음 적립! {"\n"}얼음은 없어도 지식은 쌓을 수
+            있어요!
           </Text>
         </View>
 
-        {/*퀴즈*/}
+        {/* 퀴즈 내용 */}
         <View className="bg-white rounded-xl p-xl">
-          {/*퀴즈내용*/}
           <Text className="font-sf-b text-h2">
             Q. {question ? question.question : "퀴즈를 불러오는 중입니다..."}
           </Text>
 
-          {/*OX*/}
           <View className="flex-row justify-around mt-3xl">
             <TouchableOpacity
-              className="bg-blue py-8 px-12 rounded-lg opacity-90"
-              onPress={() => handleAnswer("O")}
+              className="bg-blue py-sm px-2xl rounded-lg opacity-90"
+              onPress={() => handleSubmitAnswer("O")}
             >
               <Text className="text-white text-[60px] font-extrabold">O</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-red-400 py-8 px-12 rounded-lg opacity-90"
-              onPress={() => handleAnswer("X")}
+              className="bg-red py-sm px-2xl rounded-lg opacity-90"
+              onPress={() => handleSubmitAnswer("X")}
             >
               <Text className="text-white text-[60px] font-extrabold">X</Text>
             </TouchableOpacity>
           </View>
         </View>
-
-        {/*퀴즈 캐릭터*/}
-        <View style={{ flex: 1 }}>
-          <Images.Quiz_IpaTory
-            width={300}
-            height={200}
-            style={{
-              position: "absolute",
-              left: 30,
-            }}
-          />
+        <View className="items-center justify-center py-md">
+          <Images.IpaTori2 width={250} height={220} />
         </View>
       </View>
     </View>

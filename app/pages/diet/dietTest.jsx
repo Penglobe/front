@@ -2,53 +2,42 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  Alert,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
-  Button,
   Platform,
   NativeModules,
   NativeEventEmitter,
+  Linking,
+  ActivityIndicator,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Image as ExpoImage } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Images } from "@constants/Images";
+import { useIsFocused } from "@react-navigation/native";
 
 import { ShutterButton } from "@pages/diet/ShutterButton";
 import { ResultStore } from "@utils/storage";
 import { toCarbonRequestPayload } from "@pages/diet/transformFoodlens";
 import { requestCarbon } from "@services/dietService";
 import Modal from "@components/Modal";
-import MainButton from "../../../components/MainButton";
+import MainButton from "@components/MainButton";
+import CustomAlert from "@components/CustomAlert";
 
 const { FoodLensModule } = NativeModules;
 
-// 긴 JSON을 알럿으로 보기 좋게(길면 자름)
-function alertJSON(title, data, max = 1000) {
-  try {
-    const s = typeof data === "string" ? data : JSON.stringify(data, null, 2);
-    const msg = s.length > max ? s.slice(0, max) + `\n… (총 ${s.length}자, 잘림)` : s;
-    Alert.alert(title, msg);
-  } catch (e) {
-    Alert.alert(title, String(data));
-  }
-}
-
-// === 글로벌 Promise 핸들러 ===
+// Android 이벤트 리스너
 let pendingResolver = null;
 let pendingRejecter = null;
 
-// === 리스너 세팅 (Android) ===
 function setupFoodLensEmitter(FoodLensModule) {
   const emitter = new NativeEventEmitter(FoodLensModule);
 
-  emitter.addListener("FoodLensResult", (ev) => {
+  const subResult = emitter.addListener("FoodLensResult", (ev) => {
     if (pendingResolver) {
       try {
         const parsed = JSON.parse(ev?.rawJson ?? "{}");
-        Alert.alert("📸 FoodLens Result", ev?.rawJson ?? "{}");
         pendingResolver(parsed);
       } catch (e) {
         pendingRejecter?.(e);
@@ -58,36 +47,40 @@ function setupFoodLensEmitter(FoodLensModule) {
     }
   });
 
-  emitter.addListener("FoodLensError", (ev) => {
+  const subError = emitter.addListener("FoodLensError", (ev) => {
     if (pendingRejecter) {
-      Alert.alert("❌ FoodLens Error", ev?.message || "예측 오류");
       pendingRejecter(new Error(ev?.message || "예측 오류"));
     }
     pendingResolver = null;
     pendingRejecter = null;
   });
+
+  return () => {
+    subResult?.remove?.();
+    subError?.remove?.();
+  };
 }
 
-// === 플랫폼별 predict ===
+// iOS/Android 공통 예측
 async function predictBase64Cross(base64) {
   if (!FoodLensModule) throw new Error("FoodLensModule 없음");
 
-  // iOS (Promise API)
-  if (Platform.OS === "ios" && typeof FoodLensModule.predictBase64 === "function") {
+  if (
+    Platform.OS === "ios" &&
+    typeof FoodLensModule.predictBase64 === "function"
+  ) {
     const r = await FoodLensModule.predictBase64(base64);
-    const parsed = typeof r === "string" ? JSON.parse(r) : r;
-    alertJSON("📸 FoodLens Result (iOS)", parsed);
-    return parsed;
+    return typeof r === "string" ? JSON.parse(r) : r;
   }
 
-  // Android (이벤트 API)
-  if (Platform.OS === "android" && typeof FoodLensModule.predict === "function") {
+  if (
+    Platform.OS === "android" &&
+    typeof FoodLensModule.predict === "function"
+  ) {
     return await new Promise((resolve, reject) => {
       pendingResolver = resolve;
       pendingRejecter = reject;
-
       FoodLensModule.predict(base64);
-
       setTimeout(() => {
         if (pendingResolver) {
           reject(new Error("예측 시간 초과"));
@@ -106,28 +99,140 @@ export default function DietTest() {
   const camRef = useRef(null);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const isFocused = useIsFocused();
 
   const [loading, setLoading] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
 
-  // === Android 이벤트 리스너 등록 ===
+  const [camReady, setCamReady] = useState(false);
+
+  const [alertState, setAlertState] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    confirmText: "확인",
+    cancelText: undefined,
+    onConfirm: undefined,
+    onCancel: undefined,
+  });
+  const openAlert = (opts) =>
+    setAlertState((s) => ({ ...s, visible: true, ...opts }));
+  const closeAlert = () =>
+    setAlertState((s) => ({
+      ...s,
+      visible: false,
+      onConfirm: undefined,
+      onCancel: undefined,
+    }));
+
+  // Android 이벤트 리스너 등록
   useEffect(() => {
     if (Platform.OS === "android" && FoodLensModule) {
-      setupFoodLensEmitter(FoodLensModule);
+      const cleanup = setupFoodLensEmitter(FoodLensModule);
+      return cleanup;
     }
   }, []);
 
-  
-  // === 촬영 ===
+  // 인식 실패 -> 다시 찍기
+  const retake = () => {
+    setModalVisible(false);
+    setPreview(false);
+    setPhoto(null);
+    setSelectedMode(null);
+    setLoading(false);
+  };
+
+  const alertedRef = useRef(false);
+  useEffect(() => {
+    if (!perm || perm.granted || alertedRef.current) return;
+
+    if (perm.status === "undetermined") {
+      alertedRef.current = true;
+      requestPerm().finally(() => {
+        alertedRef.current = false;
+      });
+      return;
+    }
+
+    // 거부 상태: 재요청 가능
+    if (perm.canAskAgain) {
+      alertedRef.current = true;
+      openAlert({
+        title: "카메라 권한 필요",
+        message: "사진 촬영 기능을 사용하려면 권한을 허용해주세요.",
+        cancelText: "취소",
+        confirmText: "권한 허용",
+        onCancel: () => {
+          alertedRef.current = false;
+        },
+        onConfirm: async () => {
+          await requestPerm();
+          alertedRef.current = false;
+        },
+      });
+      return;
+    }
+
+    // 영구 거부: 설정 열기
+    alertedRef.current = true;
+    openAlert({
+      title: "권한이 비활성화되어 있어요",
+      message: "설정 > 앱 권한에서 카메라를 허용해 주세요.",
+      cancelText: "취소",
+      confirmText: "설정 열기",
+      onCancel: () => {
+        alertedRef.current = false;
+      },
+      onConfirm: () => {
+        Linking.openSettings();
+        alertedRef.current = false;
+      },
+    });
+  }, [perm?.status, perm?.canAskAgain, perm?.granted]);
+
+  const ensureCameraPermission = async () => {
+    if (!perm) {
+      const r = await requestPerm();
+      return !!r?.granted;
+    }
+    if (perm.granted) return true;
+    if (perm.status === "undetermined") {
+      const r = await requestPerm();
+      return !!r?.granted;
+    }
+    if (perm.canAskAgain !== false) {
+      const r = await requestPerm();
+      return !!r?.granted;
+    }
+    openAlert({
+      title: "권한이 비활성화되어 있어요",
+      message: "설정 > 앱 권한에서 카메라를 허용해 주세요.",
+      cancelText: "취소",
+      confirmText: "설정 열기",
+      onConfirm: () => Linking.openSettings(),
+    });
+    return false;
+  };
+
+  useEffect(() => {
+    setCamReady(false);
+  }, [isFocused, perm?.granted, preview]);
+
+  const canShowCamera = isFocused && perm?.granted && !preview;
+  const camKey = `cam:${isFocused ? 1 : 0}:${perm?.granted ? 1 : 0}:${
+    preview ? 1 : 0
+  }`;
+
+  // 촬영
   const takePhoto = async () => {
-    if (!perm?.granted) {
-      const { granted } = await requestPerm();
-      if (!granted) {
-        Alert.alert("카메라 권한 필요");
-        return;
-      }
+    const ok = await ensureCameraPermission();
+    if (!ok) return;
+    if (!camReady) {
+      // 준비 전 촬영 방지
+      return;
     }
     try {
       const shot = await camRef.current?.takePictureAsync?.({
@@ -135,49 +240,76 @@ export default function DietTest() {
         quality: 1,
         skipProcessing: false,
       });
-      Alert.alert("📷 촬영됨", `uri=${shot?.uri}\nbase64=${shot?.base64 ? "있음" : "없음"}`);
       setPhoto(shot);
       setPreview(true);
     } catch (e) {
-      Alert.alert("❌ 촬영 에러", e?.message || "Unknown error");
+      openAlert({
+        title: "촬영 실패",
+        message: "사진 촬영 중 문제가 발생했어요. 다시 시도해 주세요.",
+        confirmText: "확인",
+      });
     }
   };
 
-  // === 예측 실행 ===
+  // 계산
   const confirmAndPredict = async (mealType) => {
     try {
       if (!photo?.base64) {
-        Alert.alert("사진 없음", "먼저 사진을 찍어주세요.");
+        openAlert({
+          title: "사진 없음",
+          message: "먼저 사진을 찍어주세요.",
+          confirmText: "확인",
+        });
+        return;
+      }
+      if (!mealType) {
+        openAlert({
+          title: "방식 선택",
+          message: "어디서 드셨는지 먼저 선택해 주세요.",
+          confirmText: "확인",
+        });
         return;
       }
 
       setLoading(true);
-      Alert.alert("▶️ 시작", `mealType=${mealType}`);
 
-      // 1) FoodLens → result
       const result = await predictBase64Cross(photo.base64);
-      alertJSON("📸 최종 Result", result);
-
-      // 2) payload 생성 (서버 enum 맞게 대문자)
-      const eatModeUpper = String(mealType).toUpperCase(); // HOME|DELIVERY|TAKEOUT|RESTAURANT
+      const noFoods =
+        !result ||
+        ((!Array.isArray(result?.foods) || result.foods.length === 0) &&
+          (!Array.isArray(result?.items) || result.items.length === 0));
+      if (noFoods) {
+        setLoading(false);
+        setModalVisible(false);
+        setTimeout(() => {
+          openAlert({
+            title: "인식 실패",
+            message: "음식을 인식하지 못했어요. \n다시 찍어주세요.",
+            confirmText: "다시 찍기",
+            onConfirm: retake,
+          });
+        }, 0);
+        return;
+      }
       const payload = {
         ...toCarbonRequestPayload(result, { merge: true }),
-        eatMode: eatModeUpper,
+        eatMode: String(mealType).toUpperCase(),
       };
-      alertJSON("📦 Payload 생성됨", payload);
 
-      // 3) 안전 가드: items 유효성
       if (!Array.isArray(payload.items) || payload.items.length === 0) {
-        Alert.alert("인식 실패", "음식을 찾지 못했어요. 사진을 다시 찍어주세요.");
         setLoading(false);
+        openAlert({
+          title: "인식 실패",
+          message: "음식을 인식하지 못했어요. 다시 찍어주세요.",
+          cancelText: "취소",
+          confirmText: "다시 찍기",
+          onConfirm: retake,
+        });
         return;
       }
 
-      // 4) 서버 호출 (더미 catch 제거, Alert 디버그 켜기: requestCarbon에서 처리)
       const carbon = await requestCarbon(payload, { debugAlert: true });
-      alertJSON("🌍 Carbon 응답(파싱 후)", carbon);
 
-      // 5) 결과 저장 & 이동
       ResultStore.data = result;
       ResultStore.photoUri = photo.uri;
       ResultStore.carbon = carbon;
@@ -185,33 +317,19 @@ export default function DietTest() {
 
       setPreview(false);
       setModalVisible(false);
-      router.push("/pages/diet/dietResult");
+      router.replace("/pages/diet/dietResult");
     } catch (e) {
-      Alert.alert("❌ 탄소 계산 실패", String(e?.message || e));
-    } finally {
       setLoading(false);
+      openAlert({
+        title: "오류",
+        message: "계산 중 문제가 발생했어요. 다시 찍어볼까요?",
+        cancelText: "취소",
+        confirmText: "다시 찍기",
+        onConfirm: retake,
+      });
     }
   };
 
-  if (!perm) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-        <Text>권한 확인 중…</Text>
-      </View>
-    );
-  }
-
-  if (!perm.granted) {
-    return (
-      <View style={styles.center}>
-        <Text>카메라 권한이 필요합니다.</Text>
-        <Button title="권한 허용" onPress={requestPerm} />
-      </View>
-    );
-  }
-
-  // ✅ Eat 모드 키 상수 (서버 enum 대문자)
   const EAT_MODE = {
     HOME: "HOME",
     DELIVERY: "DELIVERY",
@@ -221,19 +339,51 @@ export default function DietTest() {
 
   return (
     <View style={styles.container}>
-      <CameraView ref={camRef} style={StyleSheet.absoluteFillObject} facing="back" />
+      {canShowCamera ? (
+        <>
+          <CameraView
+            key={camKey}
+            ref={camRef}
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            enableAudio={false}
+            onCameraReady={() => setCamReady(true)}
+          />
+          {!camReady && (
+            <View style={styles.loaderOverlay}>
+              <ActivityIndicator />
+              <Text style={{ color: "white", marginTop: 8 }}>
+                카메라 초기화 중…
+              </Text>
+            </View>
+          )}
+        </>
+      ) : null}
 
+      {/* 셔터 영역 */}
       {!preview && (
         <View style={[styles.shutterWrap(insets.bottom)]}>
-          <ShutterButton onPress={takePhoto} disabled={loading} loading={loading} />
+          <ShutterButton
+            onPress={takePhoto}
+            disabled={loading || !camReady || !canShowCamera}
+            loading={loading}
+          />
         </View>
       )}
 
+      {/* 미리보기 */}
       {preview && photo?.uri && (
         <View style={[StyleSheet.absoluteFillObject]}>
-          <ExpoImage source={{ uri: photo.uri }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
-          <View className="flex-1 gap-2" style={styles.previewBar(insets.bottom)}>
-                        <Pressable
+          <ExpoImage
+            source={{ uri: photo.uri }}
+            style={StyleSheet.absoluteFillObject}
+            contentFit="cover"
+          />
+          <View
+            className="flex-1 gap-2"
+            style={styles.previewBar(insets.bottom)}
+          >
+            <Pressable
               className="flex-1 rounded-xl items-center justify-center py-llg bg-gray2"
               onPress={() => setPreview(false)}
               disabled={loading}
@@ -242,7 +392,10 @@ export default function DietTest() {
             </Pressable>
             <Pressable
               className="flex-1 rounded-xl items-center justify-center py-llg bg-green"
-              onPress={() => setModalVisible(true)}
+              onPress={() => {
+                setSelectedMode(null);
+                setModalVisible(true);
+              }}
               disabled={loading}
             >
               <Text className="font-sf-md text-button text-white">
@@ -253,34 +406,80 @@ export default function DietTest() {
         </View>
       )}
 
-      {/* EAT_MODE Modal */}
+      {/* EAT_MODE 선택 모달 */}
       <Modal visible={modalVisible}>
-        <Text className="font-sf-sb text-black text-h3 mb-sm">이번 식사는 어디서/어떻게 드셨나요?</Text>
-        <Text className="font-sf-sb mb-md text-darkGray">방식에 따라 추가 탄소 배출량이 달라져요!</Text>
+        <Text className="font-sf-sb text-black text-h3 mb-sm">
+          이번 식사는 어디서/어떻게 드시나요?
+        </Text>
+        <Text className="font-sf-sb mb-md text-darkGray">
+          방식에 따라 탄소 절감량 계산 방식이 달라져요!
+        </Text>
 
         {[
-          { key: EAT_MODE.HOME, label: "집에서 직접 조리" },
-          { key: EAT_MODE.DELIVERY, label: "배달" },
-          { key: EAT_MODE.TAKEOUT, label: "포장(테이크아웃)" },
-          { key: EAT_MODE.RESTAURANT, label: "식당" },
-        ].map((opt) => (
-          <Pressable
-            key={opt.key}
-            className="w-full items-center rounded-xl py-lg bg-white overflow-hidden mb-xxs"
-            android_ripple={{ color: "rgba(0,0,0,0.08)" }}
-            disabled={loading}
-            style={({ pressed }) => [
-              { backgroundColor: pressed ? "#f4f4f5" : "#ffffff" },
-              { opacity: loading ? 0.6 : 1 },
-            ]}
-            onPress={() => confirmAndPredict(opt.key)}
-          >
-            <Text className="font-sf-sb text-body text-green">{opt.label}</Text>
-          </Pressable>
-        ))}
+          { key: EAT_MODE.HOME, label: "집에서 직접 조리", Icon: Images.House },
+          { key: EAT_MODE.DELIVERY, label: "배달", Icon: Images.Delivery },
+          {
+            key: EAT_MODE.TAKEOUT,
+            label: "포장(테이크아웃)",
+            Icon: Images.Takeout,
+          },
+          { key: EAT_MODE.RESTAURANT, label: "식당", Icon: Images.Restaurant },
+        ].map(({ key, label, Icon }) => {
+          const selected = selectedMode === key;
+          return (
+            <Pressable
+              key={key}
+              disabled={loading}
+              onPress={() => setSelectedMode(key)}
+              className={`w-full rounded-xl overflow-hidden mb-xxs px-md py-llg
+    ${selected ? "bg-green/20" : "bg-white"}`}
+              android_ripple={{ color: "rgba(0,0,0,0.06)" }}
+            >
+              <View className="flex-row items-center gap-2">
+                {Icon ? <Icon width={20} height={20} /> : null}
+                <Text
+                  className={
+                    selected
+                      ? "font-sf-b text-body text-green"
+                      : "font-sf-sb text-body text-black"
+                  }
+                >
+                  {label}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
 
-        <MainButton onPress={() => setModalVisible(false)} label="취소" className="mt-4 bg-lightGray" disabled={loading} />
+        <MainButton
+          onPress={() => confirmAndPredict(selectedMode)}
+          label={loading ? "계산 중…" : "계산하기"}
+          className={`mt-md ${
+            loading || !selectedMode ? "bg-lightGray" : "bg-green"
+          }`}
+          disabled={loading || !selectedMode}
+        />
       </Modal>
+
+      <CustomAlert
+        visible={alertState.visible}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        cancelText={alertState.cancelText}
+        onConfirm={() => {
+          closeAlert();
+          alertState.onConfirm?.();
+        }}
+        onCancel={
+          alertState.onCancel
+            ? () => {
+                closeAlert();
+                alertState.onCancel?.();
+              }
+            : undefined
+        }
+      />
     </View>
   );
 }
@@ -305,4 +504,10 @@ const styles = {
     justifyContent: "space-between",
     backgroundColor: "rgba(0,0,0,0.35)",
   }),
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
 };

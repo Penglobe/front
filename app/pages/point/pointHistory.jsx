@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,18 +11,18 @@ import BgGradient from "@components/BgGradient";
 import HeaderBar from "@components/HeaderBar";
 import { Images } from "@constants/Images";
 import colors from "@constants/Colors.cjs";
-import { useRouter } from "expo-router";
+import { Stack, useFocusEffect, useRouter } from "expo-router";
 import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
 
 const { Colors } = colors;
 
 const reasonLabels = {
-  TRANSPORT_ACTIVITY: "환경 걸음",
-  DIET: "식습관",
+  TRANSPORT_ACTIVITY: "펭걸음",
+  DIET: "빙하 식탁",
   ATTENDANCE: "출석",
   QUIZ: "퀴즈",
-  SURVEY: "설문",
+  SURVEY: "빙하 리포트",
   MISSION_REWARD: "미션 보상",
   SHOP_PURCHASE: "굿즈 구매",
   DONATION: "기부",
@@ -81,6 +81,12 @@ export default function PointHistory() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const renderItem = ({ item, index }) => {
     const isPlus = item.changeAmount > 0;
@@ -149,7 +155,7 @@ export default function PointHistory() {
           <View className="w-[40px]" />
 
           <Text className="text-h2 font-sf-b text-center flex-1 text-green">
-            얼음 구매
+            얼음 충전
           </Text>
 
           <Pressable
@@ -176,7 +182,6 @@ export default function PointHistory() {
                 }`}
                 style={{
                   width: "30%", // 3개씩 배치
-                  minWidth: 100, // 너무 작아지는 거 방지
                   height: 48, // 버튼 높이 고정
                 }}
               >
@@ -210,8 +215,14 @@ export default function PointHistory() {
 
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.white }}>
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       <BgGradient />
-      <HeaderBar title="얼음 적립 내역" className="px-pageX" />
+      <HeaderBar
+        title="얼음 내역"
+        onBack={() => router.replace("/(tabs)/home")}
+      />
 
       {/* 잔액 카드 */}
       <View className="px-pageX mt-5">
@@ -226,25 +237,30 @@ export default function PointHistory() {
             elevation: 4,
           }}
         >
-          <Text className="text-h4 font-sf-md">현재 보유 얼음</Text>
-          <View className="flex-row items-center">
-            <Text
-              className="text-2xl font-grotesk-b mr-sm"
-              style={{ color: Colors.green }}
-            >
-              {balance.toLocaleString("ko-KR")}
-            </Text>
-            <Images.Ice width={40} height={40} />
+          {/* 좌측 (텍스트들) */}
+          <View className="flex-col">
+            <Text className="text-caption font-sf-md">보유 얼음</Text>
+            <View className="flex-row items-center mt-1">
+              <Text
+                className="text-h1 font-grotesk-b"
+                style={{ color: Colors.green }}
+              >
+                {balance.toLocaleString("ko-KR")}
+              </Text>
+              <Images.Ice width={40} height={40} />
+            </View>
           </View>
-        </View>
-        <View className="flex-row justify-end mt-md">
+
+          {/* 우측 (버튼) */}
           <Pressable
             onPress={() => setIsChargeModalVisible(true)}
             accessibilityRole="button"
-            className="rounded-xl py-sm px-xl active:bg-green"
+            className="rounded-xl py-sm px-lg active:bg-green"
             style={{ backgroundColor: Colors.green }}
           >
-            <Text className="text-white font-sf-md text-button">얼음 구매</Text>
+            <Text className="text-white font-sf-md text-caption">
+              얼음 충전
+            </Text>
           </Pressable>
         </View>
       </View>

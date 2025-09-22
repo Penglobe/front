@@ -47,6 +47,7 @@ module.exports = {
         "grotesk-l": ["SpaceGrotesk-Light"],
       },
       fontSize: {
+        h0: ["80", { lineHeight: "86px" }],
         h1: ["24", { lineHeight: "30px" }],
         h2: ["20", { lineHeight: "26px" }],
         h3: ["18", { lineHeight: "24px" }],

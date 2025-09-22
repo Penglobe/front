@@ -6,7 +6,6 @@ import {
   TextInput,
   Pressable,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,6 +15,7 @@ import { useRouter } from "expo-router";
 import { signupLocal, apiFetch } from "@services/authService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Images } from "@constants/Images"; // 아바타 컴포넌트
+import CustomAlert from "@components/CustomAlert";
 
 const INPUT_H = 56;
 const BTN_H = 56;
@@ -25,6 +25,9 @@ const FONT = 16;
 const AVATARS = [
   { key: "ToriFace", label: "토리", Render: Images.ToriFace },
   { key: "IpaFace", label: "이파", Render: Images.IpaFace },
+  { key: "ProfileIce", label: "얼음", Render: Images.ProfileIce },
+  { key: "Fish", label: "물고기", Render: Images.Fish },
+  { key: "Polarbear", label: "북극곰", Render: Images.Polarbear },
 ];
 
 export default function Signup() {
@@ -49,6 +52,11 @@ export default function Signup() {
   const [profileLabel, setProfileLabel] = useState(""); // 표시용 라벨
   const [profileOpen, setProfileOpen] = useState(false);
 
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertNext, setAlertNext] = useState(null);
+
   // 포커스 이동용 ref
   const pwRef = useRef(null);
   const pw2Ref = useRef(null);
@@ -72,7 +80,9 @@ export default function Signup() {
 
   const onSubmit = async () => {
     if (!canSubmit) {
-      Alert.alert("확인", "입력값을 다시 확인해주세요.");
+      setAlertTitle("확인");
+      setAlertMessage("입력값을 다시 확인해주세요.");
+      setAlertVisible(true);
       return;
     }
     try {
@@ -82,12 +92,20 @@ export default function Signup() {
         password: password.trim(),
         nickname: nickname.trim(),
         regionId: regionId ? Number(regionId) : null,
-        profile, // "ToriFace" | "IpaFace"
+        profile,
       });
-      Alert.alert("성공", message || "회원가입 완료");
-      router.replace(`/?email=${encodeURIComponent(email.trim())}`);
+      setAlertTitle("성공");
+      setAlertMessage(message || "회원가입 완료");
+      setAlertNext(
+        () => () =>
+          router.replace(`/?email=${encodeURIComponent(email.trim())}`)
+      );
+      setAlertVisible(true);
     } catch (e) {
-      Alert.alert("회원가입 실패", e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertTitle("회원가입 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertNext(null);
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -113,7 +131,9 @@ export default function Signup() {
       );
       setRegions(mapped);
     } catch (e) {
-      Alert.alert("오류", e?.message ?? "지역 목록을 불러올 수 없습니다.");
+      setAlertTitle("오류");
+      setAlertMessage(e?.message ?? "지역 목록을 불러올 수 없습니다.");
+      setAlertVisible(true);
     }
   }, []);
 
@@ -279,6 +299,11 @@ export default function Signup() {
                 returnKeyType="next"
                 onSubmitEditing={() => nickRef.current?.focus()}
               />
+              {password2.length > 0 && password !== password2 && (
+                <Text className="mt-2 text-rose-600 font-sf-md">
+                  비밀번호가 일치하지 않습니다.
+                </Text>
+              )}
             </Labeled>
 
             <Labeled label="닉네임">
@@ -328,6 +353,7 @@ export default function Signup() {
                 <View className="mt-sm bg-white rounded-2xl border border-gray overflow-hidden">
                   <ScrollView
                     style={{ maxHeight: 240 }}
+                    nestedScrollEnabled
                     keyboardShouldPersistTaps="handled"
                   >
                     {regions.map((r) => {
@@ -438,7 +464,7 @@ export default function Signup() {
                           }}
                           className={`items-center justify-center mr-3 rounded-2xl p-3 ${
                             selected
-                              ? "border-2 border-emerald-500 bg-white"
+                              ? "border-2 border-green bg-white"
                               : "border border-black/10 bg-white/90"
                           }`}
                           android_ripple={{ color: "#00000010" }}
@@ -447,7 +473,7 @@ export default function Signup() {
                           <Render width={72} height={72} />
                           <Text
                             className={`mt-2 font-sf-md ${
-                              selected ? "text-emerald-600" : "text-gray-700"
+                              selected ? "text-green" : "text-gray-700"
                             }`}
                           >
                             {label}
@@ -468,7 +494,7 @@ export default function Signup() {
                 styles.loginBtnShadow,
                 {
                   height: BTN_H,
-                  backgroundColor: canSubmit ? "#10B981" : "#E5E7EB",
+                  backgroundColor: canSubmit ? "green" : "#E5E7EB",
                   opacity: loading ? 0.7 : 1,
                 },
               ]}
@@ -484,6 +510,19 @@ export default function Signup() {
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => {
+          setAlertVisible(false);
+          if (typeof alertNext === "function") {
+            const go = alertNext;
+            setAlertNext(null);
+            go(); // 알럿 확인 후 이동
+          }
+        }}
+      />
     </View>
   );
 }

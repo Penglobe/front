@@ -1,14 +1,12 @@
-// app/(tabs)/home/index.jsx
 import {
   View,
   StyleSheet,
   Pressable,
-  Dimensions,
   Alert,
   Text,
   BackHandler,
 } from "react-native";
-import { useFocusEffect, useRouter, usePathname } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@hooks/useAuth";
 import MainButton from "@components/MainButton";
@@ -23,23 +21,23 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { Image as ExpoImage } from "expo-image";
+import { StatusBar } from "expo-status-bar";
 
 export default function Home() {
   const router = useRouter();
   const { user, refreshUser } = useAuth();
 
   const [att, setAtt] = useState({ visible: false, loading: false });
-  const [preview, setPreview] = useState(null); // 미리보기 포인트
+  const [preview, setPreview] = useState(null);
   const [loadingPrev, setLoadingPrev] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [chestClicked, setChestClicked] = useState(false); // 상자 클릭 여부
+  const [chestClicked, setChestClicked] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        () => true // 아무 동작 안 함
+        () => true
       );
       return () => subscription.remove();
     }, [])
@@ -59,7 +57,6 @@ export default function Home() {
         loading: false,
       });
       if (res.ok && json?.data?.show === true) {
-        // 모달 뜰 때 선조회(선택)
         setLoadingPrev(true);
         const pRes = await apiFetch("/attendance/preview");
         const pt = await pRes.text();
@@ -79,7 +76,6 @@ export default function Home() {
     }
   }, []);
 
-  // 상자 터치 시(미리보기 없으면 요청)
   const onChestReveal = useCallback(async () => {
     setChestClicked(true);
     if (preview != null) return;
@@ -97,7 +93,6 @@ export default function Home() {
     }
   }, [preview]);
 
-  // 보상 받기(실제 지급)
   const claimAttendance = useCallback(async () => {
     try {
       setClaiming(true);
@@ -112,7 +107,6 @@ export default function Home() {
 
       const reward = Number(json?.data?.rewardPoints ?? preview ?? 0);
 
-      // 모달 닫고 한 틱 뒤 알럿(안드로이드 RNModal 겹침 회피)
       setAtt({ visible: false, loading: false });
       setPreview(null);
       setChestClicked(false);
@@ -148,11 +142,7 @@ export default function Home() {
   const totalScore = Number(user?.totalScore ?? 0);
   const level = Number(totalScore) || 0;
   const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
-
-  const IpaComp = Images[`Ipa${stage}`] ?? Images.Ipa1;
-  const ToriComp = Images[`Tori${stage}`] ?? Images.Tori1;
   const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
-
   const translateY = useSharedValue(0);
   useEffect(() => {
     translateY.value = withRepeat(
@@ -165,13 +155,9 @@ export default function Home() {
     );
   }, []);
 
-  const { width } = Dimensions.get("window");
-  const TORI_W = Math.min(width * 0.42, 220);
-  const IPA_W = Math.min(width * 0.36, 200);
-  const IPA_H = IPA_W * 1.4;
-
   return (
     <View className="flex-1">
+      <StatusBar hidden />
       <BgComp
         width="100%"
         height="100%"
@@ -180,11 +166,10 @@ export default function Home() {
         pointerEvents="none"
       />
 
-      {/* 상단 카드들 */}
       <View className="mt-6xl px-pageX flex-row justify-between">
         <Pressable
           onPress={() => router.push("/(tabs)/mypage")}
-          className="flex-row items-center justify-between bg-blue rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="min-w-[100px] flex-row items-center justify-between bg-blue rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#065A93",
             shadowOffset: { width: 0, height: 2 },
@@ -201,7 +186,7 @@ export default function Home() {
 
         <Pressable
           onPress={() => router.push("/pages/point/pointHistory")}
-          className="flex-row items-center justify-between bg-green rounded-3xl px-md py-xxs w-[100px] h-[40px] shadow-md"
+          className="min-w-[100px] flex-row items-center justify-between bg-green rounded-3xl px-lg gap-4 py-xxs h-[40px] shadow-md"
           style={{
             shadowColor: "#318643",
             shadowOffset: { width: 0, height: 2 },
@@ -230,9 +215,13 @@ export default function Home() {
             elevation: 4,
           }}
         >
-          <Text className="text-black text-body font-sf-md">
-            총 탄소 절감량
-          </Text>
+          <View className="w-full flex-row items-center justify-between">
+            <Text className="text-black text-body font-sf-md">
+              총 탄소 절감량
+            </Text>
+            <Images.Arrow width={28} height={28} />
+          </View>
+
           <Text className="font-grotesk-b text-h1 text-green">
             {(Number(totalScore) || 0).toFixed(2)}
             <Text className="text-black"> kg</Text>
@@ -245,44 +234,46 @@ export default function Home() {
       </View>
 
       {/* 퀴즈 버튼 */}
-      <Animated.View className="mt-auto items-center mb-[180px]">
+
+      <View className="mt-auto items-center mb-[180px]">
         <Pressable
           onPress={() => router.push("pages/home/quiz")}
-          className="flex-row items-center justify-center rounded-3xl px-xl py-md gap-2 bg-yellow active:bg-amber-300"
+          className="flex-row items-center justify-center rounded-3xl px-xl py-sm gap-3 bg-[#F9C332]"
           style={{
             shadowColor: "#F9C332",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.18,
-            shadowRadius: 4,
-            elevation: 4,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.3,
+            shadowRadius: 6,
+            elevation: 6,
           }}
         >
-          <Images.Quiz width={24} height={24} />
-          <Text className="text-white font-sf-b text-body">오늘의 퀴즈</Text>
-        </Pressable>
-      </Animated.View>
+          {/* 아이콘 원형 배경 */}
+          <View className="w-10 h-10 bg-white/20 rounded-full items-center justify-center">
+            <Images.Quiz width={26} height={26} />
+          </View>
 
-      {/* ✅ 출석 보상 모달: 상자 + 보상받기 */}
+          {/* 텍스트 */}
+          <Text
+            className="text-white font-sf-b text-body"
+            style={{
+              textShadowColor: "rgba(0,0,0,0.3)",
+              textShadowOffset: { width: 1, height: 1 },
+              textShadowRadius: 2,
+              letterSpacing: 1,
+            }}
+          >
+            펭퀴즈
+          </Text>
+        </Pressable>
+      </View>
+
       <Modal visible={att.visible}>
         <View className="flex-row items-center mb-3 justify-center relative">
           {/* 제목 */}
-          <Text className="text-h1 font-sf-b">출석 보상 🎉</Text>
-
-          {/* 닫기 버튼 (오른쪽 끝) */}
-          {/* <Pressable
-            onPress={() => {
-              setAtt({ visible: false, loading: false });
-              setPreview(null);
-              setChestClicked(false);
-            }}
-            className="absolute right-0"
-            style={{ padding: 4 }}
-          >
-            <Text className="text-2xl text-gray-400">✕</Text>
-          </Pressable> */}
+          <Text className="text-h1 font-sf-b">출석 보상</Text>
         </View>
 
-        <Text className="text-center text-h4 text-black font-sf-md mb-xs">
+        <Text className="text-center text-h4 text-black font-sf-md mb-md">
           상자를 클릭하여 랜덤 보상을 확인해보세요.
         </Text>
 

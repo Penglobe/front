@@ -24,8 +24,6 @@ export async function requestCarbon(payload, { timeoutMs = 15000 } = {}) {
       }
     }
 
-    console.log("[requestCarbon] 응답 JSON:", parsed);
-
     if (!res.ok) {
       const msg = parsed?.message || parsed?.error || res.statusText;
       throw new Error(`식단 API ${res.status}: ${msg}`);

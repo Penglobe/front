@@ -21,7 +21,7 @@ export default function Ranking() {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [rankingData, setRankingData] = useState([]);
 
-  // 1. 마운트 시 사용자 지역 가져오기
+  // 마운트 시 사용자 지역 가져오기
   useEffect(() => {
     const fetchUserRegion = async () => {
       try {
@@ -30,18 +30,16 @@ export default function Ranking() {
         if (userInfo && userInfo.regionName) {
           setSelectedRegion(userInfo.regionName);
         } else {
-          console.warn("User region not found, defaulting to Seoul.");
           setSelectedRegion("서울특별시"); // 찾을 수 없을 경우 기본값
         }
       } catch (error) {
-        console.error("Error fetching user info, defaulting to Seoul:", error);
         setSelectedRegion("서울특별시"); // 오류 발생 시 기본값
       }
     };
     fetchUserRegion();
   }, []);
 
-  // 2. 탭 또는 지역 변경 시 랭킹 데이터 가져오기
+  // 탭 또는 지역 변경 시 랭킹 데이터 가져오기
   useEffect(() => {
     const fetchRegionRankingData = async () => {
       // 지역 랭킹 탭이 아니거나, 지역이 아직 선택되지 않았으면 실행하지 않음
@@ -51,14 +49,12 @@ export default function Ranking() {
         const response = await apiFetch("/rankings/regions");
 
         if (!response.ok) {
-          throw new Error(`Server response error: ${response.status}`);
+          throw new Error(`서버 응답 오류: ${response.status}`);
         }
 
         const data = await response.json();
         setRankingData(data);
-      } catch (error) {
-        console.error("Error fetching region ranking:", error);
-      }
+      } catch (error) {}
     };
 
     fetchRegionRankingData();
@@ -78,8 +74,8 @@ export default function Ranking() {
       >
         <HeaderBar title="랭킹" />
         {/* 탭 메뉴 */}
-        <View className="px-pageX mt-4">
-          <View className="flex-row justify-center mb-4 gap-5">
+        <View className="mt-4 px-pageX ml-md mr-md">
+          <View className="flex-row w-full justify-between mb-4">
             {tabs.map((tab) => (
               <Pressable
                 key={tab.key}
@@ -91,8 +87,8 @@ export default function Ranking() {
                 <Text
                   className={
                     activeTab === tab.key
-                      ? "text-white font-bold text-[18px]"
-                      : "text-green font-bold text-[18px]"
+                      ? "text-white font-sf-b text-body"
+                      : "text-green font-sf-b text-body"
                   }
                 >
                   {tab.label}

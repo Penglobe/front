@@ -8,17 +8,16 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   TextInput,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
 import { apiFetch } from "@services/authService";
 import { Images } from "@constants/Images";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import CustomAlert from "@components/CustomAlert";
 
 const BASE_URL = Constants.expoConfig.extra.SERVER_URL;
 function toUri(path) {
@@ -34,12 +33,14 @@ export default function StoreListPage() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [filterType, setFilterType] = useState("전체"); // 필터 타입
-  const [sortOrder, setSortOrder] = useState("default"); // "asc", "desc", "default"
+  const [sortOrder, setSortOrder] = useState("latest"); // "asc", "desc", "latest"
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const NUM_COLUMNS = 2;
-  const TABBAR_H = 70; // 전역 탭바 높이에 맞게 조정
 
   // 서버에서 상품 불러오기
   const loadProducts = useCallback(async () => {
@@ -54,10 +55,9 @@ export default function StoreListPage() {
         throw new Error("상품 응답 형식이 예상과 다릅니다.");
       setItems(data);
     } catch (e) {
-      Alert.alert(
-        "상품목록 불러오기 실패",
-        e?.message ?? "잠시 후 다시 시도해주세요."
-      );
+      setAlertTitle("상품목록 불러오기 실패");
+      setAlertMessage(e?.message ?? "잠시 후 다시 시도해주세요.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -73,18 +73,19 @@ export default function StoreListPage() {
     setRefreshing(false);
   }, [loadProducts]);
 
+  // 필터링
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let data = items;
 
-    // 🔹 타입 필터
+    // 타입 필터
     if (filterType === "기부") {
       data = data.filter((it) => it.name?.startsWith("[기부]"));
     } else if (filterType === "상품") {
       data = data.filter((it) => !it.name?.startsWith("[기부]"));
     }
 
-    // 🔹 검색 필터
+    // 검색 필터
     if (q) {
       data = data.filter((it) => {
         const name = (it?.name ?? "").toLowerCase();
@@ -96,13 +97,9 @@ export default function StoreListPage() {
     return data;
   }, [items, query, filterType]);
 
-  const handleSearchSubmit = () => {
-    // 실시간 필터라 submit 시 별도 요청은 없음.
-  };
-
-  const clearQuery = () => setQuery("");
+  // 정렬
   const sortedItems = useMemo(() => {
-    if (filterType !== "상품") return filtered; // 상품이 아니면 그냥 필터링된 데이터
+    if (filterType !== "상품") return filtered;
 
     if (sortOrder === "asc") {
       return [...filtered].sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
@@ -117,6 +114,7 @@ export default function StoreListPage() {
     }
   }, [filtered, sortOrder, filterType]);
 
+  // 상세 이동
   const goDetail = (item) => {
     const isDonation = item.name?.startsWith("[기부]");
     const pathname = isDonation
@@ -129,6 +127,7 @@ export default function StoreListPage() {
     });
   };
 
+  // 상품 카드
   const renderItem = ({ item, index }) => {
     const isRight = index % NUM_COLUMNS === 1;
     const imgUri = toUri(item?.img);
@@ -137,15 +136,8 @@ export default function StoreListPage() {
       <Pressable
         onPress={() => goDetail(item)}
         android_ripple={{ color: "#00000010" }}
-        className={`
-          w-[48%] ${isRight ? "mr-0" : "mr-[4%]"}
-          mb-3
-          relative pb-12
-          rounded-2xl overflow-hidden
-          border border-black/10
-          bg-white/90
-          p-3
-        `}
+        className={`w-[48%] ${isRight ? "mr-0" : "mr-[4%]"} mb-3 relative pb-12
+          rounded-2xl overflow-hidden border border-black/10 bg-white/90 p-3`}
       >
         {!!imgUri && (
           <Image
@@ -154,32 +146,33 @@ export default function StoreListPage() {
           />
         )}
 
-        <Text className="text-h4 text-gray-900 font-sf-b" numberOfLines={1}>
+        <Text className="text-h4 text-black font-sf-b" numberOfLines={1}>
           {item.name}
         </Text>
 
         {!!item.description && (
           <Text
-            className="text-caption text-gray-500 font-sf-md mt-xxs"
+            className="text-caption text-darkGray font-sf-md mt-xxs mb-xxs"
             numberOfLines={2}
           >
             {item.description}
           </Text>
         )}
 
-        {/* 가격 배지: 우측 하단 고정 */}
+        {/* 가격 배지 */}
         {!item.name?.startsWith("[기부]") && (
-          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full bg-emerald-600/10 px-sm py-xs">
-            <Text className="text-green font-sf-b mr-xs">
+          <View className="absolute right-3 bottom-3 flex-row items-center rounded-full py-xs">
+            <Text className="text-green font-sf-b">
               {(item.price ?? 0).toLocaleString()}
             </Text>
-            <Images.Ice width={16} height={16} />
+            <Images.Ice width={20} height={20} />
           </View>
         )}
       </Pressable>
     );
   };
 
+  // 로딩 화면
   if (loading && items.length === 0) {
     return (
       <View className="flex-1 items-center justify-center bg-[#F5F7FB]">
@@ -191,127 +184,97 @@ export default function StoreListPage() {
 
   return (
     <View className="flex-1">
+      <Stack.Screen
+        options={{ gestureEnabled: false, headerBackVisible: false }}
+      />
       <BgGradient />
       <View className="absolute inset-0 pb-[150px]">
         <HeaderBar title="얼음 거래소" />
 
-        {/* 🔎 검색창 */}
-        <View className="px-pageX mt-4">
-          <View className="flex-row items-center bg-white rounded-xl px-md py-md shadow-md shadow-black/5">
-            <Ionicons name="search-outline" size={20} color={"#10B981"} />
-            <View className="flex-1 ml-sm mr-sm">
-              <View className="-mt-xs" />
-              <View>
-                <TextInput
-                  value={query}
-                  onChangeText={setQuery}
-                  placeholder="상품명을 검색하세요"
-                  className="font-sf-md text-gray-800"
-                  returnKeyType="search"
-                  onSubmitEditing={handleSearchSubmit}
-                />
-              </View>
+        {/* 검색창 */}
+        <View className="bg-green/20 px-pageX shadow-lg shadow-black/10">
+          <View className="mt-5">
+            <View className="flex-row items-center bg-white rounded-xl px-md py-md shadow-md shadow-black/5">
+              <Ionicons
+                name="search-outline"
+                size={20}
+                color={"green"}
+                className="mr-1"
+              />
+              <TextInput
+                placeholder="상품명을 검색하세요."
+                value={query}
+                onChangeText={setQuery}
+                className="flex-1 font-sf-md text-gray-800"
+                style={{ paddingVertical: 0, textAlignVertical: "center" }}
+                returnKeyType="search"
+              />
             </View>
-            {!!query && (
-              <Pressable onPress={clearQuery} hitSlop={8}>
-                <Ionicons name="close-circle" size={20} color={"#94A3B8"} />
-              </Pressable>
-            )}
+          </View>
+
+          {/* 필터 (전체/기부/상품) */}
+          <View className="flex-row justify-between items-center mt-md">
+            <View className="flex-row items-center gap-4 mb-sm">
+              {["전체", "기부", "상품"].map((type) => {
+                const selected = filterType === type;
+                return (
+                  <Pressable
+                    key={type}
+                    onPress={() => setFilterType(type)}
+                    android_ripple={{ color: "#16a34a20", borderless: false }}
+                    style={({ pressed }) => [
+                      { opacity: pressed ? 0.6 : 1 }, // 눌렀을 때 살짝 투명
+                    ]}
+                    className={`px-xl py-sm ${
+                      selected
+                        ? "border-b-2 border-green"
+                        : "border-b-2 border-transparent"
+                    }`}
+                  >
+                    <Text
+                      className={`font-sf ${
+                        selected
+                          ? "text-label text-green font-sf-b"
+                          : "text-label text-[#1F2937]"
+                      }`}
+                    >
+                      {type}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         </View>
 
-        {/* 목록 */}
-        <View className="flex-1 px-pageX pt-md">
-          <View className="flex-row justify-between items-center mb-sm px-xs">
-            <Text className="text-gray-500 font-sf-md">
-              {query
-                ? `검색 결과 ${filtered.length}개`
-                : `전체 ${items.length}개`}
-            </Text>
-
-            <View
-              className="flex-row items-center gap-2 mt-md
-            "
-            >
-              {["전체", "기부", "상품"].map((type) => (
-                <Pressable
-                  key={type}
-                  onPress={() => setFilterType(type)}
-                  className={`px-md py-xs rounded-xl  ${
-                    filterType === type
-                      ? "bg-emerald-600 border-emerald-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  <Text
-                    className={`font-sf-md ${
-                      filterType === type ? "text-white" : "text-gray-700"
+        <View className="px-pageX mt-lg">
+          {/*  정렬 (상품일 때만 표시) */}
+          {filterType === "상품" && (
+            <View className="flex-row items-center mb-lg justify-end gap-2">
+              {[
+                { key: "latest", label: "최신 순" },
+                { key: "asc", label: "낮은 가격 순" },
+                { key: "desc", label: "높은 가격 순" },
+              ].map(({ key, label }) => {
+                const selected = sortOrder === key;
+                return (
+                  <Pressable
+                    key={key}
+                    onPress={() => setSortOrder(key)}
+                    className={`px-md py-sm rounded-xl ${
+                      selected ? "bg-green" : "bg-white/80"
                     }`}
                   >
-                    {type}
-                  </Text>
-                </Pressable>
-              ))}
+                    <Text className={selected ? "text-white" : "text-green"}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
-          </View>
+          )}
 
-          <View className="flex-row items-center mb-4 mt-lg">
-            {filterType === "상품" && (
-              <>
-                <Pressable
-                  onPress={() => setSortOrder("latest")}
-                  className={`ml-2 px-3 py-1 rounded-xl ${
-                    sortOrder === "latest"
-                      ? "bg-emerald-600 border-emerald-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  <Text
-                    className={
-                      sortOrder === "latest" ? "text-white" : "text-gray-700"
-                    }
-                  >
-                    최신 순
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setSortOrder("asc")}
-                  className={`ml-2 px-3 py-1 rounded-xl ${
-                    sortOrder === "asc"
-                      ? "bg-emerald-600 border-emerald-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  <Text
-                    className={
-                      sortOrder === "asc" ? "text-white" : "text-gray-700"
-                    }
-                  >
-                    낮은 가격 순
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => setSortOrder("desc")}
-                  className={`ml-2 px-3 py-1 rounded-xl ${
-                    sortOrder === "desc"
-                      ? "bg-emerald-600 border-emerald-600"
-                      : "bg-white border-gray-300"
-                  }`}
-                >
-                  <Text
-                    className={
-                      sortOrder === "desc" ? "text-white" : "text-gray-700"
-                    }
-                  >
-                    높은 가격 순
-                  </Text>
-                </Pressable>
-              </>
-            )}
-          </View>
-
+          {/* 상품 목록 */}
           <FlatList
             data={filterType === "상품" ? sortedItems : filtered}
             keyExtractor={(it) => String(it.productId)}
@@ -319,9 +282,6 @@ export default function StoreListPage() {
             numColumns={NUM_COLUMNS}
             key={`cols-${NUM_COLUMNS}`}
             columnWrapperStyle={{ justifyContent: "flex-start" }}
-            contentContainerStyle={{
-              paddingBottom: TABBAR_H + insets.bottom + 12,
-            }}
             ListEmptyComponent={
               !loading ? (
                 <Text className="text-center text-gray-500 mt-2xl">
@@ -336,6 +296,12 @@ export default function StoreListPage() {
           />
         </View>
       </View>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }

@@ -1,19 +1,18 @@
 // constants/images.js
 // 배경
-import BgHome1 from "@assets/images/bg/bg-home-1.svg";
-import BgHome2 from "@assets/images/bg/bg-home-2.svg";
-import BgHome3 from "@assets/images/bg/bg-home-3.svg";
-import BgHome4 from "@assets/images/bg/bg-home-4.svg";
+import BgHome1 from "@assets/images/bg/bg-home-1.2.svg";
+import BgHome2 from "@assets/images/bg/bg-home-2.2.svg";
+import BgHome3 from "@assets/images/bg/bg-home-3.2.svg";
+import BgHome4 from "@assets/images/bg/bg-home-4.2.svg";
 import BgQuiz from "@assets/images/bg/bg-quiz.svg";
 
 // 캐릭터
 import Quiz_IpaTory from "@assets/images/character/quiz_ipatory.svg";
 import IpaTori1 from "@assets/images/character/ipa-tori-1.svg";
+import IpaTori2 from "@assets/images/character/ipa-tori-2.svg";
 import IpaFace from "@assets/images/character/ipa-face.svg";
 import Logo from "@assets/images/logo/logo.svg";
-import Ipa_sad from "@assets/images/character/ipa-sad.svg";
 import ToriFace from "@assets/images/character/tori-face.svg";
-import Ipa_gif from "@assets/images/character/ipa.gif";
 import Ipa1 from "@assets/images/character/ipa-1.svg";
 import Ipa2 from "@assets/images/character/ipa-2.svg";
 import Ipa3 from "@assets/images/character/ipa-3.svg";
@@ -26,6 +25,14 @@ import ToriObstacle from "@assets/images/character/tori-obstacle.svg";
 import survey_ipa from "@assets/images/character/survey_ipa.svg";
 import Ipa_diet from "@assets/images/character/ipa-diet.svg";
 import Tori_diet from "@assets/images/character/tori-diet.svg";
+import Ipa_Tori_diet from "@assets/images/character/ipa-tori-diet.svg";
+import Fish from "@assets/images/character/fish.svg";
+import Polarbear from "@assets/images/character/polarbear.svg";
+import ProfileIce from "@assets/images/character/profile-ice.svg";
+import IpaWalk from "@assets/images/character/ipa-walking.svg";
+import ToriWalk from "@assets/images/character/tori-walking.svg";
+import IpaToriNoData from "@assets/images/character/ipa-tori-nodata.svg";
+import Ipa_Admin from "@assets/images/character/ipa-admin.svg";
 
 // 아이콘
 import Snow from "@assets/icons/snow.svg";
@@ -44,6 +51,18 @@ import Box from "@assets/icons/giftbox.svg";
 import LogOut from "@assets/icons/logout.svg";
 import Order from "@assets/icons/order.svg";
 import Survey from "@assets/icons/survey.svg";
+import Faq from "@assets/icons/faq.svg";
+import House from "@assets/icons/house.svg";
+import Delivery from "@assets/icons/delivery.svg";
+import Takeout from "@assets/icons/takeout.svg";
+import Restaurant from "@assets/icons/restaurant.svg";
+import Information from "@assets/icons/information.svg";
+import Arrow from "@assets/icons/arrow.svg";
+import Leaf from "@assets/icons/leaf.svg";
+import Information_Black from "@assets/icons/information-black.svg";
+import Product from "@assets/icons/product.svg";
+import Donation from "@assets/icons/donation.svg";
+import Edit from "@assets/icons/edit.svg";
 
 // nav
 import TabbarBg from "@assets/nav/tabbar-bg.svg";
@@ -94,12 +113,10 @@ export const Images = {
   Quiz_IpaTory,
   Camera,
   IpaTori1,
+  IpaTori2,
   IpaFace,
   Logo,
   Kakao,
-  Ipa_sad,
-  ToriFace,
-  Ipa_gif,
   ToriFace,
   Ipa1,
   Ipa2,
@@ -117,4 +134,24 @@ export const Images = {
   ToriObstacle,
   Ipa_diet,
   Tori_diet,
+  Faq,
+  Ipa_Tori_diet,
+  House,
+  Delivery,
+  Takeout,
+  Restaurant,
+  Information,
+  Fish,
+  Polarbear,
+  ProfileIce,
+  IpaWalk,
+  ToriWalk,
+  IpaToriNoData,
+  Arrow,
+  Leaf,
+  Information_Black,
+  Ipa_Admin,
+  Product,
+  Donation,
+  Edit,
 };

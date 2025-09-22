@@ -5,9 +5,7 @@ import {
   Text,
   ScrollView,
   RefreshControl,
-  Alert,
   StyleSheet,
-  Pressable,
 } from "react-native";
 import { Images } from "@constants/Images";
 import MissionSection from "@pages/home/MissionSection";
@@ -15,6 +13,7 @@ import Modal from "@components/Modal";
 import MainButton from "@components/MainButton";
 import { useRouter } from "expo-router";
 import { apiFetch, logout } from "@services/authService";
+import CustomAlert from "@components/CustomAlert";
 
 export default function MissionScreen() {
   const [windows, setWindows] = useState(null);
@@ -23,6 +22,10 @@ export default function MissionScreen() {
 
   const [open, setOpen] = useState(false);
   const [claimInfo, setClaimInfo] = useState(null);
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const load = useCallback(async () => {
     try {
@@ -33,7 +36,9 @@ export default function MissionScreen() {
       if (res.ok && json?.data) setWindows(json.data);
       else throw new Error(json?.message || "로드 실패");
     } catch (e) {
-      Alert.alert("불러오기 실패", e.message);
+      setAlertTitle("불러오기 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요.");
+      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -63,17 +68,9 @@ export default function MissionScreen() {
       await load();
       setOpen(true);
     } catch (e) {
-      Alert.alert("수령 실패", e.message);
-    }
-  };
-
-  //임시용 나중에 지워야댐
-  const onLogout = async () => {
-    try {
-      await logout(); // 👉 clearTokens() 대신 여기서 logout() 호출
-      router.replace("/"); // 로그인 화면으로 이동
-    } catch (e) {
-      Alert.alert("로그아웃 실패", e.message ?? "다시 시도해주세요");
+      setAlertTitle("수령 실패");
+      setAlertMessage(e?.message ?? "다시 시도해주세요.");
+      setAlertVisible(true);
     }
   };
 
@@ -89,7 +86,7 @@ export default function MissionScreen() {
       />
 
       {/* 규정: 페이지 맨 위 헤더 */}
-      <HeaderBar title="환경 미션" />
+      <HeaderBar title="미션" onBack={() => router.replace("/(tabs)/home")} />
 
       {/* 규정: 헤더 아래는 px-pageX 래퍼로 감싸기 */}
       <ScrollView
@@ -105,27 +102,25 @@ export default function MissionScreen() {
             className="bg-[#D9D9D9] rounded-2xl px-md py-lg shadow-md"
             style={{ elevation: 4 }}
           >
-            <View className="flex-row items-start">
-              <Images.Notice width={18} height={18} />
-
-              <View className="flex-1 pl-sm">
-                <Text className="text-black font-sf-b text-h4 leading-[20px]">
+            <View className="gap-2">
+              <View className="flex-row items-start gap-2">
+                <Images.Information_Black width={24} height={24} />
+                <Text className="text-black font-sf-b text-h3">
                   누적 탄소 절감량을 확인하세요.
                 </Text>
-                <Text className="text-black font-sf-b text-caption leading-[20px] mt-xs">
-                  출석 미션은 매달 새로 시작됩니다.
-                </Text>
-                <Text className="text-black font-sf-b text-caption leading-[20px]">
-                  이전 보상을 수령해야 다음 보상이 수령가능합니다.
-                </Text>
               </View>
+
+              <Text className="text-black font-sf-b text-caption ml-2xl leading-[18px]">
+                출석 미션은 매달 새로 시작됩니다.{"\n"}
+                이전 보상을 수령해야 다음 보상이 수령가능합니다.
+              </Text>
             </View>
           </View>
 
           {/* 환경걸음 */}
           {windows?.WALK_CO2_KG && (
             <MissionSection
-              title="환경걸음 탄소절감량"
+              title="펭걸음 탄소절감량"
               icon={<Images.Walk width={40} height={40} />}
               slots={windows.WALK_CO2_KG}
               onClaim={onClaim}
@@ -135,7 +130,7 @@ export default function MissionScreen() {
           {/* 식단 */}
           {windows?.DIET_CO2_KG && (
             <MissionSection
-              title="식단 탄소절감량"
+              title="빙하 식탁 탄소절감량"
               icon={<Images.Diet width={40} height={40} />}
               slots={windows.DIET_CO2_KG}
               onClaim={onClaim}
@@ -165,22 +160,24 @@ export default function MissionScreen() {
           setClaimInfo(null);
         }}
       >
-        <Text className="text-black text-h2 font-sf-b mb-xs text-center">
-          보상 지급 완료!
-        </Text>
-        <View className="w-full flex-row items-center justify-center">
-          <Text className="text-green font-sf-b text-h2">
-            {claimInfo?.rewardPoints ?? 0}
+        <View className="items-center mb-llg">
+          <Text className="text-black text-h2 font-sf-b mb-xs text-center">
+            보상 지급 완료!
           </Text>
+          <View className="w-full flex-row items-center justify-center">
+            <Text className="text-green font-sf-b text-h2">
+              {claimInfo?.rewardPoints ?? 0}
+            </Text>
 
-          <Images.Ice width={28} height={28} />
+            <Images.Ice width={28} height={28} />
 
-          <Text className="text-black font-sf-b text-h2">을 받았어요.</Text>
+            <Text className="text-black font-sf-b text-h2">을 받았어요.</Text>
+          </View>
+          <View className="items-center my-3">
+            <Images.Ipa2 width={150} height={150} />
+          </View>
+          <MainButton label="확인" onPress={() => setOpen(false)} />
         </View>
-        <View className="items-center my-3">
-          <Images.Ipa2 width={150} height={150} />
-        </View>
-        <MainButton label="확인" onPress={() => setOpen(false)} />
       </Modal>
 
       {/* 하단 고정 버튼들 */}
@@ -191,54 +188,13 @@ export default function MissionScreen() {
           right: 16,
           bottom: 16,
         }}
-      >
-        {/* ✅ 상품 추가 페이지 이동 버튼 */}
-        <Pressable
-          onPress={() => router.push("/pages/shop/newproducts")}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#10B981", // emerald-600
-            marginBottom: 8, // 로그아웃 버튼과 간격
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">상품추가</Text>
-        </Pressable>
-
-        {/* 기부 추가 페이지*/}
-        <Pressable
-          onPress={() => router.push("/pages/shop/newDonation")}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#10B981", // emerald-600
-            marginBottom: 8, // 로그아웃 버튼과 간격
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">기부 추가</Text>
-        </Pressable>
-
-        {/* 기존 로그아웃 버튼 */}
-        <Pressable
-          onPress={onLogout}
-          android_ripple={{ color: "#ffffff30" }}
-          style={{
-            height: 48,
-            borderRadius: 12,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#ef4444", // red-500
-          }}
-        >
-          <Text className="text-white font-sf-b text-h4">로그아웃</Text>
-        </Pressable>
-      </View>
+      ></View>
+      <CustomAlert
+        visible={alertVisible}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={() => setAlertVisible(false)}
+      />
     </View>
   );
 }
