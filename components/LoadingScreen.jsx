@@ -37,9 +37,9 @@ export default function LoadingScreen({ message = "로딩 중..." }) {
       <ActivityIndicator size="large" color="#318643" />
 
       {showFirst ? (
-        <Images.IpaWalk width={170} height={170} />
-      ) : (
         <Images.ToriWalk width={170} height={170} />
+      ) : (
+        <Images.IpaWalk width={170} height={170} />
       )}
 
       <Text className="mt-3 text-gray-700 font-sf-md">{message}</Text>
