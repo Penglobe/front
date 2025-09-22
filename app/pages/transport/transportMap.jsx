@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, TouchableOpacity, Modal } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,6 +11,7 @@ import HeaderBar from "@components/HeaderBar";
 import KakaoMapView from "@components/KakaoMapView";
 import { Ionicons } from "@expo/vector-icons";
 import LoadingScreen from "@components/LoadingScreen";
+import { Images } from "@constants/Images";
 
 import {
   TASK_NAME,
@@ -88,6 +89,7 @@ export default function TransportMap() {
   const [distance, setDistance] = useState(0);
   const [currentCoord, setCurrentCoord] = useState(null);
   const [startCoord, setStartCoord] = useState(null);
+  const [showBgInfo, setShowBgInfo] = useState(false);
 
   const fgWatchRef = useRef(null);
   const finishedRef = useRef(false);
@@ -391,21 +393,35 @@ export default function TransportMap() {
 
       <View className="absolute left-0 right-0 px-xl py-md top-[120px]">
         <View className="bg-white rounded-2xl shadow-sm px-xl py-lg">
+          {/* 도착지 */}
           <View className="flex-row items-center mb-3">
-            <Ionicons name="location-outline" size={22} color="#318643" />
-            <Text className="font-sf-b text-lg text-gray-800" numberOfLines={1}>
+            <Ionicons name="location-outline" size={18} color="#318643" />
+            <Text
+              className="font-sf-b text-bodySm text-gray-800 ml-1"
+              numberOfLines={1}
+            >
               도착지: {placeName}
             </Text>
           </View>
+
+          {/* 거리 */}
           <View className="flex-row items-center">
-            <Ionicons name="walk-outline" size={20} color="#555" />
-            <Text className="font-sf-md text-base text-gray-600">
+            <Ionicons name="walk-outline" size={18} color="#555" />
+            <Text className="font-sf-md text-bodySm text-gray-600 ml-1">
               이동 거리:{" "}
               <Text className="font-sf-b text-[#318643]">
                 {Math.round(distance)} m
               </Text>
             </Text>
           </View>
+
+          {/* 오른쪽 상단 info 버튼 */}
+          <TouchableOpacity
+            className="absolute top-4 right-4"
+            onPress={() => setShowBgInfo(true)}
+          >
+            <Images.Information width={22} height={22} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -438,6 +454,25 @@ export default function TransportMap() {
           className={`mb-md ${transportId ? "bg-green" : "bg-gray-400"}`}
         />
       </View>
+
+      <Modal visible={showBgInfo} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-bgblack">
+          <View className="bg-white rounded-xl p-5 w-4/5">
+            <Text className="text-base font-sf-b mb-2">⚠️ 펭걸음 안내사항</Text>
+            <Text className="text-sm text-gray-600 leading-5">
+              • 앱은 백그라운드에서도 실행됩니다. {"\n"}• 앱을 강제 종료하면
+              이동 기록이 유실될 수 있습니다.{"\n"}• 네트워크 불안정 시 기록이
+              정상적으로 저장되지 않을 수 있습니다.
+            </Text>
+            <TouchableOpacity
+              className="mt-4 self-end"
+              onPress={() => setShowBgInfo(false)}
+            >
+              <Text className="text-[#318643] font-sf-md">닫기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
