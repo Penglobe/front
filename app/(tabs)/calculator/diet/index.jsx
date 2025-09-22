@@ -77,6 +77,9 @@ export default function Diet() {
           식사 사진을 올리면, {"\n"}이번 한 끼로 탄소를 얼마나{"\n"}절감했는지
           알려드려요!
         </Text>
+        <Text className="font-sf-md text-bodySm py-sm">
+          ※ 하루 3회까지 기록할 수 있어요.
+        </Text>
 
         <Pressable
           onPress={handlePress}
