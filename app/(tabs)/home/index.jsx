@@ -141,7 +141,7 @@ export default function Home() {
   const totalPoint = Number(user?.totalPoint ?? 0);
   const totalScore = Number(user?.totalScore ?? 0);
   const level = Number(totalScore) || 0;
-  const stage = level >= 300 ? 4 : level >= 150 ? 3 : level >= 50 ? 2 : 1;
+  const stage = level >= 30 ? 4 : level >= 20 ? 3 : level >= 10 ? 2 : 1;
   const BgComp = Images[`BgHome${stage}`] ?? Images.BgHome1;
   const translateY = useSharedValue(0);
   useEffect(() => {
