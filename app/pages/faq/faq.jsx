@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import HeaderBar from "@components/HeaderBar";
 import BgGradient from "@components/BgGradient";
+import { Images } from "@constants/Images";
 
 // Enable LayoutAnimation for Android
 if (
@@ -47,9 +48,10 @@ const FAQ_DATA = [
       "A. 펭걸음은 자동차가 1km 주행시 배출하는 CO₂ 양(약 0.2kg)을 기준으로 도보·자전거는 100%, 대중교통은 50%로 산정됩니다. \n\n 빙하 식탁은 식사 1끼당 약 1.5kg의 CO₂ 배출을 기준으로 식당, 배달로 식사시 유통과 조리에 추가적인 탄소 배출이 발생하므로 가중치를 더해 산정됩니다.\n\n 빙하 리포트는 각 질문들을 탄소중립 실천포털과 GS칼텍스 미디어허브의 자료를 기준으로 산정됩니다.",
   },
   {
-    question: "Q. 배경화면은 어떻게 바꾸나요?",
+    question: "Q. 홈 화면은 어떻게 바꾸나요?",
     answer:
-      "A. 배경화면은 절감하신 총 탄소량에 따라 자동으로 변경됩니다. 50kg, 150kg, 300kg을 달성할 때마다 새로운 배경화면으로 변경됩니다. 탄소 절감 목표를 달성하고 이파와 토리가 함께 하게 해주세요!",
+      "A. 홈 화면은 절감하신 총 탄소량에 따라 자동으로 변경됩니다. 10kg, 20kg, 30kg을 달성할 때마다 새로운 홈 화면으로 변경됩니다. 탄소 절감 목표를 달성하고 이파와 토리가 함께 하게 해주세요!",
+    images: [Images.BgHome1, Images.BgHome2, Images.BgHome3, Images.BgHome4],
   },
 ];
 
@@ -67,9 +69,32 @@ const FaqItem = ({ item, isOpen, onPress }) => {
           color="gray"
         />
       </TouchableOpacity>
+
       {isOpen && (
         <View className="p-md bg-gray/50">
           <Text className="font-sf text-bodySm">{item.answer}</Text>
+
+          {item.images && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="py-sm"
+            >
+              {item.images.map((Img, idx) => (
+                <View
+                  key={idx}
+                  style={{ width: 200, height: 300 }}
+                  className="mr-md bg-white rounded-lg justify-center items-center"
+                >
+                  <Img
+                    width="100%"
+                    height="100%"
+                    preserveAspectRatio="xMidYMid meet"
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          )}
         </View>
       )}
     </View>
