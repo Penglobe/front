@@ -240,10 +240,16 @@ export default function Survey() {
                           {/*커스텀 라디오 버튼 + 항목*/}
                           <View className="h-5 w-5 border-2 border-black rounded-full mr-md items-center justify-center">
                             {answer[q.itemId] === opt.value && (
-                              <View className="h-3 w-3 bg-black rounded-full" />
+                              <View className="h-3 w-3 bg-red rounded-full" />
                             )}
                           </View>
-                          <Text className="text-black text-base font-sf-md">
+                          <Text
+                            className={`text-base font-sf-md ${
+                              answer[q.itemId] === opt.value
+                                ? "text-red font-bold"
+                                : "text-black"
+                            }`}
+                          >
                             {opt.value}
                           </Text>
                         </TouchableOpacity>
