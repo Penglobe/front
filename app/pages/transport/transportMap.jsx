@@ -461,8 +461,10 @@ export default function TransportMap() {
             <Text className="text-base font-sf-b mb-2">⚠️ 펭걸음 안내사항</Text>
             <Text className="text-sm text-gray-600 leading-5">
               • 앱은 백그라운드에서도 실행됩니다. {"\n"}• 앱을 강제 종료하면
-              이동 기록이 유실될 수 있습니다.{"\n"}• 네트워크 불안정 시 기록이
-              정상적으로 저장되지 않을 수 있습니다.
+              이동 기록이 유실될 수 있습니다.{"\n"}• 네트워크가 불안정해도
+              기록은 저장되지만, 최종 전송 시점에 다시 연결되어야 합니다.{"\n"}•
+              원활한 기록을 위해, 앱의 배터리 설정을 '제한 없음'으로
+              설정해주세요.
             </Text>
             <TouchableOpacity
               className="mt-4 self-end"
