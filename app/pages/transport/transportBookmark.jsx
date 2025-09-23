@@ -278,9 +278,9 @@ export default function TransportBookmark() {
         />
       </View>
 
-      {/* ✅ 공통 출발 버튼 */}
+      {/* ✅ 공통 이동 시작 버튼 */}
       <View className="px-pageX mb-10">
-        <MainButton label="출발" onPress={handleConfirm} />
+        <MainButton label="이동 시작" onPress={handleConfirm} />
       </View>
 
       {/* ✅ CustomAlert */}
