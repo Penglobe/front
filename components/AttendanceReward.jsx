@@ -1,9 +1,9 @@
-// @components/AttendanceReward.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useDerivedValue,
   withTiming,
   withSpring,
   withSequence,
@@ -11,17 +11,20 @@ import Animated, {
   interpolate,
   Extrapolate,
   withRepeat,
+  Easing,
+  runOnJS,
 } from "react-native-reanimated";
 import { Images } from "@constants/Images";
 
-/** 개별 파티클 */
 function Particle({ p, progress, offsetY = 0 }) {
+  const derived = useDerivedValue(() => progress.value);
+
   const style = useAnimatedStyle(() => {
-    const x = Math.cos(p.angle) * p.distance * progress.value;
-    const y = Math.sin(p.angle) * p.distance * progress.value + offsetY;
+    const x = Math.cos(p.angle) * p.distance * derived.value;
+    const y = Math.sin(p.angle) * p.distance * derived.value + offsetY;
     return {
       transform: [{ translateX: x }, { translateY: y }],
-      opacity: 1 - progress.value,
+      opacity: 1 - derived.value,
     };
   });
 
@@ -41,11 +44,69 @@ function Particle({ p, progress, offsetY = 0 }) {
   );
 }
 
-/** 상자 터치 → 보상 포인트 "공개만" (지급은 부모 버튼에서) */
+function RollingRandomNumber({ target, spins = 15, baseDelay = 40, onFinish }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const progress = useSharedValue(0);
+  const prevValue = React.useRef(null); 
+
+  useEffect(() => {
+    if (!target) return;
+
+    let currentSpin = 0;
+
+    const spinStep = () => {
+      currentSpin++;
+
+      if (currentSpin >= spins) {
+        const finalValue = Math.floor(target / 10) * 10;
+        setDisplayValue(finalValue);
+        onFinish?.(); 
+        return;
+      }
+
+      const pool = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+      let value;
+      do {
+        value = pool[Math.floor(Math.random() * pool.length)];
+      } while (value === prevValue.current);
+
+      prevValue.current = value; 
+
+      progress.value = 0;
+      progress.value = withTiming(1, { duration: 100 }, () => {
+        runOnJS(setDisplayValue)(value);
+      });
+
+        const t = currentSpin / spins;
+        const delay = baseDelay + Math.pow(t, 2) * 600;
+      setTimeout(spinStep, delay);
+    };
+
+    spinStep();
+  }, [target]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0, 1], [1.2, 1]) }],
+    opacity: interpolate(progress.value, [0, 1], [0.3, 1]),
+  }));
+
+  return (
+    <Animated.Text
+      style={[
+        animatedStyle,
+        { color: "#318643", fontWeight: "bold", fontSize: 48 },
+      ]}
+    >
+      {displayValue.toLocaleString("ko-KR")}
+    </Animated.Text>
+  );
+}
+
+
 export default function AttendanceReward({
-  previewPoints, // number | null (미리보기 포인트)
-  loadingPreview = false, // 미리보기 로딩 중
-  onReveal, // 상자 터치 시 호출 (부모가 /attendance/preview 요청)
+  previewPoints,
+  loadingPreview = false,
+  onReveal,
 }) {
   const [revealed, setRevealed] = useState(false);
   const hasPreview = useMemo(
@@ -53,18 +114,16 @@ export default function AttendanceReward({
     [previewPoints]
   );
 
-  // 애니메이션 값들
   const chestScale = useSharedValue(0.9);
-  const chestOpacity = useSharedValue(1); // ✅ 처음부터 보이게
+  const chestOpacity = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
-  const revealProgress = useSharedValue(0); // 0~1
+  const revealProgress = useSharedValue(0);
 
-  // 폭죽 터지는 효과용
   const particles = useMemo(
     () =>
-      Array.from({ length: 20 }, (_, i) => {
-        const angle = Math.random() * 2 * Math.PI; // 0~360도
-        const distance = 120 + Math.random() * 80; // 튀는 거리
+      Array.from({ length: 25 }, (_, i) => {
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 120 + Math.random() * 100;
         const color = ["#ffcc00", "#ff6666", "#66ccff", "#66ff99"][i % 4];
         return { id: i, angle, distance, color };
       }),
@@ -73,14 +132,15 @@ export default function AttendanceReward({
   const [boom, setBoom] = useState(false);
   const particleProgress = useSharedValue(0);
 
-  useEffect(() => {
-    if (boom) {
-      particleProgress.value = 0;
-      particleProgress.value = withTiming(1, { duration: 800 });
-    }
-  }, [boom]);
+  const handleBoom = () => {
+    setBoom(true);
+    particleProgress.value = 0;
+    particleProgress.value = withTiming(1, {
+      duration: 1500,
+      easing: Easing.out(Easing.exp),
+    });
+  };
 
-  // Idle 상태: 상자 두근두근
   useEffect(() => {
     chestScale.value = withRepeat(
       withSequence(
@@ -92,19 +152,13 @@ export default function AttendanceReward({
     );
   }, []);
 
-  // 공개 시 카드 등장 + 폭죽
   useEffect(() => {
     if (revealed && hasPreview) {
       glowOpacity.value = withTiming(0, { duration: 140 });
       revealProgress.value = withSequence(
-        withDelay(60, withTiming(0.6, { duration: 160 })),
+        withDelay(80, withTiming(0.6, { duration: 180 })),
         withSpring(1, { damping: 10, stiffness: 160 })
       );
-
-      // 🎆 폭죽 시작
-      setBoom(true);
-      particleProgress.value = 0;
-      particleProgress.value = withTiming(1, { duration: 800 });
     }
   }, [revealed, hasPreview]);
 
@@ -112,10 +166,7 @@ export default function AttendanceReward({
     transform: [{ scale: chestScale.value }],
     opacity: chestOpacity.value,
   }));
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glowOpacity.value * (revealed ? 0 : 1),
-    transform: [{ scale: 1.03 }],
-  }));
+
   const cardStyle = useAnimatedStyle(() => {
     const scale = interpolate(
       revealProgress.value,
@@ -134,7 +185,6 @@ export default function AttendanceReward({
 
   return (
     <View className="items-center">
-      {/* 공개 전: 상자 */}
       {!revealed && (
         <Pressable
           onPress={loadingPreview ? undefined : handlePress}
@@ -159,7 +209,6 @@ export default function AttendanceReward({
         </Pressable>
       )}
 
-      {/* 공개 후: 포인트 카드 */}
       {revealed && (
         <>
           <Animated.View
@@ -167,14 +216,13 @@ export default function AttendanceReward({
             className="w-64 h-56 bg-white items-center justify-center px-xs mb-xs"
           >
             {hasPreview ? (
-              <>
-                <View className="flex-row items-center">
-                  <Text className="text-green font-sf-b text-h0">
-                    {Number(previewPoints).toLocaleString("ko-KR")}
-                  </Text>
-                  <Images.Ice width={150} height={150} />
-                </View>
-              </>
+              <View className="flex-row items-center">
+                <RollingRandomNumber
+                  target={Number(previewPoints)}
+                  onFinish={handleBoom} 
+                />
+                <Images.Ice width={150} height={150} />
+              </View>
             ) : (
               <View className="items-center">
                 <ActivityIndicator />
@@ -185,14 +233,13 @@ export default function AttendanceReward({
             )}
           </Animated.View>
 
-          {/* 🎆 폭죽 파티클 */}
           {boom &&
             particles.map((p) => (
               <Particle
                 key={p.id}
                 p={p}
                 progress={particleProgress}
-                offsetY={100}
+                offsetY={0}
               />
             ))}
         </>

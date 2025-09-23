@@ -17,7 +17,6 @@ private const val TAG = "FoodLensBridge"
 class FoodLensModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  // ✅ Core SDK 서비스 인스턴스 (lazy 생성)
   private val foodLensCoreService: FoodLensCoreService by lazy {
     FoodLensCore.createFoodLensService(reactContext, FoodLensType.FoodLens).apply {
       // 기본 옵션 세팅
